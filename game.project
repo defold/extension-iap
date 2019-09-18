@@ -10,14 +10,19 @@ height = 640
 
 [android]
 input_method = HiddenInputField
-package = com.defold.iap
+package = com.defold.iaprtestapp
+version_code = 3
 
 [project]
 title = extension-iap
+dependencies = https://github.com/andsve/dirtylarry/archive/master.zip
 
 [library]
 include_dirs = extension-iap
 
 [ios]
-bundle_identifier = com.defold.iap
+bundle_identifier = com.defold.iaprtestapp
+
+[iap]
+auto_finish_transactions = 0
 
