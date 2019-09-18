@@ -441,21 +441,21 @@ void HandlePurchaseResult(const Command* cmd)
 
 static void InvokeCallback(Command* cmd)
 {
-    switch (cmd.m_Command)
+    switch (cmd->m_Command)
     {
     case CMD_PRODUCT_RESULT:
-        HandleProductResult(&cmd);
+        HandleProductResult(cmd);
         break;
     case CMD_PURCHASE_RESULT:
-        HandlePurchaseResult(&cmd);
+        HandlePurchaseResult(cmd);
         break;
 
     default:
         assert(false);
     }
 
-    if (cmd.m_Data1) {
-        free(cmd.m_Data1);
+    if (cmd->m_Data1) {
+        free(cmd->m_Data1);
     }
 }
 
