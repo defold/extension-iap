@@ -20,7 +20,8 @@ local function list_callback(self, products, error)
 end
 
 local function buy_listener(self, transaction, error)
-	if not error and transaction.ident == "nonconsumable" then
+	pprint(transaction, error)
+	if not error and iap.get_provider_id() == iap.PROVIDER_ID_GOOGLE and transaction.ident == "nonconsumable" then
 		local name = "reset/larrylabel"
 		gui.set_color(gui.get_node(name), vmath.vector4(1,1,1,1))
 		product_items["reset"] = transaction

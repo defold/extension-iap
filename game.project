@@ -21,7 +21,7 @@ dependencies = https://github.com/andsve/dirtylarry/archive/master.zip
 include_dirs = extension-iap
 
 [ios]
-bundle_identifier = com.defold.iaprtestapp
+bundle_identifier = com.defoldextension.push
 
 [iap]
 auto_finish_transactions = 0
