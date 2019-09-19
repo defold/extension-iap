@@ -71,7 +71,6 @@ struct IAP
     jmethodID            m_Restore;
     jmethodID            m_ProcessPendingConsumables;
     jmethodID            m_FinishTransaction;
-    int                  m_Pipefd[2];
 };
 
 IAP g_IAP;
@@ -277,9 +276,7 @@ JNIEXPORT void JNICALL Java_com_defold_iap_IapJNI_onProductsResult__ILjava_lang_
         cmd.m_Data1 = strdup(pl);
         env->ReleaseStringUTFChars(productList, pl);
     }
-    if (write(g_IAP.m_Pipefd[1], &cmd, sizeof(cmd)) != sizeof(cmd)) {
-        dmLogFatal("Failed to write command");
-    }
+    add_to_queue(cmd);
 }
 
 JNIEXPORT void JNICALL Java_com_defold_iap_IapJNI_onPurchaseResult__ILjava_lang_String_2(JNIEnv* env, jobject, jint responseCode, jstring purchaseData)
@@ -299,9 +296,7 @@ JNIEXPORT void JNICALL Java_com_defold_iap_IapJNI_onPurchaseResult__ILjava_lang_
         cmd.m_Data1 = strdup(pd);
         env->ReleaseStringUTFChars(purchaseData, pd);
     }
-    if (write(g_IAP.m_Pipefd[1], &cmd, sizeof(cmd)) != sizeof(cmd)) {
-        dmLogFatal("Failed to write command");
-    }
+    add_to_queue(cmd);
 }
 
 #ifdef __cplusplus
@@ -565,14 +560,6 @@ static dmExtension::Result FinalizeIAP(dmExtension::Params* params)
         env->DeleteGlobalRef(g_IAP.m_IAPJNI);
         Detach();
         g_IAP.m_IAP = NULL;
-
-        int result = ALooper_removeFd(g_AndroidApp->looper, g_IAP.m_Pipefd[0]);
-        if (result != 1) {
-            dmLogFatal("Could not remove fd from looper: %d", result);
-        }
-
-        close(g_IAP.m_Pipefd[0]);
-        close(g_IAP.m_Pipefd[1]);
     }
     return dmExtension::RESULT_OK;
 }
