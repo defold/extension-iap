@@ -9,8 +9,6 @@
 
 #define LIB_NAME "iap"
 
-extern struct android_app* g_AndroidApp;
-
 struct IAP;
 
 #define CMD_PRODUCT_RESULT (0)
@@ -33,13 +31,13 @@ static dmMutex::HMutex     m_mutex;
 static JNIEnv* Attach()
 {
     JNIEnv* env;
-    g_AndroidApp->activity->vm->AttachCurrentThread(&env, NULL);
+    dmGraphics::GetNativeAndroidJavaVM()->AttachCurrentThread(&env, NULL);
     return env;
 }
 
 static void Detach()
 {
-    g_AndroidApp->activity->vm->DetachCurrentThread();
+    dmGraphics::GetNativeAndroidJavaVM()->DetachCurrentThread();
 }
 
 
@@ -98,7 +96,7 @@ static void VerifyCallback(lua_State* L)
     }
 }
 
-int IAP_List(lua_State* L)
+static int IAP_List(lua_State* L)
 {
     int top = lua_gettop(L);
     VerifyCallback(L);
@@ -130,7 +128,7 @@ int IAP_List(lua_State* L)
     return 0;
 }
 
-int IAP_Buy(lua_State* L)
+static int IAP_Buy(lua_State* L)
 {
     int top = lua_gettop(L);
 
@@ -146,7 +144,7 @@ int IAP_Buy(lua_State* L)
     return 0;
 }
 
-int IAP_Finish(lua_State* L)
+static int IAP_Finish(lua_State* L)
 {
     if(g_IAP.m_autoFinishTransactions)
     {
@@ -192,7 +190,7 @@ int IAP_Finish(lua_State* L)
     return 0;
 }
 
-int IAP_Restore(lua_State* L)
+static int IAP_Restore(lua_State* L)
 {
     // TODO: Missing callback here for completion/error
     // See iap_ios.mm
@@ -208,7 +206,7 @@ int IAP_Restore(lua_State* L)
     return 1;
 }
 
-int IAP_SetListener(lua_State* L)
+static int IAP_SetListener(lua_State* L)
 {
     IAP* iap = &g_IAP;
     luaL_checktype(L, 1, LUA_TFUNCTION);
@@ -237,7 +235,7 @@ int IAP_SetListener(lua_State* L)
     return 0;
 }
 
-int IAP_GetProviderId(lua_State* L)
+static int IAP_GetProviderId(lua_State* L)
 {
     lua_pushinteger(L, g_IAP.m_ProviderId);
     return 1;
@@ -303,7 +301,7 @@ JNIEXPORT void JNICALL Java_com_defold_iap_IapJNI_onPurchaseResult__ILjava_lang_
 }
 #endif
 
-void HandleProductResult(const Command* cmd)
+static void HandleProductResult(const Command* cmd)
 {
     lua_State* L = g_IAP.m_L;
     int top = lua_gettop(L);
@@ -366,7 +364,7 @@ void HandleProductResult(const Command* cmd)
     assert(top == lua_gettop(L));
 }
 
-void HandlePurchaseResult(const Command* cmd)
+static void HandlePurchaseResult(const Command* cmd)
 {
     lua_State* L = g_IAP.m_Listener.m_L;
     int top = lua_gettop(L);
@@ -468,7 +466,7 @@ static dmExtension::Result InitializeIAP(dmExtension::Params* params)
 
         jclass activity_class = env->FindClass("android/app/NativeActivity");
         jmethodID get_class_loader = env->GetMethodID(activity_class,"getClassLoader", "()Ljava/lang/ClassLoader;");
-        jobject cls = env->CallObjectMethod(g_AndroidApp->activity->clazz, get_class_loader);
+        jobject cls = env->CallObjectMethod(dmGraphics::GetNativeAndroidActivity(), get_class_loader);
         jclass class_loader = env->FindClass("java/lang/ClassLoader");
         jmethodID find_class = env->GetMethodID(class_loader, "loadClass", "(Ljava/lang/String;)Ljava/lang/Class;");
 
@@ -501,7 +499,7 @@ static dmExtension::Result InitializeIAP(dmExtension::Params* params)
         g_IAP.m_FinishTransaction = env->GetMethodID(iap_class, "finishTransaction", "(Ljava/lang/String;Lcom/defold/iap/IPurchaseListener;)V");
 
         jmethodID jni_constructor = env->GetMethodID(iap_class, "<init>", "(Landroid/app/Activity;Z)V");
-        g_IAP.m_IAP = env->NewGlobalRef(env->NewObject(iap_class, jni_constructor, g_AndroidApp->activity->clazz, g_IAP.m_autoFinishTransactions));
+        g_IAP.m_IAP = env->NewGlobalRef(env->NewObject(iap_class, jni_constructor, dmGraphics::GetNativeAndroidActivity(), g_IAP.m_autoFinishTransactions));
 
         jni_constructor = env->GetMethodID(iap_jni_class, "<init>", "()V");
         g_IAP.m_IAPJNI = env->NewGlobalRef(env->NewObject(iap_jni_class, jni_constructor));
