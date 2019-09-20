@@ -101,7 +101,7 @@ void IAPList_Callback(void* Lv, const char* result_json)
 
         int ret = lua_pcall(L, 3, 0, 0);
         if (ret != 0) {
-            dmLogError("Error running iap callback");
+            dmLogError("Error running callback: %s", lua_tostring(L, -1));
             lua_pop(L, 1);
         }
         assert(top == lua_gettop(L));
@@ -199,7 +199,7 @@ void IAPListener_Callback(void* Lv, const char* result_json, int error_code)
     }
     int ret = lua_pcall(L, 3, 0, 0);
     if (ret != 0) {
-        dmLogError("Error running iap callback");
+        dmLogError("Error running callback: %s", lua_tostring(L, -1));
         lua_pop(L, 1);
     }
     assert(top == lua_gettop(L));

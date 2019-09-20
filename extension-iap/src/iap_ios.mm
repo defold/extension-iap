@@ -123,7 +123,7 @@ IAP g_IAP;
 
     int ret = lua_pcall(L, 3, 0, 0);
     if (ret != 0) {
-        dmLogError("Error running iap callback");
+        dmLogError("Error running callback: %s", lua_tostring(L, -1));
         lua_pop(L, 1);
     }
 
@@ -166,7 +166,7 @@ IAP g_IAP;
 
     int ret = lua_pcall(L, 3, 0, 0);
     if (ret != 0) {
-        dmLogError("Error running iap callback");
+        dmLogError("Error running callback: %s", lua_tostring(L, -1));
         lua_pop(L, 1);
     }
 
@@ -262,7 +262,7 @@ void RunTransactionCallback(lua_State* L, int cb, int self, SKPaymentTransaction
 
     int ret = lua_pcall(L, 3, 0, 0);
     if (ret != 0) {
-        dmLogError("Error running iap callback");
+        dmLogError("Error running callback: %s", lua_tostring(L, -1));
         lua_pop(L, 1);
     }
 

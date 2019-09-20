@@ -14,15 +14,11 @@ struct IAP;
 #define CMD_PRODUCT_RESULT (0)
 #define CMD_PURCHASE_RESULT (1)
 
-struct DM_ALIGNED(16) Command
+struct Command
 {
-    Command()
-    {
-        memset(this, 0, sizeof(*this));
-    }
     uint32_t m_Command;
     int32_t  m_ResponseCode;
-    void*    m_Data1;
+    char*    m_Data1;
 };
 
 static dmArray<Command>    m_commandsQueue;
@@ -71,7 +67,7 @@ struct IAP
     jmethodID            m_FinishTransaction;
 };
 
-IAP g_IAP;
+static IAP g_IAP;
 
 static void add_to_queue(Command cmd)
 {
@@ -269,6 +265,7 @@ JNIEXPORT void JNICALL Java_com_defold_iap_IapJNI_onProductsResult__ILjava_lang_
     Command cmd;
     cmd.m_Command = CMD_PRODUCT_RESULT;
     cmd.m_ResponseCode = responseCode;
+    cmd.m_Data1 = 0;
     if (pl)
     {
         cmd.m_Data1 = strdup(pl);
@@ -288,7 +285,7 @@ JNIEXPORT void JNICALL Java_com_defold_iap_IapJNI_onPurchaseResult__ILjava_lang_
     Command cmd;
     cmd.m_Command = CMD_PURCHASE_RESULT;
     cmd.m_ResponseCode = responseCode;
-
+    cmd.m_Data1 = 0;
     if (pd)
     {
         cmd.m_Data1 = strdup(pd);
@@ -352,7 +349,7 @@ static void HandleProductResult(const Command* cmd)
 
     int ret = lua_pcall(L, 3, 0, 0);
     if (ret != 0) {
-        dmLogError("Error running iap callback");
+        dmLogError("Error running callback: %s", lua_tostring(L, -1));
         lua_pop(L, 1);
     }
 
@@ -425,7 +422,7 @@ static void HandlePurchaseResult(const Command* cmd)
 
     int ret = lua_pcall(L, 3, 0, 0);
     if (ret != 0) {
-        dmLogError("Error running iap callback");
+        dmLogError("Error running callback: %s", lua_tostring(L, -1));
         lua_pop(L, 1);
     }
 
