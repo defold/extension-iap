@@ -535,8 +535,8 @@ static dmExtension::Result UpdateIAP(dmExtension::Params* params)
     {
         Command* cmd = &m_commandsQueue[i];
         InvokeCallback(cmd);
-        m_commandsQueue.EraseSwap(i--);
     }
+    m_commandsQueue.SetSize(0);
     return dmExtension::RESULT_OK;
 }
 
