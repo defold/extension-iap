@@ -1,0 +1,299 @@
+- name: iap
+  type: table 
+  desc: Functions and constants for doing in-app purchases. Supported on iOS, Android (Google Play and Amazon) 
+        and Facebook Canvas platforms.
+        [icon:ios] [icon:googleplay] [icon:amazon] [icon:facebook]
+  members:
+
+#*****************************************************************************************************
+
+  - name: buy
+    type: function
+    desc: Sets the listener function for inter-app communication events.
+    parameters:
+      - name: id
+        type: string
+        desc: product to buy
+
+      - name: options
+        type: table
+        desc: optional parameters as properties. The following parameters can be set
+        members:
+        - name: request_id
+          type: string
+          desc: Facebook only. [icon:facebook] Optional custom unique request id to
+                set for this transaction. The id becomes attached to the payment within the Graph API.
+
+    examples:
+      - desc: |-
+            ```lua
+              local function iap_listener(self, transaction, error)
+                if error == nil then
+                  -- purchase is successful.
+                  print(transaction.date)
+                  -- required if auto finish transactions is disabled in project settings
+                  if (transaction.state == iap.TRANS_STATE_PURCHASED) then
+                    -- do server-side verification of purchase here..
+                    iap.finish(transaction)
+                  end
+                else
+                  print(error.error, error.reason)
+                end
+              end
+
+              function init(self)
+                  iap.set_listener(iap_listener)
+                  iap.buy("my_iap")
+              end
+            ```
+
+#*****************************************************************************************************
+
+  - name: finish
+    type: function
+    desc: Explicitly finish a product transaction.
+          [icon:attention] Calling iap.finish is required on a successful transaction
+          if `auto_finish_transactions` is disabled in project settings. Calling this function
+          with `auto_finish_transactions` set will be ignored and a warning is printed.
+          The `transaction.state` field must equal `iap.TRANS_STATE_PURCHASED`.
+    parameters:
+      - name: transaction
+        type: table
+        desc: transaction table parameter as supplied in listener callback
+
+#*****************************************************************************************************
+
+  - name: get_provider_id
+    type: function
+    desc: Get current iap provider
+    returns:
+      - name: provider_id
+        type: constant
+        desc: one of the following values
+
+               - `iap.PROVIDER_ID_GOOGLE`
+
+               - `iap.PROVIDER_ID_AMAZON`
+
+               - `iap.PROVIDER_ID_APPLE`
+
+               - `iap.PROVIDER_ID_FACEBOOK`
+
+#*****************************************************************************************************
+
+  - name: list
+    type: function
+    desc: Get a list of all avaliable iap products.
+    parameters:
+    - name: ids
+      type: table
+      desc: table (array) of identifiers to get products from
+
+    - name: callback
+      type: function
+      desc: result callback taking the following parameters
+      parameters:
+      - name: self
+        type: object
+        desc: The current object.
+
+      - name: products
+        type: table
+        desc: a table describing the available iap products.
+        members:
+        - name: ident
+          type: string
+          desc: The product identifier.
+
+        - name: title
+          type: string
+          desc: The product title.
+
+        - name: description
+          type: string
+          desc: The product description.
+
+        - name: price
+          type: number
+          desc: The price of the product.
+
+        - name: price_string
+          type: string
+          desc: The price of the product, as a formatted string (amount and currency symbol).
+
+        - name: currency_code
+          type: string
+          desc: The currency code. On Google Play, this reflects the merchant's locale, instead of the user's.
+                [icon:ios] [icon:googleplay] [icon:facebook]
+
+      - name: error
+        type: table
+        desc: a table containing error information. `nil` if there is no error. - `error` (the error message)
+
+    examples:
+      - desc: |-
+            ```lua
+              local function iap_callback(self, products, error)
+                if error == nil then
+                  for k,p in pairs(products) do
+                    -- present the product
+                    print(p.title)
+                    print(p.description)
+                  end
+                else
+                  print(error.error)
+                end
+              end
+
+              function init(self)
+                  iap.list({"my_iap"}, iap_callback)
+              end
+            ```
+
+#*****************************************************************************************************
+
+  - name: restore
+    type: function
+    desc: Restore previously purchased products.
+    returns:
+      - name: success
+        type: boolean
+        desc: value is `true` if current store supports handling
+              restored transactions, otherwise `false`.
+
+#*****************************************************************************************************
+
+  - name: set_listener
+    type: function
+    desc: Set the callback function to receive purchase transaction events.
+    parameters:
+    - name: listener
+      type: function
+      desc: listener callback function. Pass an empty function if you no longer wish to receive callbacks.
+      parameters:
+      - name: self
+        type: object
+        desc: The current object.
+
+      - name: transaction
+        type: table
+        desc: a table describing the transaction.
+        members:
+        - name: ident
+          type: string
+          desc: The product identifier.
+
+        - name: state
+          type: string
+          desc: The transaction state. One of the following
+
+               - `iap.TRANS_STATE_FAILED`
+
+               - `iap.TRANS_STATE_PURCHASED`
+
+               - `iap.TRANS_STATE_PURCHASING`
+
+               - `iap.TRANS_STATE_RESTORED`
+
+               - `iap.TRANS_STATE_UNVERIFIED`
+
+        - name: date
+          type: string
+          desc: The date and time for the transaction.
+
+        - name: trans_ident
+          type: string
+          desc: The transaction identifier. This field is only set when `state` is 
+                `TRANS_STATE_RESTORED`, `TRANS_STATE_UNVERIFIED` or `TRANS_STATE_PURCHASED`.
+
+        - name: receipt
+          type: string
+          desc: The transaction receipt. This field is only set when `state` is `TRANS_STATE_PURCHASED` or `TRANS_STATE_UNVERIFIED`.
+
+        - name: original_trans
+          type: string
+          desc: Apple only[icon:apple]. The original transaction. This field is only set when `state` is `TRANS_STATE_RESTORED`.
+
+        - name: signature
+          type: string
+          desc: Google Play only[icon:googleplay]. A string containing the signature of the purchase data that was signed with the private key of the developer.
+
+        - name: request_id
+          type: string
+          desc: Facebook only[icon:facebook]. This field is set to the optional custom unique request id `request_id` if set in the `iap.buy()` call parameters.
+
+        - name: user_id
+          type: string
+          desc: Amazon Pay only[icon:amazon]. The user ID.
+
+        - name: is_sandbox_mode
+          type: boolean
+          desc: Amazon Pay only[icon:amazon]. If `true`, the SDK is running in Sandbox mode.
+                This only allows interactions with the Amazon AppTester. Use this mode only for testing locally.
+
+        - name: cancel_date
+          type: string
+          desc: Amazon Pay only[icon:amazon]. The cancel date for the purchase. This field is only set if the purchase is canceled.
+
+        - name: canceled
+          type: string
+          desc: Amazon Pay only[icon:amazon]. Is set to `true` if the receipt was canceled or has expired; otherwise `false`.
+
+      - name: error
+        type: table
+        desc: a table containing error information. `nil` if there is no error. `error` - the error message.
+              `reason` - the reason for the error, value can be one of the following constants
+
+               - `iap.REASON_UNSPECIFIED`
+
+               - `iap.REASON_USER_CANCELED`
+
+#*****************************************************************************************************
+
+  - name: PROVIDER_ID_AMAZON
+    type: number
+    desc: provider id for Amazon
+    
+  - name: PROVIDER_ID_APPLE
+    type: number
+    desc: provider id for Apple
+    
+  - name: PROVIDER_ID_FACEBOOK
+    type: number
+    desc: provider id for Facebook
+    
+  - name: PROVIDER_ID_GOOGLE
+    type: number
+    desc: iap provider id for Google
+    
+  - name: REASON_UNSPECIFIED
+    type: number
+    desc: unspecified error reason
+    
+  - name: REASON_USER_CANCELED
+    type: number
+    desc: user canceled reason
+    
+  - name: TRANS_STATE_FAILED
+    type: number
+    desc: transaction failed state
+    
+  - name: TRANS_STATE_PURCHASED
+    type: number
+    desc: transaction purchased state
+    
+  - name: TRANS_STATE_PURCHASING
+    type: number
+    desc: transaction purchasing state
+          This is an intermediate mode followed by TRANS_STATE_PURCHASED. Store provider support dependent.
+    
+  - name: TRANS_STATE_RESTORED
+    type: number
+    desc: transaction restored state
+          This is only available on store providers supporting restoring purchases.
+    
+  - name: TRANS_STATE_UNVERIFIED
+    type: number
+    desc: transaction unverified state, requires verification of purchase
+    
+    
