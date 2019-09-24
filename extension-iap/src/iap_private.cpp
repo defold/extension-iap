@@ -42,14 +42,14 @@ char* IAP_List_CreateBuffer(lua_State* L)
     lua_pushnil(L);
     while (lua_next(L, 1) != 0) {
         if (i > 0) {
-            strncat(buf, ",", length+1);
+            dmStrlCat(buf, ",", length+1);
         }
         const char* p = lua_tostring(L, -1);
         if(!p)
         {
             luaL_error(L, "IAP: Failed to get value (string) from table");
         }
-        strncat(buf, p, length+1);
+        dmStrlCat(buf, p, length+1);
         lua_pop(L, 1);
         ++i;
     }
