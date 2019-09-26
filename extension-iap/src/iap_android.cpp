@@ -14,11 +14,15 @@ struct IAP;
 #define CMD_PRODUCT_RESULT (0)
 #define CMD_PURCHASE_RESULT (1)
 
-struct Command
+struct DM_ALIGNED(16) Command
 {
+    Command()
+    {
+        memset(this, 0, sizeof(*this));
+    }
     uint32_t m_Command;
     int32_t  m_ResponseCode;
-    char*    m_Data1;
+    void*    m_Data1;
 };
 
 static dmArray<Command>    m_commandsQueue;
@@ -69,15 +73,15 @@ struct IAP
 
 static IAP g_IAP;
 
-static void add_to_queue(Command cmd)
+static void add_to_queue(Command* cmd)
 {
     DM_MUTEX_SCOPED_LOCK(m_mutex);
     
     if(m_commandsQueue.Full())
     {
-        m_commandsQueue.OffsetCapacity(1);
+        m_commandsQueue.OffsetCapacity(2);
     }
-    m_commandsQueue.Push(cmd);
+    m_commandsQueue.Push(*cmd);
 }
 
 static void VerifyCallback(lua_State* L)
@@ -265,13 +269,12 @@ JNIEXPORT void JNICALL Java_com_defold_iap_IapJNI_onProductsResult__ILjava_lang_
     Command cmd;
     cmd.m_Command = CMD_PRODUCT_RESULT;
     cmd.m_ResponseCode = responseCode;
-    cmd.m_Data1 = 0;
     if (pl)
     {
         cmd.m_Data1 = strdup(pl);
         env->ReleaseStringUTFChars(productList, pl);
     }
-    add_to_queue(cmd);
+    add_to_queue(&cmd);
 }
 
 JNIEXPORT void JNICALL Java_com_defold_iap_IapJNI_onPurchaseResult__ILjava_lang_String_2(JNIEnv* env, jobject, jint responseCode, jstring purchaseData)
@@ -285,13 +288,12 @@ JNIEXPORT void JNICALL Java_com_defold_iap_IapJNI_onPurchaseResult__ILjava_lang_
     Command cmd;
     cmd.m_Command = CMD_PURCHASE_RESULT;
     cmd.m_ResponseCode = responseCode;
-    cmd.m_Data1 = 0;
     if (pd)
     {
         cmd.m_Data1 = strdup(pd);
         env->ReleaseStringUTFChars(purchaseData, pd);
     }
-    add_to_queue(cmd);
+    add_to_queue(&cmd);
 }
 
 #ifdef __cplusplus
@@ -429,32 +431,12 @@ static void HandlePurchaseResult(const Command* cmd)
     assert(top == lua_gettop(L));
 }
 
-static void InvokeCallback(Command* cmd)
-{
-    switch (cmd->m_Command)
-    {
-    case CMD_PRODUCT_RESULT:
-        HandleProductResult(cmd);
-        break;
-    case CMD_PURCHASE_RESULT:
-        HandlePurchaseResult(cmd);
-        break;
-
-    default:
-        assert(false);
-    }
-
-    if (cmd->m_Data1) {
-        free(cmd->m_Data1);
-    }
-}
-
 static dmExtension::Result InitializeIAP(dmExtension::Params* params)
 {
     // TODO: Life-cycle managaemnt is *budget*. No notion of "static initalization"
     // Extend extension functionality with per system initalization?
     if (g_IAP.m_InitCount == 0) {
-
+        m_commandsQueue.SetCapacity(2);
         m_mutex = dmMutex::New();
 
         g_IAP.m_autoFinishTransactions = dmConfigFile::GetInt(params->m_ConfigFile, "iap.auto_finish_transactions", 1) == 1;
@@ -528,8 +510,23 @@ static dmExtension::Result UpdateIAP(dmExtension::Params* params)
 
     for(uint32_t i = 0; i != m_commandsQueue.Size(); ++i)
     {
-        Command* cmd = &m_commandsQueue[i];
-        InvokeCallback(cmd);
+        Command& cmd = m_commandsQueue[i];
+        switch (cmd.m_Command)
+        {
+        case CMD_PRODUCT_RESULT:
+            HandleProductResult(&cmd);
+            break;
+        case CMD_PURCHASE_RESULT:
+            HandlePurchaseResult(&cmd);
+            break;
+
+        default:
+            assert(false);
+        }
+
+        if (cmd.m_Data1) {
+            free(cmd.m_Data1);
+        }
     }
     m_commandsQueue.SetSize(0);
     return dmExtension::RESULT_OK;
