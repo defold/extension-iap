@@ -14,19 +14,16 @@ struct IAP;
 #define CMD_PRODUCT_RESULT (0)
 #define CMD_PURCHASE_RESULT (1)
 
-struct DM_ALIGNED(16) Command
+struct DM_ALIGNED(16) IAPCommand
 {
-    Command()
+    IAPCommand()
     {
-        memset(this, 0, sizeof(*this));
+        memset(this, 0, sizeof(IAPCommand));
     }
     uint32_t m_Command;
     int32_t  m_ResponseCode;
     void*    m_Data1;
 };
-
-static dmArray<Command>    m_commandsQueue;
-static dmMutex::HMutex     m_mutex;
 
 static JNIEnv* Attach()
 {
@@ -69,19 +66,22 @@ struct IAP
     jmethodID            m_Restore;
     jmethodID            m_ProcessPendingConsumables;
     jmethodID            m_FinishTransaction;
+
+    dmArray<IAPCommand>  m_CommandsQueue;
+    dmMutex::HMutex      m_Mutex;
 };
 
 static IAP g_IAP;
 
-static void add_to_queue(Command* cmd)
+static void QueueCommand(IAPCommand* cmd)
 {
-    DM_MUTEX_SCOPED_LOCK(m_mutex);
+    DM_MUTEX_SCOPED_LOCK(g_IAP.m_Mutex);
     
-    if(m_commandsQueue.Full())
+    if(g_IAP.m_CommandsQueue.Full())
     {
-        m_commandsQueue.OffsetCapacity(2);
+        g_IAP.m_CommandsQueue.OffsetCapacity(2);
     }
-    m_commandsQueue.Push(*cmd);
+    g_IAP.m_CommandsQueue.Push(*cmd);
 }
 
 static void VerifyCallback(lua_State* L)
@@ -266,7 +266,7 @@ JNIEXPORT void JNICALL Java_com_defold_iap_IapJNI_onProductsResult__ILjava_lang_
         pl = env->GetStringUTFChars(productList, 0);
     }
 
-    Command cmd;
+    IAPCommand cmd;
     cmd.m_Command = CMD_PRODUCT_RESULT;
     cmd.m_ResponseCode = responseCode;
     if (pl)
@@ -274,7 +274,7 @@ JNIEXPORT void JNICALL Java_com_defold_iap_IapJNI_onProductsResult__ILjava_lang_
         cmd.m_Data1 = strdup(pl);
         env->ReleaseStringUTFChars(productList, pl);
     }
-    add_to_queue(&cmd);
+    QueueCommand(&cmd);
 }
 
 JNIEXPORT void JNICALL Java_com_defold_iap_IapJNI_onPurchaseResult__ILjava_lang_String_2(JNIEnv* env, jobject, jint responseCode, jstring purchaseData)
@@ -285,7 +285,7 @@ JNIEXPORT void JNICALL Java_com_defold_iap_IapJNI_onPurchaseResult__ILjava_lang_
         pd = env->GetStringUTFChars(purchaseData, 0);
     }
 
-    Command cmd;
+    IAPCommand cmd;
     cmd.m_Command = CMD_PURCHASE_RESULT;
     cmd.m_ResponseCode = responseCode;
     if (pd)
@@ -293,14 +293,14 @@ JNIEXPORT void JNICALL Java_com_defold_iap_IapJNI_onPurchaseResult__ILjava_lang_
         cmd.m_Data1 = strdup(pd);
         env->ReleaseStringUTFChars(purchaseData, pd);
     }
-    add_to_queue(&cmd);
+    QueueCommand(&cmd);
 }
 
 #ifdef __cplusplus
 }
 #endif
 
-static void HandleProductResult(const Command* cmd)
+static void HandleProductResult(const IAPCommand* cmd)
 {
     lua_State* L = g_IAP.m_L;
     int top = lua_gettop(L);
@@ -363,7 +363,7 @@ static void HandleProductResult(const Command* cmd)
     assert(top == lua_gettop(L));
 }
 
-static void HandlePurchaseResult(const Command* cmd)
+static void HandlePurchaseResult(const IAPCommand* cmd)
 {
     lua_State* L = g_IAP.m_Listener.m_L;
     int top = lua_gettop(L);
@@ -436,8 +436,8 @@ static dmExtension::Result InitializeIAP(dmExtension::Params* params)
     // TODO: Life-cycle managaemnt is *budget*. No notion of "static initalization"
     // Extend extension functionality with per system initalization?
     if (g_IAP.m_InitCount == 0) {
-        m_commandsQueue.SetCapacity(2);
-        m_mutex = dmMutex::New();
+        g_IAP.m_CommandsQueue.SetCapacity(2);
+        g_IAP.m_Mutex = dmMutex::New();
 
         g_IAP.m_autoFinishTransactions = dmConfigFile::GetInt(params->m_ConfigFile, "iap.auto_finish_transactions", 1) == 1;
 
@@ -501,16 +501,16 @@ static dmExtension::Result InitializeIAP(dmExtension::Params* params)
 
 static dmExtension::Result UpdateIAP(dmExtension::Params* params)
 {
-    if (m_commandsQueue.Empty())
+    if (g_IAP.m_CommandsQueue.Empty())
     {
         return dmExtension::RESULT_OK;
     }
 
-    DM_MUTEX_SCOPED_LOCK(m_mutex);
+    DM_MUTEX_SCOPED_LOCK(g_IAP.m_Mutex);
 
-    for(uint32_t i = 0; i != m_commandsQueue.Size(); ++i)
+    for(uint32_t i = 0; i != g_IAP.m_CommandsQueue.Size(); ++i)
     {
-        Command& cmd = m_commandsQueue[i];
+        IAPCommand& cmd = g_IAP.m_CommandsQueue[i];
         switch (cmd.m_Command)
         {
         case CMD_PRODUCT_RESULT:
@@ -528,13 +528,13 @@ static dmExtension::Result UpdateIAP(dmExtension::Params* params)
             free(cmd.m_Data1);
         }
     }
-    m_commandsQueue.SetSize(0);
+    g_IAP.m_CommandsQueue.SetSize(0);
     return dmExtension::RESULT_OK;
 }
 
 static dmExtension::Result FinalizeIAP(dmExtension::Params* params)
 {
-    dmMutex::Delete(m_mutex);
+    dmMutex::Delete(g_IAP.m_Mutex);
     --g_IAP.m_InitCount;
 
     if (params->m_L == g_IAP.m_Listener.m_L && g_IAP.m_Listener.m_Callback != LUA_NOREF) {
