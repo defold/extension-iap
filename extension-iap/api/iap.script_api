@@ -9,7 +9,7 @@
 
   - name: buy
     type: function
-    desc: Sets the listener function for inter-app communication events.
+    desc: Sets the listener function for In-app purchase events.
     parameters:
       - name: id
         type: string
