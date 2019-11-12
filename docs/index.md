@@ -11,11 +11,11 @@ To use this library in your Defold project, add the following URL to your <code 
 
     https://github.com/defold/extension-iap/archive/master.zip
 
-We recommend using a link to a zip file of a [https://github.com/defold/extension-v/releases](specific release).
+We recommend using a link to a zip file of a [https://github.com/defold/extension-iap/releases](specific release).
 
 ## Source code
 
-The source code is available on [GitHub](https://github.com/defold/extension-v)
+The source code is available on [GitHub](https://github.com/defold/extension-iap)
 
 
 # API reference
