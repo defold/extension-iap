@@ -53,15 +53,3 @@
        url('fonts/Noto-Sans-700italic/Noto-Sans-700italic.ttf') format('truetype'),
        url('fonts/Noto-Sans-700italic/Noto-Sans-700italic.svg#NotoSans') format('svg');
 }
-
-@font-face {
-    font-family: fontello;
-    font-weight: 400;
-    font-style: normal;
-    src: url(fonts/fontello/fontello_ef8859ce.eot);
-    src: url(fonts/fontello/fontello_ef8859ce.eot#iefix) format("embedded-opentype"),
-    url(fonts/fontello/fontello_248ab5dd.woff2) format("woff2"),
-    url(fonts/fontello/fontello_b6287553.woff) format("woff"),
-    url(fonts/fontello/fontello_df5eac8f.ttf) format("truetype"),
-    url(fonts/fontello/fontello_793be834.svg#fontello) format("svg");
-}

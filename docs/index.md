@@ -1,121 +1,23 @@
 ---
 layout: default
 ---
-## Modules
-{% for item in site.data.api %}
-### <code>{{ item.name }}</code>
-{% include description.md desc=item.desc %}
-{% endfor %}
 
-<hr>
+# Defold In-app purchase extension API documentation
 
-## Enums
-<table>
-    <tbody>
-{% for module in site.data.api %}
-    {% for item in module.members %}
-        {% if item.type contains 'number' %}
-        <tr>
-            <td><strong>{{ module.name }}.{{ item.name }}</strong></td>
-            <td>{{ item.desc | markdownify | replace: "[icon:attention]","<br><br>⚠️"}}</td>
-        </tr>
+This extension provides functions for making in-app purchases. Supported on iOS, Android (Google Play and Amazon) and Facebook Canvas.
 
-        {% endif %}
-    {% endfor %}
-{% endfor %}
-    </tbody>
-</table>
+# Usage
+To use this library in your Defold project, add the following URL to your <code class="inline-code-block">game.project</code> dependencies:
 
-<hr>
+    https://github.com/defold/extension-iap/archive/master.zip
 
-## Functions
-<table>
-    <tbody>
-{% for module in site.data.api %}
-    {% for item in module.members %}
-        {% if item.type contains 'function' %}
-        <tr>
-            <td><a href="#{{ item.name | url_encode }}"><strong>{{ module.name }}.{{ item.name }}()</strong></a></td>
-            <td>{% include description.md desc=item.desc %}</td>
-        </tr>
-        {% endif %}
-    {% endfor %}
-{% endfor %}
-    </tbody>
-</table>
+We recommend using a link to a zip file of a [https://github.com/defold/extension-v/releases](specific release).
 
-{% for module in site.data.api %}
-    {% for function in module.members %}
-        {% if function.type contains 'function' %}
-<div class="function-wrap">
-<h3 class="function-header"><a href="#{{ function.name | url_encode }}" id="{{ function.name | url_encode }}"><code>{{ module.name }}.{{ function.name }}({% for param in function.parameters %}{{param.name}}{% unless forloop.last %}, {% endunless %}{% endfor %})</code></a></h3>
-{% include description.md desc=function.desc %}
-{% if function.parameters %}
-<table>
-    <thead>
-        <tr>
-            <th>Parameter</th>
-            <th>Type</th>
-            <th>Description</th>
-        </tr>
-    </thead>
-    <tbody>
-    {% for param in function.parameters %}
-        <tr>
-            <td style="text-align: right;">
-                <strong>{{ param.name }}</strong>
-                {% if param.optional %}
-                    (optional)
-                {% endif %}
-            </td>
-            <td><code>{{ param.type }}</code></td>
-            <td>{% include description.md desc=param.desc %}
-                {% if param.type == "function" %}
-                {% include type-function.md params=param.parameters %}
-                {% endif %}
-                {% if param.type == "table" %}
-                {% include type-table.md fields=param.members %}
-                {% endif %}
-            </td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
-{% endif %}
-{% if function.returns %}
-    <table>
-        <thead>
-            <tr>
-                <th>Return value</th>
-                <th>Type</th>
-                <th>Description</th>
-            </tr>
-        </thead>
-        <tbody>
-            <h4>Returns</h4>
-            {% for return in function.returns %}
-                <tr>
-                    <td>{{ return.name }}</td>
-                    <td><code class="inline-code-block">{{ return.type }}</code></td>
-                    <td>{% include description.md desc=return.desc %}
-                        {% if return.type == "table" %}
-                        {% include type-table.md fields=return.members %}
-                        {% endif %}
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-{% endif %}
+## Source code
 
-{% if function.examples %}
-<h4>Examples</h4>
-{% for example in function.examples %}
-{{ example.desc | markdownify }}
-{% endfor %}
-{% endif %}
-</div>
+The source code is available on [GitHub](https://github.com/defold/extension-v)
 
-        {% endif %}
-    {% endfor %}
-{% endfor %}
+
+# API reference
+
+{% include api_ref.md %}

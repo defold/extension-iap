@@ -5,7 +5,7 @@
 	{% if field.optional %}
     	(optional)
 	{% endif %}
-	<code>{{ field.type }}</code> - {% include description.md desc=field.desc %}
+	<code>{{ field.type }}</code> - {{ field.desc | markdownify }}
 </li>
 {% endfor %}
 </ul>
