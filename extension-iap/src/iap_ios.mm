@@ -21,151 +21,204 @@ struct IAP
 {
     IAP()
     {
-        m_Callback = LUA_NOREF;
-        m_Self = LUA_NOREF;
-        m_InitCount = 0;
+        memset(this, 0, sizeof(*this));
         m_AutoFinishTransactions = true;
-        m_PendingTransactions = 0;
-  }
-    int                  m_InitCount;
-    int                  m_Callback;
-    int                  m_Self;
-    bool                 m_AutoFinishTransactions;
-    NSMutableDictionary* m_PendingTransactions;
-    IAPListener          m_Listener;
-    SKPaymentTransactionObserver* m_Observer;
+        IAP_ClearCallback(&m_Listener);
+    }
+    int                             m_InitCount;
+    bool                            m_AutoFinishTransactions;
+    NSMutableDictionary*            m_PendingTransactions;
+    IAPListener                     m_Listener;
+    IAPCommandQueue                 m_CommandQueue;
+    SKPaymentTransactionObserver*   m_Observer;
 };
 
 IAP g_IAP;
 
 
+// The payload of the purchasing commands
+struct IAPProduct
+{
+    const char* ident;
+    const char* title;
+    const char* description;
+    float       price;
+    const char* price_string;
+    const char* currency_code;
+};
+
+struct IAPResponse
+{
+    const char*         error; // optional
+    int32_t             error_code; // only valid if error is set
+    dmArray<IAPProduct> m_Products;
+
+    IAPResponse() {
+        memset(this, 0, sizeof(*this));
+    }
+};
+
+struct IAPTransaction
+{
+    const char*     ident;
+    int32_t         state;
+    const char*     date;
+    const char*     trans_ident; // optional
+    const char*     receipt; // optional
+    uint32_t        receipt_length;
+    const char*     original_trans; // optional
+    const char*     error; // optional
+    int32_t         error_code; // only valid if error is set
+    IAPTransaction* m_OriginalTransaction;
+
+    IAPTransaction() {
+        memset(this, 0, sizeof(*this));
+    }
+};
+
+static void IAP_FreeProduct(IAPProduct* product)
+{
+    free((void*)product->ident);
+    free((void*)product->title);
+    free((void*)product->description);
+    free((void*)product->price_string);
+    free((void*)product->currency_code);
+}
+
+static void IAP_FreeTransaction(IAPTransaction* transaction)
+{
+    if (transaction->m_OriginalTransaction) {
+        IAP_FreeTransaction(transaction->m_OriginalTransaction);
+    }
+    delete transaction->m_OriginalTransaction;
+    free((void*)transaction->ident);
+    free((void*)transaction->date);
+    free((void*)transaction->trans_ident);
+    free((void*)transaction->receipt);
+    free((void*)transaction->original_trans);
+    free((void*)transaction->error);
+}
+
 
 @interface SKProductsRequestDelegate : NSObject<SKProductsRequestDelegate>
-    @property lua_State* m_LuaState;
+    @property IAPListener m_Callback;
     @property (assign) SKProductsRequest* m_Request;
 @end
 
 @implementation SKProductsRequestDelegate
 - (void)productsRequest:(SKProductsRequest *)request didReceiveResponse:(SKProductsResponse *)response{
 
-    lua_State* L = self.m_LuaState;
-    if (g_IAP.m_Callback == LUA_NOREF) {
+    IAPListener callback = self.m_Callback;
+    if (!IAP_CallbackIsValid(&callback)) {
         dmLogError("No callback set");
         return;
     }
 
-    NSArray * skProducts = response.products;
-    int top = lua_gettop(L);
+    NSArray* skProducts = response.products;
 
-    lua_rawgeti(L, LUA_REGISTRYINDEX, g_IAP.m_Callback);
-
-    // Setup self
-    lua_rawgeti(L, LUA_REGISTRYINDEX, g_IAP.m_Self);
-    lua_pushvalue(L, -1);
-    dmScript::SetInstance(L);
-
-    if (!dmScript::IsInstanceValid(L))
-    {
-        dmLogError("Could not run facebook callback because the instance has been deleted.");
-        lua_pop(L, 2);
-        assert(top == lua_gettop(L));
-        return;
-    }
-
-    lua_newtable(L);
+    IAPResponse* iap_response = new IAPResponse;
     for (SKProduct * p in skProducts) {
 
-        lua_pushstring(L, [p.productIdentifier UTF8String]);
-        lua_newtable(L);
-
-        lua_pushstring(L, "ident");
-        lua_pushstring(L, [p.productIdentifier UTF8String]);
-        lua_rawset(L, -3);
-
-        lua_pushstring(L, "title");
-        lua_pushstring(L, [p.localizedTitle UTF8String]);
-        lua_rawset(L, -3);
-
-        lua_pushstring(L, "description");
-        lua_pushstring(L, [p.localizedDescription  UTF8String]);
-        lua_rawset(L, -3);
-
-        lua_pushstring(L, "price");
-        lua_pushnumber(L, p.price.floatValue);
-        lua_rawset(L, -3);
+        IAPProduct product = {0};
+        product.ident           = strdup([p.productIdentifier UTF8String]);
+        product.title           = strdup([p.localizedTitle UTF8String]);
+        product.description     = strdup([p.localizedDescription UTF8String]);
+        product.currency_code   = strdup([[p.priceLocale objectForKey:NSLocaleCurrencyCode] UTF8String]);
+        product.price           = p.price.floatValue;
 
         NSNumberFormatter *formatter = [[[NSNumberFormatter alloc] init] autorelease];
         [formatter setNumberStyle: NSNumberFormatterCurrencyStyle];
         [formatter setLocale: p.priceLocale];
-        NSString *price_string = [formatter stringFromNumber: p.price];
+        NSString* price_string = [formatter stringFromNumber: p.price];
+        product.price_string = strdup([price_string UTF8String]);
 
-        lua_pushstring(L, "price_string");
-        lua_pushstring(L, [price_string UTF8String]);
+        if (iap_response->m_Products.Full()) {
+            iap_response->m_Products.OffsetCapacity(2);
+        }
+        iap_response->m_Products.Push(product);
+    }
+
+
+    IAPCommand cmd;
+    cmd.m_Command = IAP_PRODUCT_RESULT;
+    cmd.m_Callback = callback;
+    cmd.m_Data = iap_response;
+    IAP_Queue_Push(&g_IAP.m_CommandQueue, &cmd);
+}
+
+static void HandleProductResult(IAPCommand* cmd)
+{
+
+    IAPResponse* response = (IAPResponse*)cmd->m_Data;
+
+    lua_State* L = cmd->m_Callback.m_L;
+    int top = lua_gettop(L);
+
+    if (!IAP_SetupCallback(&cmd->m_Callback))
+    {
+        assert(top == lua_gettop(L));
+        delete response;
+        return;
+    }
+
+    lua_newtable(L);
+
+    for (uint32_t i = 0; i < response->m_Products.Size(); ++i) {
+        IAPProduct* product = &response->m_Products[i];
+
+        lua_pushstring(L, product->ident);
+        lua_newtable(L);
+
+        lua_pushstring(L, product->ident);
+        lua_setfield(L, -2, "ident");
+        lua_pushstring(L, product->title);
+        lua_setfield(L, -2, "title");
+        lua_pushstring(L, product->description);
+        lua_setfield(L, -2, "description");
+        lua_pushnumber(L, product->price);
+        lua_setfield(L, -2, "price");
+        lua_pushstring(L, product->price_string);
+        lua_setfield(L, -2, "price_string");
+        lua_pushstring(L, product->currency_code);
+        lua_setfield(L, -2, "currency_code");
+
         lua_rawset(L, -3);
 
-        lua_pushstring(L, "currency_code");
-        lua_pushstring(L, [[p.priceLocale objectForKey:NSLocaleCurrencyCode] UTF8String]);
-        lua_rawset(L, -3);
-
-        lua_rawset(L, -3);
+        IAP_FreeProduct(product);
     }
     lua_pushnil(L);
 
     int ret = lua_pcall(L, 3, 0, 0);
     if (ret != 0) {
-        dmLogError("Error running callback: %s", lua_tostring(L, -1));
+        dmLogError("%d: Error running callback: %s", __LINE__, lua_tostring(L, -1));
         lua_pop(L, 1);
     }
 
-    dmScript::Unref(L, LUA_REGISTRYINDEX, g_IAP.m_Callback);
-    dmScript::Unref(L, LUA_REGISTRYINDEX, g_IAP.m_Self);
-    g_IAP.m_Callback = LUA_NOREF;
-    g_IAP.m_Self = LUA_NOREF;
+    IAP_UnregisterCallback(&cmd->m_Callback);
 
+    delete response;
     assert(top == lua_gettop(L));
 }
 
 - (void)request:(SKRequest *)request didFailWithError:(NSError *)error{
     dmLogWarning("SKProductsRequest failed: %s", [error.localizedDescription UTF8String]);
 
-    lua_State* L = self.m_LuaState;
-    int top = lua_gettop(L);
-
-    if (g_IAP.m_Callback == LUA_NOREF) {
+    IAPListener callback = self.m_Callback;
+    if (!IAP_CallbackIsValid(&callback)) {
         dmLogError("No callback set");
         return;
     }
 
-    lua_rawgeti(L, LUA_REGISTRYINDEX, g_IAP.m_Callback);
+    IAPResponse* response = new IAPResponse;
+    response->error = strdup([error.localizedDescription UTF8String]);
+    response->error_code = REASON_UNSPECIFIED;
 
-    // Setup self
-    lua_rawgeti(L, LUA_REGISTRYINDEX, g_IAP.m_Self);
-    lua_pushvalue(L, -1);
-    dmScript::SetInstance(L);
+    IAPCommand cmd;
+    cmd.m_Command = IAP_PRODUCT_RESULT;
+    cmd.m_Callback = callback;
+    cmd.m_Data = response;
 
-    if (!dmScript::IsInstanceValid(L))
-    {
-        dmLogError("Could not run iap callback because the instance has been deleted.");
-        lua_pop(L, 2);
-        assert(top == lua_gettop(L));
-        return;
-    }
-
-    lua_pushnil(L);
-    IAP_PushError(L, [error.localizedDescription UTF8String], REASON_UNSPECIFIED);
-
-    int ret = lua_pcall(L, 3, 0, 0);
-    if (ret != 0) {
-        dmLogError("Error running callback: %s", lua_tostring(L, -1));
-        lua_pop(L, 1);
-    }
-
-    dmScript::Unref(L, LUA_REGISTRYINDEX, g_IAP.m_Callback);
-    dmScript::Unref(L, LUA_REGISTRYINDEX, g_IAP.m_Self);
-    g_IAP.m_Callback = LUA_NOREF;
-    g_IAP.m_Self = LUA_NOREF;
-
-    assert(top == lua_gettop(L));
+    IAP_Queue_Push(&g_IAP.m_CommandQueue, &cmd);
 }
 
 - (void)requestDidFinish:(SKRequest *)request
@@ -176,125 +229,148 @@ IAP g_IAP;
 
 @end
 
-static void PushTransaction(lua_State* L, SKPaymentTransaction* transaction)
+static void CopyTransaction(SKPaymentTransaction* transaction, IAPTransaction* out)
 {
-    lua_newtable(L);
-
-    lua_pushstring(L, "ident");
-    lua_pushstring(L, [transaction.payment.productIdentifier UTF8String]);
-    lua_rawset(L, -3);
-
-    lua_pushstring(L, "state");
-    lua_pushnumber(L, transaction.transactionState);
-    lua_rawset(L, -3);
-
-    if (transaction.transactionState == SKPaymentTransactionStatePurchased || transaction.transactionState == SKPaymentTransactionStateRestored) {
-        lua_pushstring(L, "trans_ident");
-        lua_pushstring(L, [transaction.transactionIdentifier UTF8String]);
-        lua_rawset(L, -3);
-    }
-
-    if (transaction.transactionState == SKPaymentTransactionStatePurchased) {
-        lua_pushstring(L, "receipt");
-        if (floor(NSFoundationVersionNumber) <= NSFoundationVersionNumber_iOS_6_1) {
-            lua_pushlstring(L, (const char*) transaction.transactionReceipt.bytes, transaction.transactionReceipt.length);
-        } else {
-            NSURL *receiptURL = [[NSBundle mainBundle] appStoreReceiptURL];
-            NSData *receiptData = [NSData dataWithContentsOfURL:receiptURL];
-            lua_pushlstring(L, (const char*) receiptData.bytes, receiptData.length);
-        }
-        lua_rawset(L, -3);
+    if (transaction.transactionState == SKPaymentTransactionStateFailed) {
+        out->error = strdup([transaction.error.localizedDescription UTF8String]);
+        out->error_code = transaction.error.code == SKErrorPaymentCancelled ? REASON_USER_CANCELED : REASON_UNSPECIFIED;
+    } else {
+        out->error = 0;
     }
 
     NSDateFormatter *dateFormatter = [[[NSDateFormatter alloc] init] autorelease];
     [dateFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ssZZZ"];
-    lua_pushstring(L, "date");
-    lua_pushstring(L, [[dateFormatter stringFromDate: transaction.transactionDate] UTF8String]);
-    lua_rawset(L, -3);
+
+    out->ident = strdup([transaction.payment.productIdentifier UTF8String]);
+
+
+    if (transaction.transactionDate)
+        out->date  = strdup([[dateFormatter stringFromDate: transaction.transactionDate] UTF8String]);
+    out->state = transaction.transactionState;
+
+    if (transaction.transactionState == SKPaymentTransactionStatePurchased ||
+        transaction.transactionState == SKPaymentTransactionStateRestored) {
+        out->trans_ident = strdup([transaction.transactionIdentifier UTF8String]);
+    }
+
+    if (transaction.transactionState == SKPaymentTransactionStatePurchased) {
+        NSURL *receiptURL = [[NSBundle mainBundle] appStoreReceiptURL];
+        NSData *receiptData = [NSData dataWithContentsOfURL:receiptURL];
+        out->receipt_length = receiptData.length;
+        out->receipt = (const char*)malloc(out->receipt_length);
+        memcpy((void*)out->receipt, receiptData.bytes, out->receipt_length);
+    }
 
     if (transaction.transactionState == SKPaymentTransactionStateRestored && transaction.originalTransaction) {
+        out->m_OriginalTransaction = new IAPTransaction;
+        CopyTransaction(transaction.originalTransaction, out->m_OriginalTransaction);
+    }
+}
+
+static void PushTransaction(lua_State* L, IAPTransaction* transaction)
+{
+    // first argument to the callback
+    lua_newtable(L);
+
+    lua_pushstring(L, transaction->ident);
+    lua_setfield(L, -2, "ident");
+    lua_pushnumber(L, transaction->state);
+    lua_setfield(L, -2, "state");
+    if (transaction->date) {
+        lua_pushstring(L, transaction->date);
+        lua_setfield(L, -2, "date");
+    }
+
+    if (transaction->trans_ident) {
+        lua_pushstring(L, transaction->trans_ident);
+        lua_setfield(L, -2, "trans_ident");
+    }
+    if (transaction->receipt) {
+        lua_pushlstring(L, transaction->receipt, transaction->receipt_length);
+        lua_setfield(L, -2, "receipt");
+    }
+
+    if (transaction->m_OriginalTransaction) {
         lua_pushstring(L, "original_trans");
-        PushTransaction(L, transaction.originalTransaction);
+        PushTransaction(L, transaction->m_OriginalTransaction);
         lua_rawset(L, -3);
     }
 }
 
-void RunTransactionCallback(lua_State* L, int cb, int self, SKPaymentTransaction* transaction)
+
+static void HandlePurchaseResult(IAPCommand* cmd)
 {
+
+    IAPTransaction* transaction = (IAPTransaction*)cmd->m_Data;
+
+    lua_State* L = cmd->m_Callback.m_L;
     int top = lua_gettop(L);
 
-    lua_rawgeti(L, LUA_REGISTRYINDEX, cb);
-
-    // Setup self
-    lua_rawgeti(L, LUA_REGISTRYINDEX, self);
-    lua_pushvalue(L, -1);
-    dmScript::SetInstance(L);
-
-    if (!dmScript::IsInstanceValid(L))
+    if (!IAP_SetupCallback(&cmd->m_Callback))
     {
-        dmLogError("Could not run iap callback because the instance has been deleted.");
-        lua_pop(L, 2);
         assert(top == lua_gettop(L));
         return;
     }
 
     PushTransaction(L, transaction);
 
-    if (transaction.transactionState == SKPaymentTransactionStateFailed) {
-        if (transaction.error.code == SKErrorPaymentCancelled) {
-            IAP_PushError(L, [transaction.error.localizedDescription UTF8String], REASON_USER_CANCELED);
-        } else {
-            IAP_PushError(L, [transaction.error.localizedDescription UTF8String], REASON_UNSPECIFIED);
-        }
+    // Second argument to callback
+    if (transaction->error) {
+        IAP_PushError(L, transaction->error, transaction->error_code);
     } else {
         lua_pushnil(L);
     }
 
     int ret = lua_pcall(L, 3, 0, 0);
     if (ret != 0) {
-        dmLogError("Error running callback: %s", lua_tostring(L, -1));
+        dmLogError("%d: Error running callback: %s", __LINE__, lua_tostring(L, -1));
         lua_pop(L, 1);
     }
 
+    IAP_FreeTransaction(transaction);
+
+    delete transaction;
     assert(top == lua_gettop(L));
 }
 
 @implementation SKPaymentTransactionObserver
     - (void)paymentQueue:(SKPaymentQueue *)queue updatedTransactions:(NSArray *)transactions
     {
-        for (SKPaymentTransaction * transaction in transactions) {
+        for (SKPaymentTransaction* transaction in transactions) {
 
-            if ((!g_IAP.m_AutoFinishTransactions) && (transaction.transactionState == SKPaymentTransactionStatePurchased)) {
+            if ((!self.m_IAP->m_AutoFinishTransactions) && (transaction.transactionState == SKPaymentTransactionStatePurchased)) {
                 NSData *data = [transaction.transactionIdentifier dataUsingEncoding:NSUTF8StringEncoding];
                 uint64_t trans_id_hash = dmHashBuffer64((const char*) [data bytes], [data length]);
-                [g_IAP.m_PendingTransactions setObject:transaction forKey:[NSNumber numberWithInteger:trans_id_hash] ];
+                [self.m_IAP->m_PendingTransactions setObject:transaction forKey:[NSNumber numberWithInteger:trans_id_hash] ];
             }
 
-            bool has_listener = false;
-            if (self.m_IAP->m_Listener.m_Callback != LUA_NOREF) {
-                const IAPListener& l = self.m_IAP->m_Listener;
-                RunTransactionCallback(l.m_L, l.m_Callback, l.m_Self, transaction);
-                has_listener = true;
-            }
+            bool has_listener = self.m_IAP->m_Listener.m_Callback != LUA_NOREF;
+            if (!has_listener)
+                continue;
+
+            IAPTransaction* iap_transaction = new IAPTransaction;
+            CopyTransaction(transaction, iap_transaction);
+
+            IAPCommand cmd;
+            cmd.m_Callback = self.m_IAP->m_Listener;
+            cmd.m_Command = IAP_PURCHASE_RESULT;
+            cmd.m_Data = iap_transaction;
+            IAP_Queue_Push(&self.m_IAP->m_CommandQueue, &cmd);
 
             switch (transaction.transactionState)
             {
-                case SKPaymentTransactionStatePurchasing:
-                    break;
                 case SKPaymentTransactionStatePurchased:
-                    if (has_listener > 0 && g_IAP.m_AutoFinishTransactions) {
+                    if (g_IAP.m_AutoFinishTransactions) {
                         [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
                     }
                     break;
                 case SKPaymentTransactionStateFailed:
-                    if (has_listener > 0) {
-                        [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
-                    }
+                    [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
                     break;
                 case SKPaymentTransactionStateRestored:
-                    if (has_listener > 0) {
-                        [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
-                    }
+                    [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
+                    break;
+                default:
                     break;
             }
         }
@@ -304,13 +380,6 @@ void RunTransactionCallback(lua_State* L, int cb, int self, SKPaymentTransaction
 static int IAP_List(lua_State* L)
 {
     int top = lua_gettop(L);
-    if (g_IAP.m_Callback != LUA_NOREF) {
-        dmLogError("Unexpected callback set");
-        dmScript::Unref(L, LUA_REGISTRYINDEX, g_IAP.m_Callback);
-        dmScript::Unref(L, LUA_REGISTRYINDEX, g_IAP.m_Self);
-        g_IAP.m_Callback = LUA_NOREF;
-        g_IAP.m_Self = LUA_NOREF;
-    }
 
     NSCountedSet* product_identifiers = [[[NSCountedSet alloc] init] autorelease];
 
@@ -322,16 +391,13 @@ static int IAP_List(lua_State* L)
         lua_pop(L, 1);
     }
 
-    luaL_checktype(L, 2, LUA_TFUNCTION);
-    lua_pushvalue(L, 2);
-    g_IAP.m_Callback = dmScript::Ref(L, LUA_REGISTRYINDEX);
-
-    dmScript::GetInstance(L);
-    g_IAP.m_Self = dmScript::Ref(L, LUA_REGISTRYINDEX);
-
     SKProductsRequest* products_request = [[SKProductsRequest alloc] initWithProductIdentifiers: product_identifiers];
     SKProductsRequestDelegate* delegate = [SKProductsRequestDelegate alloc];
-    delegate.m_LuaState = dmScript::GetMainThread(L);
+
+    IAPListener callback;
+    IAP_RegisterCallback(L, 2, &callback);
+    delegate.m_Callback = callback;
+
     delegate.m_Request = products_request;
     products_request.delegate = delegate;
     [products_request start];
@@ -419,20 +485,9 @@ static int IAP_Restore(lua_State* L)
 static int IAP_SetListener(lua_State* L)
 {
     IAP* iap = &g_IAP;
-    luaL_checktype(L, 1, LUA_TFUNCTION);
-    lua_pushvalue(L, 1);
-    int cb = dmScript::Ref(L, LUA_REGISTRYINDEX);
 
-    if (iap->m_Listener.m_Callback != LUA_NOREF) {
-        dmScript::Unref(iap->m_Listener.m_L, LUA_REGISTRYINDEX, iap->m_Listener.m_Callback);
-        dmScript::Unref(iap->m_Listener.m_L, LUA_REGISTRYINDEX, iap->m_Listener.m_Self);
-    }
-
-    iap->m_Listener.m_L = dmScript::GetMainThread(L);
-    iap->m_Listener.m_Callback = cb;
-
-    dmScript::GetInstance(L);
-    iap->m_Listener.m_Self = dmScript::Ref(L, LUA_REGISTRYINDEX);
+    IAP_UnregisterCallback(&iap->m_Listener);
+    IAP_RegisterCallback(L, 1, &iap->m_Listener);
 
     if (g_IAP.m_Observer == 0) {
         SKPaymentTransactionObserver* observer = [[SKPaymentTransactionObserver alloc] init];
@@ -475,22 +530,44 @@ static dmExtension::Result InitializeIAP(dmExtension::Params* params)
     }
     g_IAP.m_InitCount++;
 
+    IAP_Queue_Create(&g_IAP.m_CommandQueue);
 
     lua_State*L = params->m_L;
     int top = lua_gettop(L);
     luaL_register(L, LIB_NAME, IAP_methods);
 
     // ensure ios payment constants values corresponds to iap constants.
-    assert(TRANS_STATE_PURCHASING == SKPaymentTransactionStatePurchasing);
-    assert(TRANS_STATE_PURCHASED == SKPaymentTransactionStatePurchased);
-    assert(TRANS_STATE_FAILED == SKPaymentTransactionStateFailed);
-    assert(TRANS_STATE_RESTORED == SKPaymentTransactionStateRestored);
+    assert((int)TRANS_STATE_PURCHASING == (int)SKPaymentTransactionStatePurchasing);
+    assert((int)TRANS_STATE_PURCHASED == (int)SKPaymentTransactionStatePurchased);
+    assert((int)TRANS_STATE_FAILED == (int)SKPaymentTransactionStateFailed);
+    assert((int)TRANS_STATE_RESTORED == (int)SKPaymentTransactionStateRestored);
 
     IAP_PushConstants(L);
 
     lua_pop(L, 1);
     assert(top == lua_gettop(L));
+    return dmExtension::RESULT_OK;
+}
 
+static void IAP_OnCommand(IAPCommand* cmd, void*)
+{
+    switch (cmd->m_Command)
+    {
+    case IAP_PRODUCT_RESULT:
+        HandleProductResult(cmd);
+        break;
+    case IAP_PURCHASE_RESULT:
+        HandlePurchaseResult(cmd);
+        break;
+
+    default:
+        assert(false);
+    }
+}
+
+static dmExtension::Result UpdateIAP(dmExtension::Params* params)
+{
+    IAP_Queue_Flush(&g_IAP.m_CommandQueue, IAP_OnCommand, 0);
     return dmExtension::RESULT_OK;
 }
 
@@ -500,12 +577,8 @@ static dmExtension::Result FinalizeIAP(dmExtension::Params* params)
 
     // TODO: Should we support one listener per lua-state?
     // Or just use a single lua-state...?
-    if (params->m_L == g_IAP.m_Listener.m_L && g_IAP.m_Listener.m_Callback != LUA_NOREF) {
-        dmScript::Unref(g_IAP.m_Listener.m_L, LUA_REGISTRYINDEX, g_IAP.m_Listener.m_Callback);
-        dmScript::Unref(g_IAP.m_Listener.m_L, LUA_REGISTRYINDEX, g_IAP.m_Listener.m_Self);
-        g_IAP.m_Listener.m_L = 0;
-        g_IAP.m_Listener.m_Callback = LUA_NOREF;
-        g_IAP.m_Listener.m_Self = LUA_NOREF;
+    if (params->m_L == g_IAP.m_Listener.m_L) {
+        IAP_UnregisterCallback(&g_IAP.m_Listener);
     }
 
     if (g_IAP.m_InitCount == 0) {
@@ -520,10 +593,13 @@ static dmExtension::Result FinalizeIAP(dmExtension::Params* params)
             g_IAP.m_Observer = 0;
         }
     }
+
+    IAP_Queue_Destroy(&g_IAP.m_CommandQueue);
+
     return dmExtension::RESULT_OK;
 }
 
 
-DM_DECLARE_EXTENSION(IAPExt, "IAP", 0, 0, InitializeIAP, 0, 0, FinalizeIAP)
+DM_DECLARE_EXTENSION(IAPExt, "IAP", 0, 0, InitializeIAP, UpdateIAP, 0, FinalizeIAP)
 
 #endif // DM_PLATFORM_IOS

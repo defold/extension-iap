@@ -5,6 +5,16 @@
 
 #include <dmsdk/sdk.h>
 
+// TODO: Rename Callback
+struct IAPListener
+{
+    IAPListener();
+
+    lua_State* m_L;
+    int        m_Callback;
+    int        m_Self;
+};
+
 enum EIAPCommand
 {
 	IAP_PRODUCT_RESULT,
@@ -17,9 +27,14 @@ struct DM_ALIGNED(16) IAPCommand
     {
         memset(this, 0, sizeof(IAPCommand));
     }
-    int32_t  m_Command;
-    int32_t  m_ResponseCode;
-    void*    m_Data;
+
+    // Used for storing eventual callback info (if needed)
+    IAPListener m_Callback;
+
+    // THe actual command payload
+    int32_t  	m_Command;
+    int32_t  	m_ResponseCode;
+    void*    	m_Data;
 };
 
 struct IAPCommandQueue
@@ -28,19 +43,11 @@ struct IAPCommandQueue
     dmMutex::HMutex      m_Mutex;
 };
 
-struct IAPListener
-{
-    IAPListener()
-    {
-        m_L = 0;
-        m_Callback = LUA_NOREF;
-        m_Self = LUA_NOREF;
-    }
-    lua_State* m_L;
-    int        m_Callback;
-    int        m_Self;
-};
-
+void IAP_ClearCallback(IAPListener* callback);
+void IAP_RegisterCallback(lua_State* L, int index, IAPListener* callback);
+void IAP_UnregisterCallback(IAPListener* callback);
+bool IAP_SetupCallback(IAPListener* callback);
+bool IAP_CallbackIsValid(IAPListener* callback);
 
 char* IAP_List_CreateBuffer(lua_State* L);
 void IAP_PushError(lua_State* L, const char* error, int reason);
