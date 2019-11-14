@@ -17,16 +17,6 @@ struct IAP;
     @property IAP* m_IAP;
 @end
 
-/*# In-app purchases API documentation
- *
- * Functions and constants for interacting with Apple's In-app purchases
- * and Google's In-app billing.
- *
- * @document
- * @name In-app purchases
- * @namespace iap
- */
-
 struct IAP
 {
     IAP()
@@ -311,68 +301,7 @@ void RunTransactionCallback(lua_State* L, int cb, int self, SKPaymentTransaction
     }
 @end
 
-/*# list in-app products
- *
- * Get a list of all avaliable iap products. Products are described as a [type:table]
- * with the following fields:
- *
- * `ident`
- * : The product identifier.
- *
- * `title`
- * : The product title.
- *
- * `description`
- * : The product description.
- *
- * `price`
- * : The price of the product.
- *
- * `price_string`
- * : The price of the product, as a formatted string (amount and currency symbol).
- *
- * `currency_code` [icon:ios] [icon:googleplay] [icon:facebook]
- * : The currency code. On Google Play, this reflects the merchant's locale, instead of the user's.
- *
- * [icon:attention] Nested calls, that is calling `iap.list()` from within the callback is
- * not supported. Doing so will result in call being ignored with the engine reporting
- * "Unexpected callback set".
- *
- * @name iap.list
- * @param ids [type:table] table (array) of identifiers to get products from
- * @param callback [type:function(self, products, error)] result callback
- *
- * `self`
- * : [type:object] The current object.
- *
- * `products`
- * : [type:table] Table describing the available iap products. See above for details.
- *
- * `error`
- * : [type:table] a table containing error information. `nil` if there is no error.
- * - `error` (the error message)
- *
- * @examples
- *
- * ```lua
- * local function iap_callback(self, products, error)
- *   if error == nil then
- *     for k,p in pairs(products) do
- *       -- present the product
- *       print(p.title)
- *       print(p.description)
- *     end
- *   else
- *     print(error.error)
- *   end
- * end
- *
- * function init(self)
- *     iap.list({"my_iap"}, iap_callback)
- * end
- * ```
- */
-int IAP_List(lua_State* L)
+static int IAP_List(lua_State* L)
 {
     int top = lua_gettop(L);
     if (g_IAP.m_Callback != LUA_NOREF) {
@@ -411,44 +340,7 @@ int IAP_List(lua_State* L)
     return 0;
 }
 
-/*# buy product
- *
- * Perform a product purchase.
- *
- * [icon:attention] Calling `iap.finish()` is required on a successful transaction if
- * `auto_finish_transactions` is disabled in project settings.
- *
- * @name iap.buy
- * @param id [type:string] product to buy
- * @param [options] [type:table] optional parameters as properties. The following parameters can be set:
- *
- * - `request_id` ([icon:facebook] Facebook only. Optional custom unique request id to
- * set for this transaction. The id becomes attached to the payment within the Graph API.)
- *
- * @examples
- *
- * ```lua
- * local function iap_listener(self, transaction, error)
- *   if error == nil then
- *     -- purchase is successful.
- *     print(transaction.date)
- *     -- required if auto finish transactions is disabled in project settings
- *     if (transaction.state == iap.TRANS_STATE_PURCHASED) then
- *       -- do server-side verification of purchase here..
- *       iap.finish(transaction)
- *     end
- *   else
- *     print(error.error, error.reason)
- *   end
- * end
- *
- * function init(self)
- *     iap.set_listener(iap_listener)
- *     iap.buy("my_iap")
- * end
- * ```
- */
-int IAP_Buy(lua_State* L)
+static int IAP_Buy(lua_State* L)
 {
     int top = lua_gettop(L);
 
@@ -464,20 +356,7 @@ int IAP_Buy(lua_State* L)
     return 0;
 }
 
-/*# finish buying product
- *
- * Explicitly finish a product transaction.
- *
- * [icon:attention] Calling iap.finish is required on a successful transaction
- * if `auto_finish_transactions` is disabled in project settings. Calling this function
- * with `auto_finish_transactions` set will be ignored and a warning is printed.
- * The `transaction.state` field must equal `iap.TRANS_STATE_PURCHASED`.
- *
- * @name iap.finish
- * @param transaction [type:table] transaction table parameter as supplied in listener callback
- *
- */
-int IAP_Finish(lua_State* L)
+static int IAP_Finish(lua_State* L)
 {
     if(g_IAP.m_AutoFinishTransactions)
     {
@@ -525,15 +404,7 @@ int IAP_Finish(lua_State* L)
     return 0;
 }
 
-/*# restore products (non-consumable)
- *
- * Restore previously purchased products.
- *
- * @name iap.restore
- * @return success [type:boolean] `true` if current store supports handling
- * restored transactions, otherwise `false`.
- */
-int IAP_Restore(lua_State* L)
+static int IAP_Restore(lua_State* L)
 {
     // TODO: Missing callback here for completion/error
     // See callback under "Handling Restored Transactions"
@@ -545,72 +416,7 @@ int IAP_Restore(lua_State* L)
     return 1;
 }
 
-/*# set purchase transaction listener
- *
- * Set the callback function to receive purchase transaction events. Transactions are
- * described as a [type:table] with the following fields:
- *
- * `ident`
- * : The product identifier.
- *
- * `state`
- * : The transaction state. See `iap.TRANS_STATE_*`.
- *
- * `date`
- * : The date and time for the transaction.
- *
- * `trans_ident`
- * : The transaction identifier. This field is only set when `state` is TRANS_STATE_RESTORED,
- * TRANS_STATE_UNVERIFIED or TRANS_STATE_PURCHASED.
- *
- * `receipt`
- * : The transaction receipt. This field is only set when `state` is TRANS_STATE_PURCHASED
- * or TRANS_STATE_UNVERIFIED.
- *
- * `original_trans` [icon:apple]
- * : Apple only. The original transaction. This field is only set when `state` is
- * TRANS_STATE_RESTORED.
- *
- * `signature` [icon:googleplay]
- * : Google Play only. A string containing the signature of the purchase data that was signed
- * with the private key of the developer.
- *
- * `request_id` [icon:facebook]
- * : Facebook only. This field is set to the optional custom unique request id `request_id`
- * if set in the `iap.buy()` call parameters.
- *
- * `user_id` [icon:amazon]
- * : Amazon Pay only. The user ID.
- *
- * `is_sandbox_mode` [icon:amazon]
- * : Amazon Pay only. If `true`, the SDK is running in Sandbox mode. This only allows
- * interactions with the Amazon AppTester. Use this mode only for testing locally.
- *
- * `cancel_date` [icon:amazon]
- * : Amazon Pay only. The cancel date for the purchase. This field is only set if the
- * purchase is canceled.
- *
- * `canceled` [icon:amazon]
- * : Amazon Pay only. Is set to `true` if the receipt was canceled or has expired;
- * otherwise `false`.
- *
- * @name iap.set_listener
- * @param listener [type:function(self, transaction, error)] listener callback function.
- * Pass an empty function if you no longer wish to receive callbacks.
- *
- * `self`
- * : [type:object] The current object.
- *
- * `transaction`
- * : [type:table] a table describing the transaction. See above for details.
- *
- * `error`
- * : [type:table] a table containing error information. `nil` if there is no error.
- * - `error` (the error message)
- * - `reason` (the reason for the error, see `iap.REASON_*`)
- *
- */
-int IAP_SetListener(lua_State* L)
+static int IAP_SetListener(lua_State* L)
 {
     IAP* iap = &g_IAP;
     luaL_checktype(L, 1, LUA_TFUNCTION);
@@ -642,18 +448,7 @@ int IAP_SetListener(lua_State* L)
     return 0;
 }
 
-/*# get current provider id
- *
- * @name iap.get_provider_id
- * @return id [type:constant] provider id.
- *
- * - `iap.PROVIDER_ID_GOOGLE`
- * - `iap.PROVIDER_ID_AMAZON`
- * - `iap.PROVIDER_ID_APPLE`
- * - `iap.PROVIDER_ID_FACEBOOK`
- *
- */
-int IAP_GetProviderId(lua_State* L)
+static int IAP_GetProviderId(lua_State* L)
 {
     lua_pushinteger(L, PROVIDER_ID_APPLE);
     return 1;
@@ -670,79 +465,7 @@ static const luaL_reg IAP_methods[] =
     {0, 0}
 };
 
-/*# transaction purchasing state
- *
- * This is an intermediate mode followed by TRANS_STATE_PURCHASED.
- * Store provider support dependent.
- *
- * @name iap.TRANS_STATE_PURCHASING
- * @variable
- */
-
-/*# transaction purchased state
- *
- * @name iap.TRANS_STATE_PURCHASED
- * @variable
- */
-
-/*# transaction unverified state, requires verification of purchase
- *
- * @name iap.TRANS_STATE_UNVERIFIED
- * @variable
- */
-
-/*# transaction failed state
- *
- * @name iap.TRANS_STATE_FAILED
- * @variable
- */
-
-/*# transaction restored state
- *
- * This is only available on store providers supporting restoring purchases.
- *
- * @name iap.TRANS_STATE_RESTORED
- * @variable
- */
-
-/*# unspecified error reason
- *
- * @name iap.REASON_UNSPECIFIED
- * @variable
- */
-
-/*# user canceled reason
- *
- * @name iap.REASON_USER_CANCELED
- * @variable
- */
-
-
-/*# iap provider id for Google
- *
- * @name iap.PROVIDER_ID_GOOGLE
- * @variable
- */
-
-/*# provider id for Amazon
- *
- * @name iap.PROVIDER_ID_AMAZON
- * @variable
- */
-
-/*# provider id for Apple
- *
- * @name iap.PROVIDER_ID_APPLE
- * @variable
- */
-
-/*# provider id for Facebook
- *
- * @name iap.PROVIDER_ID_FACEBOOK
- * @variable
- */
-
-dmExtension::Result InitializeIAP(dmExtension::Params* params)
+static dmExtension::Result InitializeIAP(dmExtension::Params* params)
 {
     // TODO: Life-cycle managaemnt is *budget*. No notion of "static initalization"
     // Extend extension functionality with per system initalization?
@@ -771,7 +494,7 @@ dmExtension::Result InitializeIAP(dmExtension::Params* params)
     return dmExtension::RESULT_OK;
 }
 
-dmExtension::Result FinalizeIAP(dmExtension::Params* params)
+static dmExtension::Result FinalizeIAP(dmExtension::Params* params)
 {
     --g_IAP.m_InitCount;
 
