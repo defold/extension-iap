@@ -96,4 +96,43 @@ void IAP_PushConstants(lua_State* L)
     #undef SETCONSTANT
 }
 
+
+void IAP_Queue_Create(IAPCommandQueue* queue)
+{
+    queue->m_Mutex = dmMutex::New();
+}
+
+void IAP_Queue_Destroy(IAPCommandQueue* queue)
+{
+    dmMutex::Delete(queue->m_Mutex);
+}
+
+void IAP_Queue_Push(IAPCommandQueue* queue, IAPCommand* cmd)
+{
+    DM_MUTEX_SCOPED_LOCK(queue->m_Mutex);
+
+    if(queue->m_Commands.Full())
+    {
+        queue->m_Commands.OffsetCapacity(2);
+    }
+    queue->m_Commands.Push(*cmd);
+}
+
+void IAP_Queue_Flush(IAPCommandQueue* queue, IAPCommandFn fn, void* ctx)
+{
+    assert(fn != 0);
+    if (queue->m_Commands.Empty())
+    {
+        return;
+    }
+
+    DM_MUTEX_SCOPED_LOCK(queue->m_Mutex);
+
+    for(uint32_t i = 0; i != queue->m_Commands.Size(); ++i)
+    {
+        fn(&queue->m_Commands[i], ctx);
+    }
+    queue->m_Commands.SetSize(0);
+}
+
 #endif // DM_PLATFORM_HTML5 || DM_PLATFORM_ANDROID || DM_PLATFORM_IOS
