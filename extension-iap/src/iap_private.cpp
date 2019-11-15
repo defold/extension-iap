@@ -7,65 +7,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-
-IAPListener::IAPListener() {
-    IAP_ClearCallback(this);
-}
-
-void IAP_ClearCallback(IAPListener* callback)
-{
-    callback->m_L = 0;
-    callback->m_Callback = LUA_NOREF;
-    callback->m_Self = LUA_NOREF;
-}
-
-void IAP_RegisterCallback(lua_State* L, int index, IAPListener* callback)
-{
-    luaL_checktype(L, index, LUA_TFUNCTION);
-    lua_pushvalue(L, index);
-    callback->m_Callback = dmScript::Ref(L, LUA_REGISTRYINDEX);
-
-    dmScript::GetInstance(L);
-    callback->m_Self = dmScript::Ref(L, LUA_REGISTRYINDEX);
-
-    callback->m_L = L;
-}
-
-void IAP_UnregisterCallback(IAPListener* callback)
-{
-    if (LUA_NOREF != callback->m_Callback)
-        dmScript::Unref(callback->m_L, LUA_REGISTRYINDEX, callback->m_Callback);
-    if (LUA_NOREF != callback->m_Self)
-        dmScript::Unref(callback->m_L, LUA_REGISTRYINDEX, callback->m_Self);
-    callback->m_Callback = LUA_NOREF;
-    callback->m_Self = LUA_NOREF;
-    callback->m_L = 0;
-}
-
-bool IAP_SetupCallback(IAPListener* callback)
-{
-    lua_State* L = callback->m_L;
-    lua_rawgeti(L, LUA_REGISTRYINDEX, callback->m_Callback);
-
-    // Setup self
-    lua_rawgeti(L, LUA_REGISTRYINDEX, callback->m_Self);
-    lua_pushvalue(L, -1);
-    dmScript::SetInstance(L);
-
-    if (!dmScript::IsInstanceValid(L))
-    {
-        dmLogError("Could not run callback because the instance has been deleted.");
-        lua_pop(L, 2);
-        return false;
-    }
-    return true;
-}
-
-bool IAP_CallbackIsValid(IAPListener* callback)
-{
-    return callback != 0 && callback->m_L != 0 && callback->m_Callback != LUA_NOREF && callback->m_Self != LUA_NOREF;
-}
-
 // Creates a comma separated string, given a table where all values are strings (or numbers)
 // Returns a malloc'ed string, which the caller must free
 char* IAP_List_CreateBuffer(lua_State* L)
