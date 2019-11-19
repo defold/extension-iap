@@ -23,12 +23,11 @@ struct IAP
     {
         memset(this, 0, sizeof(*this));
         m_AutoFinishTransactions = true;
-        IAP_ClearCallback(&m_Listener);
     }
     int                             m_InitCount;
     bool                            m_AutoFinishTransactions;
     NSMutableDictionary*            m_PendingTransactions;
-    IAPListener                     m_Listener;
+    dmScript::LuaCallbackInfo*      m_Listener;
     IAPCommandQueue                 m_CommandQueue;
     SKPaymentTransactionObserver*   m_Observer;
 };
@@ -101,15 +100,14 @@ static void IAP_FreeTransaction(IAPTransaction* transaction)
 
 
 @interface SKProductsRequestDelegate : NSObject<SKProductsRequestDelegate>
-    @property IAPListener m_Callback;
+    @property dmScript::LuaCallbackInfo* m_Callback;
     @property (assign) SKProductsRequest* m_Request;
 @end
 
 @implementation SKProductsRequestDelegate
 - (void)productsRequest:(SKProductsRequest *)request didReceiveResponse:(SKProductsResponse *)response{
 
-    IAPListener callback = self.m_Callback;
-    if (!IAP_CallbackIsValid(&callback)) {
+    if (!dmScript::IsCallbackValid(self.m_Callback)) {
         dmLogError("No callback set");
         return;
     }
@@ -141,7 +139,7 @@ static void IAP_FreeTransaction(IAPTransaction* transaction)
 
     IAPCommand cmd;
     cmd.m_Command = IAP_PRODUCT_RESULT;
-    cmd.m_Callback = callback;
+    cmd.m_Callback = self.m_Callback;
     cmd.m_Data = iap_response;
     IAP_Queue_Push(&g_IAP.m_CommandQueue, &cmd);
 }
@@ -151,10 +149,10 @@ static void HandleProductResult(IAPCommand* cmd)
 
     IAPResponse* response = (IAPResponse*)cmd->m_Data;
 
-    lua_State* L = cmd->m_Callback.m_L;
+    lua_State* L = dmScript::GetCallbackLuaContext(g_IAP.m_Listener);
     int top = lua_gettop(L);
 
-    if (!IAP_SetupCallback(&cmd->m_Callback))
+    if (!dmScript::SetupCallback(cmd->m_Callback))
     {
         assert(top == lua_gettop(L));
         delete response;
@@ -188,13 +186,14 @@ static void HandleProductResult(IAPCommand* cmd)
     }
     lua_pushnil(L);
 
-    int ret = lua_pcall(L, 3, 0, 0);
+    int ret = dmScript::PCall(L, 3, 0);
     if (ret != 0) {
         dmLogError("%d: Error running callback: %s", __LINE__, lua_tostring(L, -1));
         lua_pop(L, 1);
     }
 
-    IAP_UnregisterCallback(&cmd->m_Callback);
+    dmScript::TeardownCallback(cmd->m_Callback);
+    dmScript::DestroyCallback(cmd->m_Callback);
 
     delete response;
     assert(top == lua_gettop(L));
@@ -203,8 +202,7 @@ static void HandleProductResult(IAPCommand* cmd)
 - (void)request:(SKRequest *)request didFailWithError:(NSError *)error{
     dmLogWarning("SKProductsRequest failed: %s", [error.localizedDescription UTF8String]);
 
-    IAPListener callback = self.m_Callback;
-    if (!IAP_CallbackIsValid(&callback)) {
+    if (!dmScript::IsCallbackValid(self.m_Callback)) {
         dmLogError("No callback set");
         return;
     }
@@ -215,7 +213,7 @@ static void HandleProductResult(IAPCommand* cmd)
 
     IAPCommand cmd;
     cmd.m_Command = IAP_PRODUCT_RESULT;
-    cmd.m_Callback = callback;
+    cmd.m_Callback = self.m_Callback;
     cmd.m_Data = response;
 
     IAP_Queue_Push(&g_IAP.m_CommandQueue, &cmd);
@@ -300,13 +298,12 @@ static void PushTransaction(lua_State* L, IAPTransaction* transaction)
 
 static void HandlePurchaseResult(IAPCommand* cmd)
 {
-
     IAPTransaction* transaction = (IAPTransaction*)cmd->m_Data;
 
-    lua_State* L = cmd->m_Callback.m_L;
+    lua_State* L = dmScript::GetCallbackLuaContext(cmd->m_Callback);
     int top = lua_gettop(L);
 
-    if (!IAP_SetupCallback(&cmd->m_Callback))
+    if (!dmScript::SetupCallback(cmd->m_Callback))
     {
         assert(top == lua_gettop(L));
         return;
@@ -321,11 +318,13 @@ static void HandlePurchaseResult(IAPCommand* cmd)
         lua_pushnil(L);
     }
 
-    int ret = lua_pcall(L, 3, 0, 0);
+    int ret = dmScript::PCall(L, 3, 0);
     if (ret != 0) {
         dmLogError("%d: Error running callback: %s", __LINE__, lua_tostring(L, -1));
         lua_pop(L, 1);
     }
+
+    dmScript::TeardownCallback(cmd->m_Callback);
 
     IAP_FreeTransaction(transaction);
 
@@ -344,8 +343,7 @@ static void HandlePurchaseResult(IAPCommand* cmd)
                 [self.m_IAP->m_PendingTransactions setObject:transaction forKey:[NSNumber numberWithInteger:trans_id_hash] ];
             }
 
-            bool has_listener = self.m_IAP->m_Listener.m_Callback != LUA_NOREF;
-            if (!has_listener)
+            if (!self.m_IAP->m_Listener)
                 continue;
 
             IAPTransaction* iap_transaction = new IAPTransaction;
@@ -394,10 +392,7 @@ static int IAP_List(lua_State* L)
     SKProductsRequest* products_request = [[SKProductsRequest alloc] initWithProductIdentifiers: product_identifiers];
     SKProductsRequestDelegate* delegate = [SKProductsRequestDelegate alloc];
 
-    IAPListener callback;
-    IAP_RegisterCallback(L, 2, &callback);
-    delegate.m_Callback = callback;
-
+    delegate.m_Callback = dmScript::CreateCallback(L, 2);
     delegate.m_Request = products_request;
     products_request.delegate = delegate;
     [products_request start];
@@ -486,8 +481,10 @@ static int IAP_SetListener(lua_State* L)
 {
     IAP* iap = &g_IAP;
 
-    IAP_UnregisterCallback(&iap->m_Listener);
-    IAP_RegisterCallback(L, 1, &iap->m_Listener);
+    if (iap->m_Listener)
+        dmScript::DestroyCallback(iap->m_Listener);
+
+    iap->m_Listener = dmScript::CreateCallback(L, 1);
 
     if (g_IAP.m_Observer == 0) {
         SKPaymentTransactionObserver* observer = [[SKPaymentTransactionObserver alloc] init];
@@ -577,8 +574,9 @@ static dmExtension::Result FinalizeIAP(dmExtension::Params* params)
 
     // TODO: Should we support one listener per lua-state?
     // Or just use a single lua-state...?
-    if (params->m_L == g_IAP.m_Listener.m_L) {
-        IAP_UnregisterCallback(&g_IAP.m_Listener);
+    if (params->m_L == dmScript::GetCallbackLuaContext(g_IAP.m_Listener)) {
+        dmScript::DestroyCallback(g_IAP.m_Listener);
+        g_IAP.m_Listener = 0;
     }
 
     if (g_IAP.m_InitCount == 0) {

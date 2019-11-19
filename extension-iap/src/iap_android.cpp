@@ -27,20 +27,15 @@ struct IAP
     IAP()
     {
         memset(this, 0, sizeof(*this));
-        m_Callback = LUA_NOREF;
-        m_Self = LUA_NOREF;
-        m_Listener.m_Callback = LUA_NOREF;
-        m_Listener.m_Self = LUA_NOREF;
         m_autoFinishTransactions = true;
         m_ProviderId = PROVIDER_ID_GOOGLE;
     }
     int             m_InitCount;
-    int             m_Callback;
-    int             m_Self;
     bool            m_autoFinishTransactions;
     int             m_ProviderId;
-    lua_State*      m_L;
-    IAPListener     m_Listener;
+
+    dmScript::LuaCallbackInfo* m_ProductCallback;
+    dmScript::LuaCallbackInfo* m_Listener;
 
     jobject         m_IAP;
     jobject         m_IAPJNI;
@@ -56,22 +51,9 @@ struct IAP
 
 static IAP g_IAP;
 
-static void ResetCallback(lua_State* L)
-{
-    if (g_IAP.m_Callback != LUA_NOREF) {
-        dmScript::Unref(L, LUA_REGISTRYINDEX, g_IAP.m_Callback);
-        dmScript::Unref(L, LUA_REGISTRYINDEX, g_IAP.m_Self);
-        g_IAP.m_Callback = LUA_NOREF;
-        g_IAP.m_Self = LUA_NOREF;
-        g_IAP.m_L = 0;
-    }
-}
-
 static int IAP_List(lua_State* L)
 {
     int top = lua_gettop(L);
-    ResetCallback(L);
-
     char* buf = IAP_List_CreateBuffer(L);
     if( buf == 0 )
     {
@@ -79,14 +61,10 @@ static int IAP_List(lua_State* L)
         return 0;
     }
 
-    luaL_checktype(L, 2, LUA_TFUNCTION);
-    lua_pushvalue(L, 2);
-    g_IAP.m_Callback = dmScript::Ref(L, LUA_REGISTRYINDEX);
+    if (g_IAP.m_ProductCallback)
+        dmScript::DestroyCallback(g_IAP.m_ProductCallback);
 
-    dmScript::GetInstance(L);
-    g_IAP.m_Self = dmScript::Ref(L, LUA_REGISTRYINDEX);
-
-    g_IAP.m_L = dmScript::GetMainThread(L);
+    g_IAP.m_ProductCallback = dmScript::CreateCallback(L, 2);
 
     JNIEnv* env = Attach();
     jstring products = env->NewStringUTF(buf);
@@ -180,22 +158,13 @@ static int IAP_Restore(lua_State* L)
 static int IAP_SetListener(lua_State* L)
 {
     IAP* iap = &g_IAP;
-    luaL_checktype(L, 1, LUA_TFUNCTION);
-    lua_pushvalue(L, 1);
-    int cb = dmScript::Ref(L, LUA_REGISTRYINDEX);
 
-    bool had_previous = false;
-    if (iap->m_Listener.m_Callback != LUA_NOREF) {
-        dmScript::Unref(iap->m_Listener.m_L, LUA_REGISTRYINDEX, iap->m_Listener.m_Callback);
-        dmScript::Unref(iap->m_Listener.m_L, LUA_REGISTRYINDEX, iap->m_Listener.m_Self);
-        had_previous = true;
-    }
+    bool had_previous = iap->m_Listener != 0;
 
-    iap->m_Listener.m_L = dmScript::GetMainThread(L);
-    iap->m_Listener.m_Callback = cb;
+    if (iap->m_Listener)
+        dmScript::DestroyCallback(iap->m_Listener);
 
-    dmScript::GetInstance(L);
-    iap->m_Listener.m_Self = dmScript::Ref(L, LUA_REGISTRYINDEX);
+    iap->m_Listener = dmScript::CreateCallback(L, 1);
 
     // On first set listener, trigger process old ones.
     if (!had_previous) {
@@ -238,6 +207,7 @@ JNIEXPORT void JNICALL Java_com_defold_iap_IapJNI_onProductsResult__ILjava_lang_
     }
 
     IAPCommand cmd;
+    cmd.m_Callback = g_IAP.m_ProductCallback;
     cmd.m_Command = IAP_PRODUCT_RESULT;
     cmd.m_ResponseCode = responseCode;
     if (pl)
@@ -257,6 +227,7 @@ JNIEXPORT void JNICALL Java_com_defold_iap_IapJNI_onPurchaseResult__ILjava_lang_
     }
 
     IAPCommand cmd;
+    cmd.m_Callback = g_IAP.m_Listener;
     cmd.m_Command = IAP_PURCHASE_RESULT;
     cmd.m_ResponseCode = responseCode;
     if (pd)
@@ -273,25 +244,11 @@ JNIEXPORT void JNICALL Java_com_defold_iap_IapJNI_onPurchaseResult__ILjava_lang_
 
 static void HandleProductResult(const IAPCommand* cmd)
 {
-    lua_State* L = g_IAP.m_L;
+    lua_State* L = dmScript::GetCallbackLuaContext(cmd->m_Callback);
     int top = lua_gettop(L);
 
-    if (g_IAP.m_Callback == LUA_NOREF) {
-        dmLogError("No callback set");
-        return;
-    }
-
-    lua_rawgeti(L, LUA_REGISTRYINDEX, g_IAP.m_Callback);
-
-    // Setup self
-    lua_rawgeti(L, LUA_REGISTRYINDEX, g_IAP.m_Self);
-    lua_pushvalue(L, -1);
-    dmScript::SetInstance(L);
-
-    if (!dmScript::IsInstanceValid(L))
+    if (!dmScript::SetupCallback(cmd->m_Callback))
     {
-        dmLogError("Could not run IAP callback because the instance has been deleted.");
-        lua_pop(L, 2);
         assert(top == lua_gettop(L));
         return;
     }
@@ -326,36 +283,21 @@ static void HandleProductResult(const IAPCommand* cmd)
         lua_pop(L, 1);
     }
 
-    dmScript::Unref(L, LUA_REGISTRYINDEX, g_IAP.m_Callback);
-    dmScript::Unref(L, LUA_REGISTRYINDEX, g_IAP.m_Self);
-    g_IAP.m_Callback = LUA_NOREF;
-    g_IAP.m_Self = LUA_NOREF;
+    dmScript::TeardownCallback(cmd->m_Callback);
+    dmScript::DestroyCallback(cmd->m_Callback);
+    assert(g_IAP.m_ProductCallback == cmd->m_Callback);
+    g_IAP.m_ProductCallback = 0;
 
     assert(top == lua_gettop(L));
 }
 
 static void HandlePurchaseResult(const IAPCommand* cmd)
 {
-    lua_State* L = g_IAP.m_Listener.m_L;
+    lua_State* L = dmScript::GetCallbackLuaContext(cmd->m_Callback);
     int top = lua_gettop(L);
 
-    if (g_IAP.m_Listener.m_Callback == LUA_NOREF) {
-        dmLogError("No callback set");
-        return;
-    }
-
-
-    lua_rawgeti(L, LUA_REGISTRYINDEX, g_IAP.m_Listener.m_Callback);
-
-    // Setup self
-    lua_rawgeti(L, LUA_REGISTRYINDEX, g_IAP.m_Listener.m_Self);
-    lua_pushvalue(L, -1);
-    dmScript::SetInstance(L);
-
-    if (!dmScript::IsInstanceValid(L))
+    if (!dmScript::SetupCallback(cmd->m_Callback))
     {
-        dmLogError("Could not run IAP callback because the instance has been deleted.");
-        lua_pop(L, 2);
         assert(top == lua_gettop(L));
         return;
     }
@@ -393,11 +335,13 @@ static void HandlePurchaseResult(const IAPCommand* cmd)
         IAP_PushError(L, "failed to buy product", REASON_UNSPECIFIED);
     }
 
-    int ret = lua_pcall(L, 3, 0, 0);
+    int ret = dmScript::PCall(L, 3, 0);
     if (ret != 0) {
         dmLogError("Error running callback: %s", lua_tostring(L, -1));
         lua_pop(L, 1);
     }
+
+    dmScript::TeardownCallback(cmd->m_Callback);
 
     assert(top == lua_gettop(L));
 }
@@ -500,12 +444,9 @@ static dmExtension::Result FinalizeIAP(dmExtension::Params* params)
     IAP_Queue_Destroy(&g_IAP.m_CommandQueue);
     --g_IAP.m_InitCount;
 
-    if (params->m_L == g_IAP.m_Listener.m_L && g_IAP.m_Listener.m_Callback != LUA_NOREF) {
-        dmScript::Unref(g_IAP.m_Listener.m_L, LUA_REGISTRYINDEX, g_IAP.m_Listener.m_Callback);
-        dmScript::Unref(g_IAP.m_Listener.m_L, LUA_REGISTRYINDEX, g_IAP.m_Listener.m_Self);
-        g_IAP.m_Listener.m_L = 0;
-        g_IAP.m_Listener.m_Callback = LUA_NOREF;
-        g_IAP.m_Listener.m_Self = LUA_NOREF;
+    if (params->m_L == dmScript::GetCallbackLuaContext(g_IAP.m_Listener)) {
+        dmScript::DestroyCallback(g_IAP.m_Listener);
+        g_IAP.m_Listener = 0;
     }
 
     if (g_IAP.m_InitCount == 0) {
