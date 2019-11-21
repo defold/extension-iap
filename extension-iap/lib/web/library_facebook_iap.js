@@ -31,7 +31,7 @@ var LibraryFacebookIAP = {
                 FB_PAYMENT_RESPONSE_APPINVALIDITEMPARAM : 1383051
             },
 
-            http_callback: function(xmlhttp, callback, lua_state, products, product_ids, product_count, url_index, url_count) {
+            http_callback: function(xmlhttp, callback, lua_callback, products, product_ids, product_count, url_index, url_count) {
                 if (xmlhttp.readyState == 4) {
                     if(xmlhttp.status == 200) {
                         var xmlDoc = document.createElement( 'html' );
@@ -72,11 +72,11 @@ var LibraryFacebookIAP = {
                     if(url_index == product_count-1) {
                         var productsJSON = JSON.stringify(products);
                         var res_buf = allocate(intArrayFromString(productsJSON), 'i8', ALLOC_STACK);
-                        Runtime.dynCall('vii', callback, [lua_state, res_buf]);
+                        Runtime.dynCall('vii', callback, [lua_callback, res_buf]);
                     } else {
                         var xmlhttp = new XMLHttpRequest();
                         xmlhttp.onreadystatechange = function() {
-                            FBinner.http_callback(xmlhttp, callback, lua_state, products, product_ids, product_count, url_index+1);
+                            FBinner.http_callback(xmlhttp, callback, lua_callback, products, product_ids, product_count, url_index+1);
                         };
                         xmlhttp.open("GET", product_ids[url_index+1], true);
                         xmlhttp.send();
@@ -86,7 +86,7 @@ var LibraryFacebookIAP = {
 
         },
 
-        dmIAPFBList: function(params, callback, lua_state) {
+        dmIAPFBList: function(params, callback, lua_callback) {
             var product_ids = Pointer_stringify(params).trim().split(',');
             var product_count = product_ids.length;
             if(product_count == 0) {
@@ -96,7 +96,7 @@ var LibraryFacebookIAP = {
             products = {};
             var xmlhttp = new XMLHttpRequest();
             xmlhttp.onreadystatechange = function() {
-                FBinner.http_callback(xmlhttp, callback, lua_state, products, product_ids, product_count, 0);
+                FBinner.http_callback(xmlhttp, callback, lua_callback, products, product_ids, product_count, 0);
             };
             // chain of async http read of product files
             xmlhttp.open("GET", product_ids[0], true);
@@ -104,7 +104,7 @@ var LibraryFacebookIAP = {
         },
 
         // https://developers.facebook.com/docs/javascript/reference/FB.ui
-        dmIAPFBBuy: function(param_product_id, param_request_id, callback, lua_state) {
+        dmIAPFBBuy: function(param_product_id, param_request_id, callback, lua_callback) {
             var product_id = Pointer_stringify(param_product_id);
 
             var buy_params = {
@@ -144,7 +144,7 @@ var LibraryFacebookIAP = {
 
 	                    var productsJSON = JSON.stringify(result)
 	                    var res_buf = allocate(intArrayFromString(productsJSON), 'i8', ALLOC_STACK);
-	                    Runtime.dynCall('viii', callback, [lua_state, res_buf, 0]);
+	                    Runtime.dynCall('viii', callback, [lua_callback, res_buf, 0]);
 
 	                } else {
 
@@ -157,7 +157,7 @@ var LibraryFacebookIAP = {
 	                        reason = FBinner.BillingResponse.BILLING_RESPONSE_RESULT_ERROR;
 	                        console.log("Unknown response: ", response);
 	                    }
-	                    Runtime.dynCall('viii', callback, [lua_state, 0, reason]);
+	                    Runtime.dynCall('viii', callback, [lua_callback, 0, reason]);
 	                }
             	}
             );

@@ -15,152 +15,98 @@ struct IAP
     IAP()
     {
         memset(this, 0, sizeof(*this));
-        m_Callback = LUA_NOREF;
-        m_Self = LUA_NOREF;
-        m_Listener.m_Callback = LUA_NOREF;
-        m_Listener.m_Self = LUA_NOREF;
         m_autoFinishTransactions = true;
     }
-    int                  m_InitCount;
-    int                  m_Callback;
-    int                  m_Self;
-    bool                 m_autoFinishTransactions;
-    lua_State*           m_L;
-    IAPListener          m_Listener;
 
+    dmScript::LuaCallbackInfo*  m_Listener;
+    int                         m_InitCount;
+    bool                        m_autoFinishTransactions;
 } g_IAP;
 
-typedef void (*OnIAPFBList)(void *L, const char* json);
-typedef void (*OnIAPFBListenerCallback)(void *L, const char* json, int error_code);
+typedef void (*OnIAPFBList)(void* luacallback, const char* json);
+typedef void (*OnIAPFBListenerCallback)(void* luacallback, const char* json, int error_code);
 
 extern "C" {
     // Implementation in library_facebook_iap.js
-    void dmIAPFBList(const char* item_ids, OnIAPFBList callback, lua_State* L);
-    void dmIAPFBBuy(const char* item_id, const char* request_id, OnIAPFBListenerCallback callback, lua_State* L);
+    void dmIAPFBList(const char* item_ids, OnIAPFBList callback, dmScript::LuaCallbackInfo* luacallback);
+    void dmIAPFBBuy(const char* item_id, const char* request_id, OnIAPFBListenerCallback callback, dmScript::LuaCallbackInfo* luacallback);
 }
 
-
-static void VerifyCallback(lua_State* L)
+static void IAPList_Callback(void* luacallback, const char* result_json)
 {
-    if (g_IAP.m_Callback != LUA_NOREF) {
-        dmLogError("Unexpected callback set");
-        dmScript::Unref(L, LUA_REGISTRYINDEX, g_IAP.m_Callback);
-        dmScript::Unref(L, LUA_REGISTRYINDEX, g_IAP.m_Self);
-        g_IAP.m_Callback = LUA_NOREF;
-        g_IAP.m_Self = LUA_NOREF;
-        g_IAP.m_L = 0;
+    dmScript::LuaCallbackInfo* callback = (dmScript::LuaCallbackInfo*)luacallback;
+    lua_State* L = dmScript::GetCallbackLuaContext(callback);
+    DM_LUA_STACK_CHECK(L, 0);
+
+    if (!dmScript::SetupCallback(callback))
+    {
+        dmScript::DestroyCallback(callback);
+        return;
     }
-}
 
-void IAPList_Callback(void* Lv, const char* result_json)
-{
-    lua_State* L = (lua_State*) Lv;
-    if (g_IAP.m_Callback != LUA_NOREF) {
-        int top = lua_gettop(L);
-        int callback = g_IAP.m_Callback;
-        lua_rawgeti(L, LUA_REGISTRYINDEX, callback);
-
-        // Setup self
-        lua_rawgeti(L, LUA_REGISTRYINDEX, g_IAP.m_Self);
-        lua_pushvalue(L, -1);
-        dmScript::SetInstance(L);
-
-        if (!dmScript::IsInstanceValid(L))
-        {
-            dmLogError("Could not run iap facebook callback because the instance has been deleted.");
-            lua_pop(L, 2);
-            assert(top == lua_gettop(L));
-            return;
-        }
-        if(result_json != 0)
-        {
-            dmJson::Document doc;
-            dmJson::Result r = dmJson::Parse(result_json, &doc);
-            if (r == dmJson::RESULT_OK && doc.m_NodeCount > 0) {
-                char err_str[128];
-                if (dmScript::JsonToLua(L, &doc, 0, err_str, sizeof(err_str)) < 0) {
-                    dmLogError("Failed converting list result JSON to Lua; %s", err_str);
-                    lua_pushnil(L);
-                    IAP_PushError(L, "Failed converting list result JSON to Lua", REASON_UNSPECIFIED);
-                } else {
-                    lua_pushnil(L);
-                }
-            } else {
-                dmLogError("Failed to parse list result JSON (%d)", r);
+    if(result_json != 0)
+    {
+        dmJson::Document doc;
+        dmJson::Result r = dmJson::Parse(result_json, &doc);
+        if (r == dmJson::RESULT_OK && doc.m_NodeCount > 0) {
+            char err_str[128];
+            if (dmScript::JsonToLua(L, &doc, 0, err_str, sizeof(err_str)) < 0) {
+                dmLogError("Failed converting list result JSON to Lua; %s", err_str);
                 lua_pushnil(L);
-                IAP_PushError(L, "Failed to parse list result JSON", REASON_UNSPECIFIED);
+                IAP_PushError(L, "Failed converting list result JSON to Lua", REASON_UNSPECIFIED);
+            } else {
+                lua_pushnil(L);
             }
-            dmJson::Free(&doc);
-        }
-        else
-        {
-            dmLogError("Got empty list result.");
+        } else {
+            dmLogError("Failed to parse list result JSON (%d)", r);
             lua_pushnil(L);
-            IAP_PushError(L, "Got empty list result.", REASON_UNSPECIFIED);
+            IAP_PushError(L, "Failed to parse list result JSON", REASON_UNSPECIFIED);
         }
-
-        int ret = lua_pcall(L, 3, 0, 0);
-        if (ret != 0) {
-            dmLogError("Error running callback: %s", lua_tostring(L, -1));
-            lua_pop(L, 1);
-        }
-        assert(top == lua_gettop(L));
-        dmScript::Unref(L, LUA_REGISTRYINDEX, callback);
-
-        g_IAP.m_Callback = LUA_NOREF;
-    } else {
-        dmLogError("No callback set");
+        dmJson::Free(&doc);
+    }
+    else
+    {
+        dmLogError("Got empty list result.");
+        lua_pushnil(L);
+        IAP_PushError(L, "Got empty list result.", REASON_UNSPECIFIED);
     }
 
+    int ret = dmScript::PCall(L, 3, 0);
+    (void)ret;
+
+    dmScript::DestroyCallback(callback);
+    dmScript::TeardownCallback(callback);
 }
 
-int IAP_List(lua_State* L)
+static int IAP_List(lua_State* L)
 {
-    int top = lua_gettop(L);
-    VerifyCallback(L);
+    DM_LUA_STACK_CHECK(L, 0);
 
     char* buf = IAP_List_CreateBuffer(L);
     if( buf == 0 )
     {
-        assert(top == lua_gettop(L));
         return 0;
     }
 
-    luaL_checktype(L, 2, LUA_TFUNCTION);
-    lua_pushvalue(L, 2);
-    g_IAP.m_Callback = dmScript::Ref(L, LUA_REGISTRYINDEX);
-    dmScript::GetInstance(L);
-    g_IAP.m_Self = dmScript::Ref(L, LUA_REGISTRYINDEX);
-    g_IAP.m_L = dmScript::GetMainThread(L);
-    dmIAPFBList(buf, (OnIAPFBList)IAPList_Callback, g_IAP.m_L);
+    dmScript::LuaCallbackInfo* callback = dmScript::CreateCallback(L, 2);
+
+    dmIAPFBList(buf, (OnIAPFBList)IAPList_Callback, callback);
 
     free(buf);
-    assert(top == lua_gettop(L));
     return 0;
 }
 
-void IAPListener_Callback(void* Lv, const char* result_json, int error_code)
+static void IAPListener_Callback(void* luacallback, const char* result_json, int error_code)
 {
-    lua_State* L = g_IAP.m_Listener.m_L;
-    int top = lua_gettop(L);
-    if (g_IAP.m_Listener.m_Callback == LUA_NOREF) {
-        dmLogError("No callback set");
-        return;
-    }
-    lua_rawgeti(L, LUA_REGISTRYINDEX, g_IAP.m_Listener.m_Callback);
+    dmScript::LuaCallbackInfo* callback = (dmScript::LuaCallbackInfo*)luacallback;
+    lua_State* L = dmScript::GetCallbackLuaContext(callback);
+    DM_LUA_STACK_CHECK(L, 0);
 
-    // Setup self
-    lua_rawgeti(L, LUA_REGISTRYINDEX, g_IAP.m_Listener.m_Self);
-    lua_pushvalue(L, -1);
-    dmScript::SetInstance(L);
-
-    if (!dmScript::IsInstanceValid(L))
+    if (!dmScript::SetupCallback(callback))
     {
-        dmLogError("Could not run IAP callback because the instance has been deleted.");
-        lua_pop(L, 2);
-        assert(top == lua_gettop(L));
         return;
     }
+
     if (result_json) {
         dmJson::Document doc;
         dmJson::Result r = dmJson::Parse(result_json, &doc);
@@ -197,21 +143,23 @@ void IAPListener_Callback(void* Lv, const char* result_json, int error_code)
                 break;
         }
     }
-    int ret = lua_pcall(L, 3, 0, 0);
-    if (ret != 0) {
-        dmLogError("Error running callback: %s", lua_tostring(L, -1));
-        lua_pop(L, 1);
-    }
-    assert(top == lua_gettop(L));
+
+    int ret = dmScript::PCall(L, 3, 0);
+    (void)ret;
+
+    dmScript::TeardownCallback(callback);
 }
 
 
-int IAP_Buy(lua_State* L)
+static int IAP_Buy(lua_State* L)
 {
-    if (g_IAP.m_Listener.m_Callback == LUA_NOREF) {
+    DM_LUA_STACK_CHECK(L, 0);
+
+    if (!g_IAP.m_Listener) {
         dmLogError("No callback set");
         return 0;
     }
+
     int top = lua_gettop(L);
     const char* id = luaL_checkstring(L, 1);
     const char* request_id = 0x0;
@@ -224,43 +172,34 @@ int IAP_Buy(lua_State* L)
         lua_pop(L, 2);
     }
 
-    dmIAPFBBuy(id, request_id, (OnIAPFBListenerCallback)IAPListener_Callback, L);
-    assert(top == lua_gettop(L));
+    dmIAPFBBuy(id, request_id, (OnIAPFBListenerCallback)IAPListener_Callback, g_IAP.m_Listener);
     return 0;
 }
 
-int IAP_SetListener(lua_State* L)
+static int IAP_SetListener(lua_State* L)
 {
-    IAP* iap = &g_IAP;
-    luaL_checktype(L, 1, LUA_TFUNCTION);
-    lua_pushvalue(L, 1);
-    int cb = dmScript::Ref(L, LUA_REGISTRYINDEX);
-
-    if (iap->m_Listener.m_Callback != LUA_NOREF) {
-        dmScript::Unref(iap->m_Listener.m_L, LUA_REGISTRYINDEX, iap->m_Listener.m_Callback);
-        dmScript::Unref(iap->m_Listener.m_L, LUA_REGISTRYINDEX, iap->m_Listener.m_Self);
-    }
-    iap->m_Listener.m_L = dmScript::GetMainThread(L);
-    iap->m_Listener.m_Callback = cb;
-    dmScript::GetInstance(L);
-    iap->m_Listener.m_Self = dmScript::Ref(L, LUA_REGISTRYINDEX);
-
+    DM_LUA_STACK_CHECK(L, 0);
+    if (g_IAP.m_Listener)
+        dmScript::DestroyCallback(g_IAP.m_Listener);
+    g_IAP.m_Listener = dmScript::CreateCallback(L, 1);
     return 0;
 }
 
-int IAP_Finish(lua_State* L)
+static int IAP_Finish(lua_State* L)
 {
     return 0;
 }
 
-int IAP_Restore(lua_State* L)
+static int IAP_Restore(lua_State* L)
 {
+    DM_LUA_STACK_CHECK(L, 1);
     lua_pushboolean(L, 0);
     return 1;
 }
 
-int IAP_GetProviderId(lua_State* L)
+static int IAP_GetProviderId(lua_State* L)
 {
+    DM_LUA_STACK_CHECK(L, 1);
     lua_pushinteger(L, PROVIDER_ID_FACEBOOK);
     return 1;
 }
@@ -276,13 +215,13 @@ static const luaL_reg IAP_methods[] =
     {0, 0}
 };
 
-dmExtension::Result InitializeIAP(dmExtension::Params* params)
+static dmExtension::Result InitializeIAP(dmExtension::Params* params)
 {
     if (g_IAP.m_InitCount == 0) {
         g_IAP.m_autoFinishTransactions = dmConfigFile::GetInt(params->m_ConfigFile, "iap.auto_finish_transactions", 1) == 1;
     }
     g_IAP.m_InitCount++;
-    lua_State*L = params->m_L;
+    lua_State* L = params->m_L;
     int top = lua_gettop(L);
     luaL_register(L, LIB_NAME, IAP_methods);
 
@@ -293,15 +232,13 @@ dmExtension::Result InitializeIAP(dmExtension::Params* params)
     return dmExtension::RESULT_OK;
 }
 
-dmExtension::Result FinalizeIAP(dmExtension::Params* params)
+static dmExtension::Result FinalizeIAP(dmExtension::Params* params)
 {
     --g_IAP.m_InitCount;
-    if (params->m_L == g_IAP.m_Listener.m_L && g_IAP.m_Listener.m_Callback != LUA_NOREF) {
-        dmScript::Unref(g_IAP.m_Listener.m_L, LUA_REGISTRYINDEX, g_IAP.m_Listener.m_Callback);
-        dmScript::Unref(g_IAP.m_Listener.m_L, LUA_REGISTRYINDEX, g_IAP.m_Listener.m_Self);
-        g_IAP.m_Listener.m_L = 0;
-        g_IAP.m_Listener.m_Callback = LUA_NOREF;
-        g_IAP.m_Listener.m_Self = LUA_NOREF;
+    if (g_IAP.m_Listener && g_IAP.m_InitCount == 0)
+    {
+        dmScript::DestroyCallback(g_IAP.m_Listener);
+        g_IAP.m_Listener = 0;
     }
     return dmExtension::RESULT_OK;
 }
