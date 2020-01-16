@@ -277,11 +277,7 @@ static void HandleProductResult(const IAPCommand* cmd)
         IAP_PushError(L, "failed to fetch product", REASON_UNSPECIFIED);
     }
 
-    int ret = lua_pcall(L, 3, 0, 0);
-    if (ret != 0) {
-        dmLogError("Error running callback: %s", lua_tostring(L, -1));
-        lua_pop(L, 1);
-    }
+    dmScript::PCall(L, 3, 0);
 
     dmScript::TeardownCallback(cmd->m_Callback);
     dmScript::DestroyCallback(cmd->m_Callback);
@@ -335,11 +331,7 @@ static void HandlePurchaseResult(const IAPCommand* cmd)
         IAP_PushError(L, "failed to buy product", REASON_UNSPECIFIED);
     }
 
-    int ret = dmScript::PCall(L, 3, 0);
-    if (ret != 0) {
-        dmLogError("Error running callback: %s", lua_tostring(L, -1));
-        lua_pop(L, 1);
-    }
+    dmScript::PCall(L, 3, 0);
 
     dmScript::TeardownCallback(cmd->m_Callback);
 

@@ -186,11 +186,7 @@ static void HandleProductResult(IAPCommand* cmd)
     }
     lua_pushnil(L);
 
-    int ret = dmScript::PCall(L, 3, 0);
-    if (ret != 0) {
-        dmLogError("%d: Error running callback: %s", __LINE__, lua_tostring(L, -1));
-        lua_pop(L, 1);
-    }
+    dmScript::PCall(L, 3, 0);
 
     dmScript::TeardownCallback(cmd->m_Callback);
     dmScript::DestroyCallback(cmd->m_Callback);
@@ -318,11 +314,7 @@ static void HandlePurchaseResult(IAPCommand* cmd)
         lua_pushnil(L);
     }
 
-    int ret = dmScript::PCall(L, 3, 0);
-    if (ret != 0) {
-        dmLogError("%d: Error running callback: %s", __LINE__, lua_tostring(L, -1));
-        lua_pop(L, 1);
-    }
+    dmScript::PCall(L, 3, 0);
 
     dmScript::TeardownCallback(cmd->m_Callback);
 
