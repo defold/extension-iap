@@ -5,12 +5,12 @@ main_collection = /main/main.collectionc
 shared_state = 1
 
 [display]
-width = 960
-height = 640
+width = 640
+height = 1136
 
 [android]
 input_method = HiddenInputField
-package = com.defold.iaprtestapp
+package = com.defold.extension.iap
 version_code = 3
 
 [project]
@@ -21,8 +21,11 @@ dependencies = https://github.com/andsve/dirtylarry/archive/master.zip
 include_dirs = extension-iap
 
 [ios]
-bundle_identifier = com.defoldextension.push
+bundle_identifier = com.defold.extension.iap
 
 [iap]
 auto_finish_transactions = 0
+
+[osx]
+bundle_identifier = com.defold.extension.iap
 

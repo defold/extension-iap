@@ -1,59 +1,112 @@
 local dirtylarry = require "dirtylarry/dirtylarry"
 
+local GOLDBARS_SMALL = "com.defold.iap.goldbar.small"
+local GOLDBARS_MEDIUM = "com.defold.iap.goldbar.medium"
+local GOLDBARS_LARGE = "com.defold.iap.goldbar.large"
+local SUBSCRIPTION = "com.defold.iap.subscription"
+
 local items = {
-	"consumable",
-	"nonconsumable"
+	GOLDBARS_SMALL,
+	GOLDBARS_MEDIUM,
+	GOLDBARS_LARGE,
+	SUBSCRIPTION,
 }
 
-local product_items = {}
+local item_buttons = {
+	[GOLDBARS_SMALL] = "goldbars_small",
+	[GOLDBARS_MEDIUM] = "goldbars_medium",
+	[GOLDBARS_LARGE] = "goldbars_large",
+	[SUBSCRIPTION] = "subscription",
+}
 
-local function list_callback(self, products, error)
-	if error == nil then
-		for k,p in pairs(products) do
-			product_items[p.ident] = p
-			local name = p.ident.."/larrylabel"
-			gui.set_color(gui.get_node(name), vmath.vector4(1,1,1,1))
-		end
-	else
-		print(error.error)
+local available_items = {}
+
+local LOG = {}
+
+local function log(fmt, ...)
+	if not fmt then return end
+	local line = fmt:format(...)
+	print(line)
+	table.insert(LOG, line)
+	if #LOG > 10 then
+		table.remove(LOG, 1)
 	end
+	local s = table.concat(LOG, "\n")
+	gui.set_text(gui.get_node("log"), s)
 end
+
+local function buy(id)
+	log("iap.buy() " .. id)
+	iap.buy(id)
+end
+
+local function list()
+	log("iap.list()")
+	for item, button in pairs(item_buttons) do
+		gui.set_color(gui.get_node(button.."/larrylabel"), vmath.vector4(1,1,1,0.5))
+	end
+	iap.list(items, function(self, products, error)
+		if error then
+			log(error.error)
+			return
+		end
+
+		for k,p in pairs(products) do
+			available_items[p.ident] = p
+			log("Item %s", p.ident)
+			local button = item_buttons[p.ident]
+			if button then
+				gui.set_color(gui.get_node(button.."/larrylabel"), vmath.vector4(1,1,1,1))
+			else
+				log("Unable to find button for %s", tostring(p.ident))
+			end
+		end
+	end)
+end
+
 
 local function buy_listener(self, transaction, error)
 	pprint(transaction, error)
-	if not error and iap.get_provider_id() == iap.PROVIDER_ID_GOOGLE and transaction.ident == "nonconsumable" then
-		local name = "reset/larrylabel"
-		gui.set_color(gui.get_node(name), vmath.vector4(1,1,1,1))
+	if error then
+		log("iap.buy() error %s - %s", tostring(error.error), tostring(error.reason))
+		return
+	end
+	
+	if iap.get_provider_id() == iap.PROVIDER_ID_GOOGLE and transaction.ident == NON_CONSUMABLE then
+		log("iap.buy() ok - google")
+		gui.set_color(gui.get_node("reset/larrylabel"), vmath.vector4(1,1,1,1))
 		product_items["reset"] = transaction
-	elseif not error then
+	else
+		log("iap.buy() ok")
+		log("iap.finish()")
 		iap.finish(transaction)
 	end
 end
 
 function init(self)
+	self.log = {}
+	log("init()")
 	msg.post(".", "acquire_input_focus")
-	iap.list(items, list_callback)
+	if not iap then
+		log("In-App Purchases not supported")
+		return
+	end
+
+	list()
 	iap.set_listener(buy_listener)
 end
 
 function on_input(self, action_id, action)
-	if product_items["consumable"] then
-		dirtylarry:button("consumable", action_id, action, function()
-			iap.buy("consumable")
+	if action_id then
+		for item, button in pairs(item_buttons) do
+			if available_items[item] then
+				dirtylarry:button(button, action_id, action, function()
+					buy(item)
+				end)
+			end
+		end
+		dirtylarry:button("list", action_id, action, function()
+			list()
 		end)
-	end	
-
-	if product_items["nonconsumable"] then
-		dirtylarry:button("nonconsumable", action_id, action, function()
-			iap.buy("nonconsumable")
-		end)
-	end	
-
-	if product_items["reset"] then
-		dirtylarry:button("reset", action_id, action, function()
-			iap.finish(product_items["reset"])
-			product_items["reset"] =  nil
-			gui.set_color(gui.get_node("reset/larrylabel"), vmath.vector4(1,0,0,1))
-		end)
-	end	
+	end
 end
