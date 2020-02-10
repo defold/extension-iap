@@ -67,7 +67,7 @@ public class IapGooglePlay implements Handler.Callback {
     private boolean autoFinishTransactions;
 
     private static interface ISkuRequestListener {
-    	public void onProducts(int resultCode, JSONObject products);
+        public void onProducts(int resultCode, JSONObject products);
     }
 
     private static class SkuRequest {

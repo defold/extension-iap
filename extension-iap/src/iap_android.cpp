@@ -244,6 +244,12 @@ JNIEXPORT void JNICALL Java_com_defold_iap_IapJNI_onPurchaseResult__ILjava_lang_
 
 static void HandleProductResult(const IAPCommand* cmd)
 {
+    if (cmd->m_Callback == 0)
+    {
+        dmLogWarning("Received product list but no listener was set!");
+        return;
+    }
+
     lua_State* L = dmScript::GetCallbackLuaContext(cmd->m_Callback);
     int top = lua_gettop(L);
 
@@ -289,6 +295,12 @@ static void HandleProductResult(const IAPCommand* cmd)
 
 static void HandlePurchaseResult(const IAPCommand* cmd)
 {
+    if (cmd->m_Callback == 0)
+    {
+        dmLogWarning("Received purchase result but no listener was set!");
+        return;
+    }
+
     lua_State* L = dmScript::GetCallbackLuaContext(cmd->m_Callback);
     int top = lua_gettop(L);
 

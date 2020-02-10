@@ -69,8 +69,8 @@ public class IapGooglePlayActivity extends Activity {
     }
 
     private void buy(String product, String productType) {
-    	// Flush any pending items, in order to be able to buy the same (new) product again
-    	processPendingConsumables();
+        // Flush any pending items, in order to be able to buy the same (new) product again
+        processPendingConsumables();
 
         try {
             Bundle buyIntentBundle = service.getBuyIntent(3, getPackageName(), product, productType, "");
