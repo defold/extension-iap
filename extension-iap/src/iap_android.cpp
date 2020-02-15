@@ -34,7 +34,6 @@ struct IAP
     bool            m_autoFinishTransactions;
     int             m_ProviderId;
 
-    dmScript::LuaCallbackInfo* m_ProductCallback;
     dmScript::LuaCallbackInfo* m_Listener;
 
     jobject         m_IAP;
@@ -61,14 +60,13 @@ static int IAP_List(lua_State* L)
         return 0;
     }
 
-    if (g_IAP.m_ProductCallback)
-        dmScript::DestroyCallback(g_IAP.m_ProductCallback);
-
-    g_IAP.m_ProductCallback = dmScript::CreateCallback(L, 2);
-
     JNIEnv* env = Attach();
+    IAPCommand* cmd = new IAPCommand;
+    cmd->m_Callback = dmScript::CreateCallback(L, 2);
+    cmd->m_Command = IAP_PRODUCT_RESULT;
+
     jstring products = env->NewStringUTF(buf);
-    env->CallVoidMethod(g_IAP.m_IAP, g_IAP.m_List, products, g_IAP.m_IAPJNI);
+    env->CallVoidMethod(g_IAP.m_IAP, g_IAP.m_List, products, g_IAP.m_IAPJNI, (jlong)cmd);
     env->DeleteLocalRef(products);
     Detach();
 
@@ -198,7 +196,7 @@ extern "C" {
 #endif
 
 
-JNIEXPORT void JNICALL Java_com_defold_iap_IapJNI_onProductsResult__ILjava_lang_String_2(JNIEnv* env, jobject, jint responseCode, jstring productList)
+JNIEXPORT void JNICALL Java_com_defold_iap_IapJNI_onProductsResult(JNIEnv* env, jobject, jint responseCode, jstring productList, jlong cmdHandle)
 {
     const char* pl = 0;
     if (productList)
@@ -206,16 +204,14 @@ JNIEXPORT void JNICALL Java_com_defold_iap_IapJNI_onProductsResult__ILjava_lang_
         pl = env->GetStringUTFChars(productList, 0);
     }
 
-    IAPCommand cmd;
-    cmd.m_Callback = g_IAP.m_ProductCallback;
-    cmd.m_Command = IAP_PRODUCT_RESULT;
-    cmd.m_ResponseCode = responseCode;
+    IAPCommand* cmd = (IAPCommand*)cmdHandle;
+    cmd->m_ResponseCode = responseCode;
     if (pl)
     {
-        cmd.m_Data = strdup(pl);
+        cmd->m_Data = strdup(pl);
         env->ReleaseStringUTFChars(productList, pl);
     }
-    IAP_Queue_Push(&g_IAP.m_CommandQueue, &cmd);
+    IAP_Queue_Push(&g_IAP.m_CommandQueue, cmd);
 }
 
 JNIEXPORT void JNICALL Java_com_defold_iap_IapJNI_onPurchaseResult__ILjava_lang_String_2(JNIEnv* env, jobject, jint responseCode, jstring purchaseData)
@@ -287,8 +283,6 @@ static void HandleProductResult(const IAPCommand* cmd)
 
     dmScript::TeardownCallback(cmd->m_Callback);
     dmScript::DestroyCallback(cmd->m_Callback);
-    assert(g_IAP.m_ProductCallback == cmd->m_Callback);
-    g_IAP.m_ProductCallback = 0;
 
     assert(top == lua_gettop(L));
 }
@@ -388,7 +382,7 @@ static dmExtension::Result InitializeIAP(dmExtension::Params* params)
         jclass iap_jni_class = (jclass)env->CallObjectMethod(cls, find_class, str_class_name);
         env->DeleteLocalRef(str_class_name);
 
-        g_IAP.m_List = env->GetMethodID(iap_class, "listItems", "(Ljava/lang/String;Lcom/defold/iap/IListProductsListener;)V");
+        g_IAP.m_List = env->GetMethodID(iap_class, "listItems", "(Ljava/lang/String;Lcom/defold/iap/IListProductsListener;J)V");
         g_IAP.m_Buy = env->GetMethodID(iap_class, "buy", "(Ljava/lang/String;Lcom/defold/iap/IPurchaseListener;)V");
         g_IAP.m_Restore = env->GetMethodID(iap_class, "restore", "(Lcom/defold/iap/IPurchaseListener;)V");
         g_IAP.m_Stop = env->GetMethodID(iap_class, "stop", "()V");
