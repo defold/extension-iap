@@ -233,6 +233,7 @@ static void CopyTransaction(SKPaymentTransaction* transaction, IAPTransaction* o
     }
 
     NSDateFormatter *dateFormatter = [[[NSDateFormatter alloc] init] autorelease];
+    [dateFormatter setLocale: [NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"]];
     [dateFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ssZZZ"];
 
     out->ident = strdup([transaction.payment.productIdentifier UTF8String]);
