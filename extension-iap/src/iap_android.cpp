@@ -50,6 +50,12 @@ struct IAP
 
 static IAP g_IAP;
 
+static int IAP_ProcessPendingTransactions(lua_State* L)
+{
+    //todo handle pending transactions if there is such thing on Android
+    return 0;
+}
+
 static int IAP_List(lua_State* L)
 {
     int top = lua_gettop(L);
@@ -187,6 +193,7 @@ static const luaL_reg IAP_methods[] =
     {"restore", IAP_Restore},
     {"set_listener", IAP_SetListener},
     {"get_provider_id", IAP_GetProviderId},
+    {"process_pending_transactions", IAP_ProcessPendingTransactions},
     {0, 0}
 };
 

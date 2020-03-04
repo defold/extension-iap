@@ -29,6 +29,7 @@ struct IAP
     NSMutableDictionary*            m_PendingTransactions;
     dmScript::LuaCallbackInfo*      m_Listener;
     IAPCommandQueue                 m_CommandQueue;
+    IAPCommandQueue                 m_ObservableQueue;
     SKPaymentTransactionObserver*   m_Observer;
 };
 
@@ -324,28 +325,25 @@ static void HandlePurchaseResult(IAPCommand* cmd)
     assert(top == lua_gettop(L));
 }
 
-@implementation SKPaymentTransactionObserver
-    - (void)paymentQueue:(SKPaymentQueue *)queue updatedTransactions:(NSArray *)transactions
-    {
-        for (SKPaymentTransaction* transaction in transactions) {
-
-            if ((!self.m_IAP->m_AutoFinishTransactions) && (transaction.transactionState == SKPaymentTransactionStatePurchased)) {
+static void processTransactions(IAP* m_IAP, NSArray* transactions) {
+    for (SKPaymentTransaction* transaction in transactions) {
+            if ((!m_IAP->m_AutoFinishTransactions) && (transaction.transactionState == SKPaymentTransactionStatePurchased)) {
                 NSData *data = [transaction.transactionIdentifier dataUsingEncoding:NSUTF8StringEncoding];
                 uint64_t trans_id_hash = dmHashBuffer64((const char*) [data bytes], [data length]);
-                [self.m_IAP->m_PendingTransactions setObject:transaction forKey:[NSNumber numberWithInteger:trans_id_hash] ];
+                [m_IAP->m_PendingTransactions setObject:transaction forKey:[NSNumber numberWithInteger:trans_id_hash] ];
             }
 
-            if (!self.m_IAP->m_Listener)
+            if (!m_IAP->m_Listener)
                 continue;
 
             IAPTransaction* iap_transaction = new IAPTransaction;
             CopyTransaction(transaction, iap_transaction);
 
             IAPCommand cmd;
-            cmd.m_Callback = self.m_IAP->m_Listener;
+            cmd.m_Callback = m_IAP->m_Listener;
             cmd.m_Command = IAP_PURCHASE_RESULT;
             cmd.m_Data = iap_transaction;
-            IAP_Queue_Push(&self.m_IAP->m_CommandQueue, &cmd);
+            IAP_Queue_Push(&m_IAP->m_ObservableQueue, &cmd);
 
             switch (transaction.transactionState)
             {
@@ -363,7 +361,19 @@ static void HandlePurchaseResult(IAPCommand* cmd)
                 default:
                     break;
             }
-        }
+    }
+}
+
+static int IAP_ProcessPendingTransactions(lua_State* L)
+{
+    processTransactions(&g_IAP, [SKPaymentQueue defaultQueue].transactions);
+    return 0;
+}
+
+@implementation SKPaymentTransactionObserver
+    - (void)paymentQueue:(SKPaymentQueue *)queue updatedTransactions:(NSArray *)transactions
+    {
+        processTransactions(self.m_IAP, transactions);
     }
 @end
 
@@ -477,18 +487,6 @@ static int IAP_SetListener(lua_State* L)
         dmScript::DestroyCallback(iap->m_Listener);
 
     iap->m_Listener = dmScript::CreateCallback(L, 1);
-
-    if (g_IAP.m_Observer == 0) {
-        SKPaymentTransactionObserver* observer = [[SKPaymentTransactionObserver alloc] init];
-        observer.m_IAP = &g_IAP;
-        // NOTE: We add the listener *after* a lua listener is set
-        // The payment queue is persistent and "old" transaction might be processed
-        // from previous session. We call "finishTransaction" when appropriate
-        // for all transaction and we must ensure that the result is delivered to lua.
-        [[SKPaymentQueue defaultQueue] addTransactionObserver: observer];
-        g_IAP.m_Observer = observer;
-    }
-
     return 0;
 }
 
@@ -506,6 +504,7 @@ static const luaL_reg IAP_methods[] =
     {"restore", IAP_Restore},
     {"set_listener", IAP_SetListener},
     {"get_provider_id", IAP_GetProviderId},
+    {"process_pending_transactions", IAP_ProcessPendingTransactions},
     {0, 0}
 };
 
@@ -520,6 +519,7 @@ static dmExtension::Result InitializeIAP(dmExtension::Params* params)
     g_IAP.m_InitCount++;
 
     IAP_Queue_Create(&g_IAP.m_CommandQueue);
+    IAP_Queue_Create(&g_IAP.m_ObservableQueue);
 
     lua_State*L = params->m_L;
     int top = lua_gettop(L);
@@ -535,6 +535,12 @@ static dmExtension::Result InitializeIAP(dmExtension::Params* params)
 
     lua_pop(L, 1);
     assert(top == lua_gettop(L));
+
+    SKPaymentTransactionObserver* observer = [[SKPaymentTransactionObserver alloc] init];
+    observer.m_IAP = &g_IAP;
+    [[SKPaymentQueue defaultQueue] addTransactionObserver: observer];
+    g_IAP.m_Observer = observer;
+
     return dmExtension::RESULT_OK;
 }
 
@@ -557,6 +563,9 @@ static void IAP_OnCommand(IAPCommand* cmd, void*)
 static dmExtension::Result UpdateIAP(dmExtension::Params* params)
 {
     IAP_Queue_Flush(&g_IAP.m_CommandQueue, IAP_OnCommand, 0);
+    if (g_IAP.m_Observer) {
+        IAP_Queue_Flush(&g_IAP.m_ObservableQueue, IAP_OnCommand, 0);
+    }
     return dmExtension::RESULT_OK;
 }
 
@@ -585,6 +594,7 @@ static dmExtension::Result FinalizeIAP(dmExtension::Params* params)
     }
 
     IAP_Queue_Destroy(&g_IAP.m_CommandQueue);
+    IAP_Queue_Destroy(&g_IAP.m_ObservableQueue);
 
     return dmExtension::RESULT_OK;
 }
