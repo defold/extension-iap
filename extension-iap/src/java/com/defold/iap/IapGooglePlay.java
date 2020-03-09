@@ -17,6 +17,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.ResolveInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -155,9 +156,23 @@ public class IapGooglePlay implements Handler.Callback {
         this.autoFinishTransactions = autoFinishTransactions;
     }
 
+    private static boolean isPlayStoreInstalled(Context context){
+        try {
+            context.getPackageManager().getPackageInfo("com.android.vending", 0);
+            return true;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+    }
+
     private void init() {
         // NOTE: We must create Handler lazily as construction of
         // handlers must be in the context of a "looper" on Android
+
+        if (!isPlayStoreInstalled(activity)) {
+            Log.e(TAG, "Unable to find Google Play Store (com.android.vending)");
+            return;
+        }
 
         if (this.initialized)
             return;

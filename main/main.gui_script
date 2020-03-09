@@ -12,6 +12,7 @@ local items = {
 	SUBSCRIPTION,
 }
 
+-- mapping between product id and button name
 local item_buttons = {
 	[GOLDBARS_SMALL] = "goldbars_small",
 	[GOLDBARS_MEDIUM] = "goldbars_medium",
