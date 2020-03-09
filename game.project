@@ -11,7 +11,7 @@ height = 1136
 [android]
 input_method = HiddenInputField
 package = com.defold.extension.iap
-version_code = 3
+version_code = 5
 
 [project]
 title = extension-iap
