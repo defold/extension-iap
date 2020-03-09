@@ -119,8 +119,20 @@ static void IAP_FreeTransaction(IAPTransaction* transaction)
 
         IAPProduct product = {0};
         product.ident           = strdup([p.productIdentifier UTF8String]);
-        product.title           = strdup([p.localizedTitle UTF8String]);
-        product.description     = strdup([p.localizedDescription UTF8String]);
+        if (p.localizedTitle) {
+            product.title       = strdup([p.localizedTitle UTF8String]);
+        }
+        else {
+            dmLogWarning("Product %s has no localizedTitle", [p.productIdentifier UTF8String]);
+            product.title       = "";
+        }
+        if (p.localizedDescription) {
+            product.description = strdup([p.localizedDescription UTF8String]);
+        }
+        else {
+            dmLogWarning("Product %s has no localizedDescription", [p.productIdentifier UTF8String]);
+            product.description = "";
+        }
         product.currency_code   = strdup([[p.priceLocale objectForKey:NSLocaleCurrencyCode] UTF8String]);
         product.price           = p.price.floatValue;
 
