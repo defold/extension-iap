@@ -119,8 +119,8 @@ static void IAP_FreeTransaction(IAPTransaction* transaction)
 
         IAPProduct product = {0};
         product.ident           = strdup([p.productIdentifier UTF8String]);
-        product.title           = strdup([p.localizedTitle UTF8String]);
-        product.description     = strdup([p.localizedDescription UTF8String]);
+        product.title           = p.localizedTitle ? strdup([p.localizedTitle UTF8String]) : strdup([p.productIdentifier UTF8String]);
+        product.description     = p.localizedDescription ? strdup([p.localizedDescription UTF8String]) : "";
         product.currency_code   = strdup([[p.priceLocale objectForKey:NSLocaleCurrencyCode] UTF8String]);
         product.price           = p.price.floatValue;
 
