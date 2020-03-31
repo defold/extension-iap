@@ -163,6 +163,13 @@
 
 #*****************************************************************************************************
 
+  - name: process_pending_transactions
+    type: function
+    desc: Process transactions still unprocessed from previous session if any. Transactions will be
+          processed with callback function set with `set_listener` function
+
+#*****************************************************************************************************
+
   - name: set_listener
     type: function
     desc: Set the callback function to receive purchase transaction events.
