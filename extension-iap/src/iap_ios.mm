@@ -325,25 +325,25 @@ static void HandlePurchaseResult(IAPCommand* cmd)
     assert(top == lua_gettop(L));
 }
 
-static void processTransactions(IAP* m_IAP, NSArray* transactions) {
+static void processTransactions(IAP* iap, NSArray* transactions) {
     for (SKPaymentTransaction* transaction in transactions) {
-            if ((!m_IAP->m_AutoFinishTransactions) && (transaction.transactionState == SKPaymentTransactionStatePurchased)) {
+            if ((!iap->m_AutoFinishTransactions) && (transaction.transactionState == SKPaymentTransactionStatePurchased)) {
                 NSData *data = [transaction.transactionIdentifier dataUsingEncoding:NSUTF8StringEncoding];
                 uint64_t trans_id_hash = dmHashBuffer64((const char*) [data bytes], [data length]);
-                [m_IAP->m_PendingTransactions setObject:transaction forKey:[NSNumber numberWithInteger:trans_id_hash] ];
+                [iap->m_PendingTransactions setObject:transaction forKey:[NSNumber numberWithInteger:trans_id_hash] ];
             }
 
-            if (!m_IAP->m_Listener)
+            if (!iap->m_Listener)
                 continue;
 
             IAPTransaction* iap_transaction = new IAPTransaction;
             CopyTransaction(transaction, iap_transaction);
 
             IAPCommand cmd;
-            cmd.m_Callback = m_IAP->m_Listener;
+            cmd.m_Callback = iap->m_Listener;
             cmd.m_Command = IAP_PURCHASE_RESULT;
             cmd.m_Data = iap_transaction;
-            IAP_Queue_Push(&m_IAP->m_ObservableQueue, &cmd);
+            IAP_Queue_Push(&iap->m_ObservableQueue, &cmd);
 
             switch (transaction.transactionState)
             {
