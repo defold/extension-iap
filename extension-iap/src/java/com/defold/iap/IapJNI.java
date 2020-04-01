@@ -23,7 +23,7 @@ public class IapJNI implements IListProductsListener, IPurchaseListener {
     }
 
     @Override
-    public native void onProductsResult(int responseCode, String productList);
+    public native void onProductsResult(int responseCode, String productList, long cmdHandle);
 
     @Override
     public native void onPurchaseResult(int responseCode, String purchaseData);

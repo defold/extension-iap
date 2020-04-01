@@ -253,7 +253,7 @@ public class IapGooglePlay implements Handler.Callback {
         });
     }
 
-    public void listItems(final String skus, final IListProductsListener listener) {
+    public void listItems(final String skus, final IListProductsListener listener, final long commandPtr) {
         ArrayList<String> skuList = new ArrayList<String>();
         for (String x : skus.split(",")) {
             if (x.trim().length() > 0) {
@@ -276,15 +276,15 @@ public class IapGooglePlay implements Handler.Callback {
                                 products.put(key, convertProduct(product));
                             }
                         }
-                        listener.onProductsResult(resultCode, products.toString());
+                        listener.onProductsResult(resultCode, products.toString(), commandPtr);
                     }
                     catch(JSONException e) {
                         Log.wtf(TAG, "Failed to convert products", e);
-                        listener.onProductsResult(resultCode, null);
+                        listener.onProductsResult(resultCode, null, commandPtr);
                     }
                 }
                 else {
-                    listener.onProductsResult(resultCode, null);
+                    listener.onProductsResult(resultCode, null, commandPtr);
                 }
             }
         }));

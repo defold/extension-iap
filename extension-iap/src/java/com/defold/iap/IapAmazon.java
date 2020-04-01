@@ -35,6 +35,7 @@ public class IapAmazon implements PurchasingListener {
     public static final String TAG = "iap";
 
     private HashMap<RequestId, IListProductsListener> listProductsListeners;
+    private HashMap<RequestId, Long> listProductsCommandPtrs;
     private HashMap<RequestId, IPurchaseListener> purchaseListeners;
 
     private Activity activity;
@@ -54,7 +55,7 @@ public class IapAmazon implements PurchasingListener {
     public void stop() {
     }
 
-    public void listItems(final String skus, final IListProductsListener listener) {
+    public void listItems(final String skus, final IListProductsListener listener, final long commandPtr) {
         final Set<String> skuSet = new HashSet<String>();
         for (String x : skus.split(",")) {
             if (x.trim().length() > 0) {
@@ -71,6 +72,7 @@ public class IapAmazon implements PurchasingListener {
             RequestId req = PurchasingService.getProductData(skuSet);
             if (req != null) {
                 listProductsListeners.put(req, listener);
+                listProductsCommandPtrs.put(req, commandPtr);
             } else {
                 Log.e(TAG, "Did not expect a null requestId");
             }
@@ -150,17 +152,21 @@ public class IapAmazon implements PurchasingListener {
     public void onProductDataResponse(ProductDataResponse productDataResponse) {
         RequestId reqId = productDataResponse.getRequestId();
         IListProductsListener listener;
+        long commadPtr = 0;
         synchronized (this.listProductsListeners) {
             listener = this.listProductsListeners.get(reqId);
+            commadPtr = this.listProductsCommandPtrs.get(reqId);
+
+            this.listProductsListeners.remove(reqId);
+            this.listProductsCommandPtrs.remove(reqId);
             if (listener == null) {
                 Log.e(TAG, "No listener found for request " + reqId.toString());
                 return;
             }
-            this.listProductsListeners.remove(reqId);
         }
 
         if (productDataResponse.getRequestStatus() != ProductDataResponse.RequestStatus.SUCCESSFUL) {
-            listener.onProductsResult(IapJNI.BILLING_RESPONSE_RESULT_ERROR, null);
+            listener.onProductsResult(IapJNI.BILLING_RESPONSE_RESULT_ERROR, null, commadPtr);
         } else {
             Map<String, Product> products = productDataResponse.getProductData();
             try {
@@ -180,9 +186,9 @@ public class IapAmazon implements PurchasingListener {
                     }
                     data.put(key, item);
                 }
-                listener.onProductsResult(IapJNI.BILLING_RESPONSE_RESULT_OK, data.toString());
+                listener.onProductsResult(IapJNI.BILLING_RESPONSE_RESULT_OK, data.toString(), commadPtr);
             } catch (JSONException e) {
-                listener.onProductsResult(IapJNI.BILLING_RESPONSE_RESULT_ERROR, null);
+                listener.onProductsResult(IapJNI.BILLING_RESPONSE_RESULT_ERROR, null, commadPtr);
             }
         }
     }
