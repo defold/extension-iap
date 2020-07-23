@@ -3,7 +3,7 @@
     package="{{android.package}}">
 <uses-sdk android:minSdkVersion="{{android.minimum_sdk_version}}" android:targetSdkVersion="{{android.target_sdk_version}}" />
     <application>
-        
+
         <!-- For IAP -->
         <activity android:name="com.defold.iap.IapGooglePlayActivity"
           android:theme="@android:style/Theme.Translucent.NoTitleBar"
@@ -20,6 +20,4 @@
 
     </application>
 
-    <uses-permission android:name="com.android.vending.BILLING" />
-    
 </manifest>

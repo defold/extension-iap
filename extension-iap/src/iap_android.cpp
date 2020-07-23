@@ -52,7 +52,12 @@ static IAP g_IAP;
 
 static int IAP_ProcessPendingTransactions(lua_State* L)
 {
-    //todo handle pending transactions if there is such thing on Android
+    IAP* iap = &g_IAP;
+
+    JNIEnv* env = Attach();
+    env->CallVoidMethod(g_IAP.m_IAP, g_IAP.m_ProcessPendingConsumables, g_IAP.m_IAPJNI);
+    Detach();
+
     return 0;
 }
 
@@ -468,4 +473,3 @@ static dmExtension::Result FinalizeIAP(dmExtension::Params* params)
 DM_DECLARE_EXTENSION(IAPExt, "IAP", 0, 0, InitializeIAP, UpdateIAP, 0, FinalizeIAP)
 
 #endif //DM_PLATFORM_ANDROID
-
