@@ -184,11 +184,14 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
      */
     private List<Purchase> queryPurchases(final String type) {
         PurchasesResult result = billingClient.queryPurchases(type);
+        List<Purchase> purchases = result.getPurchasesList();
+        if (purchases == null) {
+            purchases = new ArrayList<Purchase>();
+        }
         if (result.getBillingResult().getResponseCode() != BillingResponseCode.OK) {
             Log.e(TAG, "Unable to query pending purchases: " + result.getBillingResult().getDebugMessage());
-            return new ArrayList<Purchase>();
         }
-        return result.getPurchasesList();
+        return purchases;
     }
 
     /**
@@ -332,12 +335,14 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
 
             @Override
             public void onSkuDetailsResponse(BillingResult billingResult, List<SkuDetails> skuDetails) {
-                // cache skus (cache will be used to speed up buying)
-                for (SkuDetails sd : skuDetails) {
-                    IapGooglePlay.this.products.put(sd.getSku(), sd);
+                if (skuDetails != null) {
+                    // cache skus (cache will be used to speed up buying)
+                    for (SkuDetails sd : skuDetails) {
+                        IapGooglePlay.this.products.put(sd.getSku(), sd);
+                    }
+                    // add to list of all sku details
+                    allSkuDetails.addAll(skuDetails);
                 }
-                // add to list of all sku details
-                allSkuDetails.addAll(skuDetails);
                 // we're finished when we have queried for both in-app and subs
                 queries--;
                 if (queries == 0) {
