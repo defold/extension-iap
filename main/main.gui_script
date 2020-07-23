@@ -4,6 +4,7 @@ local GOLDBARS_SMALL = "com.defold.iap.goldbar.small"
 local GOLDBARS_MEDIUM = "com.defold.iap.goldbar.medium"
 local GOLDBARS_LARGE = "com.defold.iap.goldbar.large"
 local SUBSCRIPTION = "com.defold.iap.subscription"
+local NON_CONSUMABLE = "com.defold.iap.removeads"
 
 local items = {
 	GOLDBARS_SMALL,
