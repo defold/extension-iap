@@ -37,10 +37,8 @@ import com.android.billingclient.api.SkuDetailsResponseListener;
 public class IapGooglePlay implements PurchasesUpdatedListener {
     public static final String TAG = "IapGooglePlay";
 
+    private Map<String, SkuDetails> products = new HashMap<String, SkuDetails>();
     private BillingClient billingClient;
-
-    private Map<String, SkuDetails> products;
-
     private IPurchaseListener purchaseListener;
     private boolean autoFinishTransactions;
     private Activity activity;
@@ -48,7 +46,6 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
     public IapGooglePlay(Activity activity, boolean autoFinishTransactions) {
         this.activity = activity;
         this.autoFinishTransactions = autoFinishTransactions;
-        products = new HashMap<String, SkuDetails>();
 
         billingClient = BillingClient.newBuilder(activity).setListener(this).enablePendingPurchases().build();
         billingClient.startConnection(new BillingClientStateListener() {
@@ -56,7 +53,8 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
             public void onBillingSetupFinished(BillingResult billingResult) {
                 if (billingResult.getResponseCode() == BillingResponseCode.OK) {
                     Log.v(TAG, "Setup finished");
-                    // TODO BillingClient.queryPurchases()
+                    // NOTE: we will not query purchases here. This is done
+                    // when the extension listener is set
                 }
                 else {
                     Log.wtf(TAG, "Setup error: " + billingResult.getDebugMessage());
@@ -69,6 +67,12 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
             }
         });
     }
+
+    public void stop() {
+        Log.d(TAG, "stop()");
+        billingClient.endConnection();
+    }
+
     public String toISO8601(final Date date) {
         String formatted = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(date);
         return formatted.substring(0, 22) + ":" + formatted.substring(22);
@@ -133,8 +137,7 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
         return defoldState;
     }
 
-    private int billingResponseCodeToDefoldResponse(int responseCode)
-    {
+    private int billingResponseCodeToDefoldResponse(int responseCode) {
         int defoldResponse;
         switch(responseCode) {
             case BillingResponseCode.BILLING_UNAVAILABLE:
@@ -176,8 +179,9 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
         return billingResponseCodeToDefoldResponse(result.getResponseCode());
     }
 
-    // -------------------------------------------
-
+    /**
+     * Query Google Play for purchases done within the app.
+     */
     private List<Purchase> queryPurchases(final String type) {
         PurchasesResult result = billingClient.queryPurchases(type);
         if (result.getBillingResult().getResponseCode() != BillingResponseCode.OK) {
@@ -187,8 +191,13 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
         return result.getPurchasesList();
     }
 
-    public void processPendingConsumables(final IPurchaseListener purchaseListener)
-    {
+    /**
+     * This method is called either explicitly from Lua or from extension code
+     * when "set_listener()" is called from Lua.
+     * The method will query purchases and try to handle them one by one (either
+     * trying to consume/finish them or simply notify the provided listener).
+     */
+    public void processPendingConsumables(final IPurchaseListener purchaseListener) {
         Log.d(TAG, "processPendingConsumables()");
         List<Purchase> purchasesList = new ArrayList<Purchase>();
         purchasesList.addAll(queryPurchases(SkuType.INAPP));
@@ -198,67 +207,78 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
         }
     }
 
-    // -------------------------------------------
-
-    private void consumePurchase(final Purchase purchase, final IPurchaseListener purchaseListener)
-    {
-        Log.d(TAG, "consumePurchase()");
+    /**
+     * Consume a purchase. This will acknowledge the purchase and make it
+     * available to buy again.
+     */
+    private void consumePurchase(final String purchaseToken, final ConsumeResponseListener consumeListener) {
+        Log.d(TAG, "consumePurchase() " + purchaseToken);
         ConsumeParams consumeParams = ConsumeParams.newBuilder()
-            .setPurchaseToken(purchase.getPurchaseToken())
+            .setPurchaseToken(purchaseToken)
             .build();
 
-        billingClient.consumeAsync(consumeParams, new ConsumeResponseListener() {
+        billingClient.consumeAsync(consumeParams, consumeListener);
+    }
+
+    /**
+     * Called from Lua. This method will try to consume a purchase.
+     */
+    public void finishTransaction(final String purchaseToken, final IPurchaseListener purchaseListener) {
+        Log.d(TAG, "finishTransaction() " + purchaseToken);
+        consumePurchase(purchaseToken, new ConsumeResponseListener() {
             @Override
             public void onConsumeResponse(BillingResult billingResult, String purchaseToken) {
-                Log.d(TAG, "consumePurchase() onConsumeResponse " + billingResult.getResponseCode() + " purchaseToken: " + purchaseToken);
+                Log.d(TAG, "finishTransaction() response code " + billingResult.getResponseCode() + " purchaseToken: " + purchaseToken);
+                // note: we only call the purchase listener if an error happens
                 if (billingResult.getResponseCode() != BillingResponseCode.OK) {
                     Log.e(TAG, "Unable to consume purchase: " + billingResult.getDebugMessage());
                     purchaseListener.onPurchaseResult(billingResultToDefoldResponse(billingResult), "");
-                    return;
                 }
             }
         });
     }
 
-    public void finishTransaction(final String purchaseToken, final IPurchaseListener purchaseListener) {
-        Log.d(TAG, "finishTransaction() " + purchaseToken);
-        List<Purchase> purchasesList = new ArrayList<Purchase>();
-        purchasesList.addAll(queryPurchases(SkuType.INAPP));
-        purchasesList.addAll(queryPurchases(SkuType.SUBS));
-
-        for(Purchase p : purchasesList) {
-            Log.d(TAG, "finishTransaction() purchase: " + p.getOriginalJson());
-            if (p.getPurchaseToken().equals(purchaseToken)) {
-                consumePurchase(p, purchaseListener);
-                return;
-            }
-        }
-        Log.e(TAG, "Unable to find purchase for token: " + purchaseToken);
-        purchaseListener.onPurchaseResult(IapJNI.BILLING_RESPONSE_RESULT_ERROR, "");
-    }
-
-    // -------------------------------------------
-
+    /**
+     * Handle a purchase. If the extension is configured to automatically
+     * finish transactions the purchase will be immediately consumed. Otherwise
+     * the product will be returned via the listener without being consumed.
+     * NOTE: Billing 3.0 requires purchases to be acknowledged within 3 days of
+     * purchase unless they are consumed.
+     */
     private void handlePurchase(final Purchase purchase, final IPurchaseListener purchaseListener) {
         if (this.autoFinishTransactions) {
-            consumePurchase(purchase, purchaseListener);
+            consumePurchase(purchase.getPurchaseToken(), new ConsumeResponseListener() {
+                @Override
+                public void onConsumeResponse(BillingResult billingResult, String purchaseToken) {
+                    Log.d(TAG, "handlePurchase() response code " + billingResult.getResponseCode() + " purchaseToken: " + purchaseToken);
+                    purchaseListener.onPurchaseResult(billingResultToDefoldResponse(billingResult), convertPurchase(purchase));
+                }
+            });
         }
         else {
             purchaseListener.onPurchaseResult(billingResponseCodeToDefoldResponse(BillingResponseCode.OK), convertPurchase(purchase));
         }
     }
 
+    /**
+     * BillingClient listener set in the constructor.
+     */
     @Override
     public void onPurchasesUpdated(BillingResult billingResult, List<Purchase> purchases) {
         if (billingResult.getResponseCode() == BillingResponseCode.OK && purchases != null) {
             for (Purchase purchase : purchases) {
                 handlePurchase(purchase, this.purchaseListener);
             }
-        } else {
+        }
+        else {
             this.purchaseListener.onPurchaseResult(billingResultToDefoldResponse(billingResult), "");
         }
     }
 
+    /**
+     * Buy a product. This method stores the listener and uses it in the
+     * onPurchasesUpdated() callback.
+     */
     private void buyProduct(SkuDetails sku, final IPurchaseListener purchaseListener) {
         this.purchaseListener = purchaseListener;
 
@@ -273,6 +293,9 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
         }
     }
 
+    /**
+     * Called from Lua.
+     */
     public void buy(final String product, final IPurchaseListener purchaseListener) {
         Log.d(TAG, "buy()");
 
@@ -298,10 +321,11 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
         }
     }
 
-    // -------------------------------------------
-
-    private void querySkuDetailsAsync(final List<String> skuList, final SkuDetailsResponseListener listener)
-    {
+    /**
+     * Get details for a list of products. The products can be a mix of
+     * in-app products and subscriptions.
+     */
+    private void querySkuDetailsAsync(final List<String> skuList, final SkuDetailsResponseListener listener) {
         SkuDetailsResponseListener detailsListener = new SkuDetailsResponseListener() {
             private List<SkuDetails> allSkuDetails = new ArrayList<SkuDetails>();
             private int queries = 2;
@@ -309,15 +333,14 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
             @Override
             public void onSkuDetailsResponse(BillingResult billingResult, List<SkuDetails> skuDetails) {
                 // cache skus (cache will be used to speed up buying)
-                for (SkuDetails sd : skuDetails)
-                {
+                for (SkuDetails sd : skuDetails) {
                     IapGooglePlay.this.products.put(sd.getSku(), sd);
                 }
-                //
+                // add to list of all sku details
                 allSkuDetails.addAll(skuDetails);
+                // we're finished when we have queried for both in-app and subs
                 queries--;
-                if (queries == 0)
-                {
+                if (queries == 0) {
                     listener.onSkuDetailsResponse(billingResult, allSkuDetails);
                 }
             }
@@ -326,8 +349,10 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
         billingClient.querySkuDetailsAsync(SkuDetailsParams.newBuilder().setSkusList(skuList).setType(SkuType.SUBS).build(), detailsListener);
     }
 
-    public void listItems(final String products, final IListProductsListener productsListener, final long commandPtr)
-    {
+    /**
+     * Called from Lua.
+     */
+    public void listItems(final String products, final IListProductsListener productsListener, final long commandPtr) {
         Log.d(TAG, "listItems()");
 
         // create list of skus from comma separated string
@@ -343,8 +368,7 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
             public void onSkuDetailsResponse(BillingResult billingResult, List<SkuDetails> skuDetails) {
                 JSONArray a = new JSONArray();
                 if (billingResult.getResponseCode() == BillingResponseCode.OK) {
-                    for (SkuDetails sd : skuDetails)
-                    {
+                    for (SkuDetails sd : skuDetails) {
                         a.put(convertSkuDetails(sd));
                     }
                 }
@@ -356,15 +380,7 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
         });
     }
 
-    // -------------------------------------------
-
-    public void stop()
-    {
-        Log.d(TAG, "stop()");
-    }
-
-    public void restore(final IPurchaseListener listener)
-    {
+    public void restore(final IPurchaseListener listener) {
         Log.d(TAG, "restore()");
     }
 }

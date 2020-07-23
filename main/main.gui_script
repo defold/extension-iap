@@ -88,8 +88,8 @@ local function buy_listener(self, transaction, error)
 		gui.set_color(gui.get_node("reset/larrylabel"), vmath.vector4(1,1,1,1))
 		product_items["reset"] = transaction
 	else
-		log("iap.buy() ok")
-		log("iap.finish()")
+		log("iap.buy() ok %s", transaction.ident)
+		log("iap.finish() %s", transaction.ident)
 		iap.finish(transaction)
 	end
 end
