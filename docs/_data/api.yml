@@ -1,6 +1,6 @@
 - name: iap
-  type: table 
-  desc: Functions and constants for doing in-app purchases. Supported on iOS, Android (Google Play and Amazon) 
+  type: table
+  desc: Functions and constants for doing in-app purchases. Supported on iOS, Android (Google Play and Amazon)
         and Facebook Canvas platforms.
         [icon:ios] [icon:googleplay] [icon:amazon] [icon:facebook]
   members:
@@ -55,6 +55,19 @@
           [icon:attention] Calling iap.finish is required on a successful transaction
           if `auto_finish_transactions` is disabled in project settings. Calling this function
           with `auto_finish_transactions` set will be ignored and a warning is printed.
+          The `transaction.state` field must equal `iap.TRANS_STATE_PURCHASED`.
+    parameters:
+      - name: transaction
+        type: table
+        desc: transaction table parameter as supplied in listener callback
+
+#*****************************************************************************************************
+
+  - name: acknowledge
+    type: function
+    desc: Acknowledges a product transaction but does not consume it.
+          [icon:attention] [icon:googleplay] Calling iap.acknowledge is required on a successful transaction
+          on Google Play unless iap.finish is called.
           The `transaction.state` field must equal `iap.TRANS_STATE_PURCHASED`.
     parameters:
       - name: transaction
@@ -210,7 +223,7 @@
 
         - name: trans_ident
           type: string
-          desc: The transaction identifier. This field is only set when `state` is 
+          desc: The transaction identifier. This field is only set when `state` is
                 `TRANS_STATE_RESTORED`, `TRANS_STATE_UNVERIFIED` or `TRANS_STATE_PURCHASED`.
 
         - name: receipt
@@ -260,47 +273,45 @@
   - name: PROVIDER_ID_AMAZON
     type: number
     desc: provider id for Amazon
-    
+
   - name: PROVIDER_ID_APPLE
     type: number
     desc: provider id for Apple
-    
+
   - name: PROVIDER_ID_FACEBOOK
     type: number
     desc: provider id for Facebook
-    
+
   - name: PROVIDER_ID_GOOGLE
     type: number
     desc: iap provider id for Google
-    
+
   - name: REASON_UNSPECIFIED
     type: number
     desc: unspecified error reason
-    
+
   - name: REASON_USER_CANCELED
     type: number
     desc: user canceled reason
-    
+
   - name: TRANS_STATE_FAILED
     type: number
     desc: transaction failed state
-    
+
   - name: TRANS_STATE_PURCHASED
     type: number
     desc: transaction purchased state
-    
+
   - name: TRANS_STATE_PURCHASING
     type: number
     desc: transaction purchasing state
           This is an intermediate mode followed by TRANS_STATE_PURCHASED. Store provider support dependent.
-    
+
   - name: TRANS_STATE_RESTORED
     type: number
     desc: transaction restored state
           This is only available on store providers supporting restoring purchases.
-    
+
   - name: TRANS_STATE_UNVERIFIED
     type: number
     desc: transaction unverified state, requires verification of purchase
-    
-    

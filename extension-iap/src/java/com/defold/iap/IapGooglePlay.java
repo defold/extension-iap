@@ -28,11 +28,12 @@ import com.android.billingclient.api.SkuDetails;
 import com.android.billingclient.api.ConsumeParams;
 import com.android.billingclient.api.BillingFlowParams;
 import com.android.billingclient.api.SkuDetailsParams;
+import com.android.billingclient.api.AcknowledgePurchaseParams;
 import com.android.billingclient.api.PurchasesUpdatedListener;
 import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.ConsumeResponseListener;
 import com.android.billingclient.api.SkuDetailsResponseListener;
-
+import com.android.billingclient.api.AcknowledgePurchaseResponseListener;
 
 public class IapGooglePlay implements PurchasesUpdatedListener {
     public static final String TAG = "IapGooglePlay";
@@ -70,7 +71,14 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
 
     public void stop() {
         Log.d(TAG, "stop()");
-        billingClient.endConnection();
+        this.activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (billingClient.isReady()) {
+                    billingClient.endConnection();
+                }
+            }
+        });
     }
 
     public String toISO8601(final Date date) {
@@ -172,6 +180,7 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
                 defoldResponse = IapJNI.BILLING_RESPONSE_RESULT_ERROR;
                 break;
         }
+        Log.d(TAG, "billingResponseCodeToDefoldResponse: " + responseCode + " defoldResponse: " + defoldResponse);
         return defoldResponse;
     }
 
@@ -235,6 +244,29 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
                 // note: we only call the purchase listener if an error happens
                 if (billingResult.getResponseCode() != BillingResponseCode.OK) {
                     Log.e(TAG, "Unable to consume purchase: " + billingResult.getDebugMessage());
+                    purchaseListener.onPurchaseResult(billingResultToDefoldResponse(billingResult), "");
+                }
+            }
+        });
+    }
+
+    /**
+     * Called from Lua. This method will try to acknowledge a purchase (but not finish/consume it).
+     */
+    public void acknowledgeTransaction(final String purchaseToken, final IPurchaseListener purchaseListener) {
+        Log.d(TAG, "acknowledgeTransaction() " + purchaseToken);
+
+        AcknowledgePurchaseParams acknowledgeParams = AcknowledgePurchaseParams.newBuilder()
+            .setPurchaseToken(purchaseToken)
+            .build();
+
+        billingClient.acknowledgePurchase(acknowledgeParams, new AcknowledgePurchaseResponseListener() {
+            @Override
+            public void onAcknowledgePurchaseResponse(BillingResult billingResult) {
+                Log.d(TAG, "acknowledgeTransaction() response code " + billingResult.getResponseCode());
+                // note: we only call the purchase listener if an error happens
+                if (billingResult.getResponseCode() != BillingResponseCode.OK) {
+                    Log.e(TAG, "Unable to acknowledge purchase: " + billingResult.getDebugMessage());
                     purchaseListener.onPurchaseResult(billingResultToDefoldResponse(billingResult), "");
                 }
             }
@@ -385,7 +417,11 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
         });
     }
 
+    /**
+     * Called from Lua.
+     */
     public void restore(final IPurchaseListener listener) {
         Log.d(TAG, "restore()");
+        processPendingConsumables(listener);
     }
 }

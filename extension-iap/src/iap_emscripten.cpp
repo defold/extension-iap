@@ -193,6 +193,11 @@ static int IAP_Finish(lua_State* L)
     return 0;
 }
 
+static int IAP_Acknowledge(lua_State* L)
+{
+    return 0;
+}
+
 static int IAP_Restore(lua_State* L)
 {
     DM_LUA_STACK_CHECK(L, 1);
@@ -212,6 +217,7 @@ static const luaL_reg IAP_methods[] =
     {"list", IAP_List},
     {"buy", IAP_Buy},
     {"finish", IAP_Finish},
+    {"acknowledge", IAP_Acknowledge},
     {"restore", IAP_Restore},
     {"set_listener", IAP_SetListener},
     {"get_provider_id", IAP_GetProviderId},
