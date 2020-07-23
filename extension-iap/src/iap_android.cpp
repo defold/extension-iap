@@ -52,8 +52,6 @@ static IAP g_IAP;
 
 static int IAP_ProcessPendingTransactions(lua_State* L)
 {
-    IAP* iap = &g_IAP;
-
     JNIEnv* env = Attach();
     env->CallVoidMethod(g_IAP.m_IAP, g_IAP.m_ProcessPendingConsumables, g_IAP.m_IAPJNI);
     Detach();
