@@ -3,21 +3,11 @@
     package="{{android.package}}">
 <uses-sdk android:minSdkVersion="{{android.minimum_sdk_version}}" android:targetSdkVersion="{{android.target_sdk_version}}" />
     <application>
-
-        <!-- For IAP -->
-        <activity android:name="com.defold.iap.IapGooglePlayActivity"
-          android:theme="@android:style/Theme.Translucent.NoTitleBar"
-          android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
-          android:label="IAP">
-        </activity>
-
         <!-- For Amazon IAP -->
         <receiver android:name="com.amazon.device.iap.ResponseReceiver" >
             <intent-filter>
                 <action android:name="com.amazon.inapp.purchasing.NOTIFY" android:permission="com.amazon.inapp.purchasing.Permission.NOTIFY" />
             </intent-filter>
         </receiver>
-
     </application>
-
 </manifest>
