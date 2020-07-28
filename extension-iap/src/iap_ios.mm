@@ -503,6 +503,11 @@ static int IAP_SetListener(lua_State* L)
     return 0;
 }
 
+static int IAP_Acknowledge(lua_State* L)
+{
+    return 0;
+}
+
 static int IAP_GetProviderId(lua_State* L)
 {
     lua_pushinteger(L, PROVIDER_ID_APPLE);
@@ -514,6 +519,7 @@ static const luaL_reg IAP_methods[] =
     {"list", IAP_List},
     {"buy", IAP_Buy},
     {"finish", IAP_Finish},
+    {"acknowledge", IAP_Acknowledge},
     {"restore", IAP_Restore},
     {"set_listener", IAP_SetListener},
     {"get_provider_id", IAP_GetProviderId},

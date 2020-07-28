@@ -43,6 +43,7 @@ struct IAP
     jmethodID       m_Buy;
     jmethodID       m_Restore;
     jmethodID       m_ProcessPendingConsumables;
+    jmethodID       m_AcknowledgeTransaction;
     jmethodID       m_FinishTransaction;
 
     IAPCommandQueue m_CommandQueue;
@@ -52,7 +53,10 @@ static IAP g_IAP;
 
 static int IAP_ProcessPendingTransactions(lua_State* L)
 {
-    //todo handle pending transactions if there is such thing on Android
+    JNIEnv* env = Attach();
+    env->CallVoidMethod(g_IAP.m_IAP, g_IAP.m_ProcessPendingConsumables, g_IAP.m_IAPJNI);
+    Detach();
+
     return 0;
 }
 
@@ -143,6 +147,46 @@ static int IAP_Finish(lua_State* L)
     return 0;
 }
 
+static int IAP_Acknowledge(lua_State* L)
+{
+    int top = lua_gettop(L);
+
+    luaL_checktype(L, 1, LUA_TTABLE);
+
+    lua_getfield(L, -1, "state");
+    if (lua_isnumber(L, -1))
+    {
+        if(lua_tointeger(L, -1) != TRANS_STATE_PURCHASED)
+        {
+            dmLogError("Invalid transaction state (must be iap.TRANS_STATE_PURCHASED).");
+            lua_pop(L, 1);
+            assert(top == lua_gettop(L));
+            return 0;
+        }
+    }
+    lua_pop(L, 1);
+
+    lua_getfield(L, -1, "receipt");
+    if (!lua_isstring(L, -1)) {
+        dmLogError("Transaction error. Invalid transaction data, does not contain 'receipt' key.");
+        lua_pop(L, 1);
+    }
+    else
+    {
+        const char * receipt = lua_tostring(L, -1);
+        lua_pop(L, 1);
+
+        JNIEnv* env = Attach();
+        jstring receiptUTF = env->NewStringUTF(receipt);
+        env->CallVoidMethod(g_IAP.m_IAP, g_IAP.m_AcknowledgeTransaction, receiptUTF, g_IAP.m_IAPJNI);
+        env->DeleteLocalRef(receiptUTF);
+        Detach();
+    }
+
+    assert(top == lua_gettop(L));
+    return 0;
+}
+
 static int IAP_Restore(lua_State* L)
 {
     // TODO: Missing callback here for completion/error
@@ -190,6 +234,7 @@ static const luaL_reg IAP_methods[] =
     {"list", IAP_List},
     {"buy", IAP_Buy},
     {"finish", IAP_Finish},
+    {"acknowledge", IAP_Acknowledge},
     {"restore", IAP_Restore},
     {"set_listener", IAP_SetListener},
     {"get_provider_id", IAP_GetProviderId},
@@ -223,6 +268,7 @@ JNIEXPORT void JNICALL Java_com_defold_iap_IapJNI_onProductsResult(JNIEnv* env, 
 
 JNIEXPORT void JNICALL Java_com_defold_iap_IapJNI_onPurchaseResult__ILjava_lang_String_2(JNIEnv* env, jobject, jint responseCode, jstring purchaseData)
 {
+    dmLogInfo("Java_com_defold_iap_IapJNI_onPurchaseResult__ILjava_lang_String_2 %d", (int)responseCode);
     const char* pd = 0;
     if (purchaseData)
     {
@@ -395,6 +441,7 @@ static dmExtension::Result InitializeIAP(dmExtension::Params* params)
         g_IAP.m_Stop = env->GetMethodID(iap_class, "stop", "()V");
         g_IAP.m_ProcessPendingConsumables = env->GetMethodID(iap_class, "processPendingConsumables", "(Lcom/defold/iap/IPurchaseListener;)V");
         g_IAP.m_FinishTransaction = env->GetMethodID(iap_class, "finishTransaction", "(Ljava/lang/String;Lcom/defold/iap/IPurchaseListener;)V");
+        g_IAP.m_AcknowledgeTransaction = env->GetMethodID(iap_class, "acknowledgeTransaction", "(Ljava/lang/String;Lcom/defold/iap/IPurchaseListener;)V");
 
         jmethodID jni_constructor = env->GetMethodID(iap_class, "<init>", "(Landroid/app/Activity;Z)V");
         g_IAP.m_IAP = env->NewGlobalRef(env->NewObject(iap_class, jni_constructor, dmGraphics::GetNativeAndroidActivity(), g_IAP.m_autoFinishTransactions));
@@ -468,4 +515,3 @@ static dmExtension::Result FinalizeIAP(dmExtension::Params* params)
 DM_DECLARE_EXTENSION(IAPExt, "IAP", 0, 0, InitializeIAP, UpdateIAP, 0, FinalizeIAP)
 
 #endif //DM_PLATFORM_ANDROID
-

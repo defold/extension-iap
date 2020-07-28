@@ -37,9 +37,19 @@ local function log(fmt, ...)
 	gui.set_text(gui.get_node("log"), s)
 end
 
+local function process_pending_transactions()
+	log("iap.process_pending_transactions()")
+	iap.process_pending_transactions()
+end
+
 local function buy(id)
 	log("iap.buy() " .. id)
 	iap.buy(id)
+end
+
+local function restore()
+	log("iap.restore()")
+	iap.restore()
 end
 
 local function list()
@@ -68,25 +78,32 @@ end
 
 
 local function buy_listener(self, transaction, error)
-	pprint(transaction, error)
+	pprint(transaction)
 	if error then
 		log("iap.buy() error %s - %s", tostring(error.error), tostring(error.reason))
 		return
 	end
-	
+
 	if iap.get_provider_id() == iap.PROVIDER_ID_GOOGLE and transaction.ident == NON_CONSUMABLE then
 		log("iap.buy() ok - google")
 		gui.set_color(gui.get_node("reset/larrylabel"), vmath.vector4(1,1,1,1))
 		product_items["reset"] = transaction
 	else
-		log("iap.buy() ok")
-		log("iap.finish()")
-		iap.finish(transaction)
+		log("iap.buy() ok %s", transaction.ident)
+		if self.finish then
+			log("iap.finish() %s", transaction.ident)
+			iap.finish(transaction)
+		elseif self.acknowledge then
+			log("iap.acknowledge() %s", transaction.ident)
+			iap.acknowledge(transaction)
+		end
 	end
 end
 
 function init(self)
 	self.log = {}
+	self.finish = false
+	self.acknowledge = false
 	log("init()")
 	msg.post(".", "acquire_input_focus")
 	if not iap then
@@ -110,5 +127,13 @@ function on_input(self, action_id, action)
 		dirtylarry:button("list", action_id, action, function()
 			list()
 		end)
+		dirtylarry:button("restore", action_id, action, function()
+			restore()
+		end)
+		dirtylarry:button("pending", action_id, action, function()
+			process_pending_transactions()
+		end)
+		self.finish = dirtylarry:checkbox("chk_finish", action_id, action, self.finish)
+		self.acknowledge = dirtylarry:checkbox("chk_acknowledge", action_id, action, self.acknowledge)
 	end
 end
