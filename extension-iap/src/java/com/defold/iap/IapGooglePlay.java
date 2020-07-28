@@ -71,17 +71,12 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
 
     public void stop() {
         Log.d(TAG, "stop()");
-        this.activity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (billingClient.isReady()) {
-                    billingClient.endConnection();
-                }
-            }
-        });
+        if (billingClient.isReady()) {
+            billingClient.endConnection();
+        }
     }
 
-    public String toISO8601(final Date date) {
+    private String toISO8601(final Date date) {
         String formatted = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").format(date);
         return formatted.substring(0, 22) + ":" + formatted.substring(22);
     }
