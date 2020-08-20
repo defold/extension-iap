@@ -125,14 +125,14 @@ static void IAP_FreeTransaction(IAPTransaction* transaction)
         }
         else {
             dmLogWarning("Product %s has no localizedTitle", [p.productIdentifier UTF8String]);
-            product.title       = "";
+            product.title       = strdup("");
         }
         if (p.localizedDescription) {
             product.description = strdup([p.localizedDescription UTF8String]);
         }
         else {
             dmLogWarning("Product %s has no localizedDescription", [p.productIdentifier UTF8String]);
-            product.description = "";
+            product.description = strdup("");
         }
         product.currency_code   = strdup([[p.priceLocale objectForKey:NSLocaleCurrencyCode] UTF8String]);
         product.price           = p.price.floatValue;
