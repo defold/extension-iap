@@ -45,6 +45,7 @@ public class IapAmazon implements PurchasingListener {
         this.activity = activity;
         this.autoFinishTransactions = autoFinishTransactions;
         this.listProductsListeners = new HashMap<RequestId, IListProductsListener>();
+        this.listProductsCommandPtrs = new HashMap<RequestId, Long>();
         this.purchaseListeners = new HashMap<RequestId, IPurchaseListener>();
         PurchasingService.registerListener(activity, this);
     }
