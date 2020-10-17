@@ -97,6 +97,10 @@ public class IapAmazon implements PurchasingListener {
         }
         PurchasingService.notifyFulfillment(receipt, FulfillmentResult.FULFILLED);
     }
+    
+    public void acknowledgeTransaction(final String purchaseToken, final IPurchaseListener purchaseListener) {
+        // Stub to prevent errors.
+    }
 
     private void doGetPurchaseUpdates(final IPurchaseListener listener, final boolean reset) {
         synchronized (purchaseListeners) {
