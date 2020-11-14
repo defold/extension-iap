@@ -173,17 +173,20 @@ Most payment providers only supports synchronous payments. This means that the c
 ## Asynchronous payments
 
 Some payment providers require supporting asynchronous payments. This means that the client (your application) will only receive a notification when the payment is initiated. In order to verify completion of payment, further communication needs to be done between the developer server (or client) and the payment provider in order to verify.
+
 In the case of an initiated asynchronous payment the IAP listener will receive the state TRANS_STATE_UNVERIFIED to indicate this (as opposed to TRANS_STATE_PURCHASED). This is the final state of the payment, meaning no more callbacks will be done on this transaction.
 
 
 ## Purchase fulfilment
 
 In order to complete a purchase from a payment provider, the application needs to signal a purchase fulfilment to the provider telling the provider the purchase has gone through (for example by developer server-side verification).
+
 IAP supports auto-completion, where fulfilment is automatically signalled to the provider when a purchase is complete (this is the default behavior). You can also disable auto-completion in the game project settings. You are then required to call `iap.finish()` when the transaction is complete, which will signal purchase fulfilment to the provider.
 
 
 ### Consumable vs non-consumable products
-The Google Play store does only support consumable products. If you need non-consumable products it is recommended to use manual fulfillment of purchases and never finish purchases for products that should be non-consumable. As long as a purchase isn't finished it will be returned as an active purchase when `iap.set_listener()` is called.
+
+The Google Play store does only support consumable products. If you need non-consumable products it is recommended to use manual fulfilment of purchases and never finish purchases for products that should be non-consumable. As long as a purchase isn't finished it will be returned as an active purchase when `iap.set_listener()` is called. If you do not call `iap.finish()` on a purchase you still need to indicate to Google Play that the purchase has been handled. You can do this by calling `iap.acknowledge()`. If you do not call `iap.acknowledge()` the purchase will be automatically refunded by Google after a few days.
 
 The Apple App Store supports non-consumable products which means that you need to finish all purchases when you provide products to your users. You can do it automatically by keeping the default behavior in the game project settings or manually (if you want to do that after server validation, for example) using `iap.finish()`.
 
@@ -212,7 +215,7 @@ Android `iap.list()` returns "failed to fetch product"
 : You need to upload and publish an *.apk* on the alpha or beta channels on the Google Play Developer Console. Also make sure that the _time and date_ on your device is correct.
 
 Android (Google Play) `iap.list()` never returns more than 20 products
-: Google has an [limit of 20 products per request](https://github.com/android/play-billing-samples/blob/7a94c6905a9c125518354c216b5c3094fde47ce1/TrivialDrive/app/src/main/aidl/com/android/vending/billing/IInAppBillingService.aidl#L62). The solution is to make multiple calls to `iap.list()` and combine the results if the number of products exceeds 20.
+: Google has a [limit of 20 products per request](https://github.com/android/play-billing-samples/blob/7a94c6905a9c125518354c216b5c3094fde47ce1/TrivialDrive/app/src/main/aidl/com/android/vending/billing/IInAppBillingService.aidl#L62). The solution is to make multiple calls to `iap.list()` and combine the results if the number of products exceeds 20.
 
 iOS `iap.list()` returns nothing
 : Make sure that you’ve requested an iOS Paid Applications account, and all proper documentation has been filed. Without proper authorization, your iOS app purchasing (even test purchases) will not work.
