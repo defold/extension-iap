@@ -72,7 +72,7 @@ var LibraryFacebookIAP = {
                     if(url_index == product_count-1) {
                         var productsJSON = JSON.stringify(products);
                         var res_buf = allocate(intArrayFromString(productsJSON), 'i8', ALLOC_STACK);
-                        Runtime.dynCall('vii', callback, [lua_callback, res_buf]);
+                        {{{ makeDynCall('vii', 'callback')}}}(lua_callback, res_buf);
                     } else {
                         var xmlhttp = new XMLHttpRequest();
                         xmlhttp.onreadystatechange = function() {
@@ -87,7 +87,7 @@ var LibraryFacebookIAP = {
         },
 
         dmIAPFBList: function(params, callback, lua_callback) {
-            var product_ids = Pointer_stringify(params).trim().split(',');
+            var product_ids = UTF8ToString(params).trim().split(',');
             var product_count = product_ids.length;
             if(product_count == 0) {
                 console.log("Calling iap.list with no item id's. Ignored.");
@@ -105,7 +105,7 @@ var LibraryFacebookIAP = {
 
         // https://developers.facebook.com/docs/javascript/reference/FB.ui
         dmIAPFBBuy: function(param_product_id, param_request_id, callback, lua_callback) {
-            var product_id = Pointer_stringify(param_product_id);
+            var product_id = UTF8ToString(param_product_id);
 
             var buy_params = {
                     method: 'pay',
@@ -113,7 +113,7 @@ var LibraryFacebookIAP = {
                     product: product_id,
             };
             if(param_request_id != 0) {
-                buy_params.request_id = Pointer_stringify(param_request_id);
+                buy_params.request_id = UTF8ToString(param_request_id);
             }
 
             FB.ui(buy_params,
@@ -144,7 +144,7 @@ var LibraryFacebookIAP = {
 
 	                    var productsJSON = JSON.stringify(result)
 	                    var res_buf = allocate(intArrayFromString(productsJSON), 'i8', ALLOC_STACK);
-	                    Runtime.dynCall('viii', callback, [lua_callback, res_buf, 0]);
+	                    {{{ makeDynCall('viii', 'callback')}}}(lua_callback, res_buf, 0);
 
 	                } else {
 
@@ -157,7 +157,7 @@ var LibraryFacebookIAP = {
 	                        reason = FBinner.BillingResponse.BILLING_RESPONSE_RESULT_ERROR;
 	                        console.log("Unknown response: ", response);
 	                    }
-	                    Runtime.dynCall('viii', callback, [lua_callback, 0, reason]);
+	                    {{{ makeDynCall('viii', 'callback')}}}(lua_callback, 0, reason);
 	                }
             	}
             );
