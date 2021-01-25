@@ -339,7 +339,7 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
             querySkuDetailsAsync(skuList, new SkuDetailsResponseListener() {
                 @Override
                 public void onSkuDetailsResponse(BillingResult billingResult, List<SkuDetails> skuDetailsList) {
-                    if (billingResult.getResponseCode() == BillingResponseCode.OK) {
+                    if (billingResult.getResponseCode() == BillingResponseCode.OK && (skuDetailsList != null) && !skuDetailsList.isEmpty()) {
                         buyProduct(skuDetailsList.get(0), purchaseListener);
                     }
                     else {
