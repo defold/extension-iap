@@ -28,6 +28,7 @@ struct IAP
     bool                            m_AutoFinishTransactions;
     NSMutableDictionary*            m_PendingTransactions;
     dmScript::LuaCallbackInfo*      m_Listener;
+    dmScript::LuaCallbackInfo*      m_RestoreListener;
     IAPCommandQueue                 m_CommandQueue;
     IAPCommandQueue                 m_ObservableQueue;
     SKPaymentTransactionObserver*   m_Observer;
@@ -597,6 +598,11 @@ static dmExtension::Result FinalizeIAP(dmExtension::Params* params)
     if (params->m_L == dmScript::GetCallbackLuaContext(g_IAP.m_Listener)) {
         dmScript::DestroyCallback(g_IAP.m_Listener);
         g_IAP.m_Listener = 0;
+    }
+
+    if (iap->m_RestoreListener)
+    {
+        dmScript::DestroyCallback(iap->m_RestoreListener);
     }
 
     if (g_IAP.m_InitCount == 0) {

@@ -35,6 +35,7 @@ struct IAP
     int             m_ProviderId;
 
     dmScript::LuaCallbackInfo* m_Listener;
+    dmScript::LuaCallbackInfo* m_RestoreListener;
 
     jobject         m_IAP;
     jobject         m_IAPJNI;
@@ -191,13 +192,22 @@ static int IAP_Restore(lua_State* L)
 {
     // TODO: Missing callback here for completion/error
     // See iap_ios.mm
+    DM_LUA_STACKCHECK(L, 1);
 
-    int top = lua_gettop(L);
+    if (iap->m_RestoreListener)
+    {
+        dmScript::DestroyCallback(iap->m_RestoreListener);
+        iap->m_RestoreListener = 0;
+    }
+
+    if (lua_isfunction(L, 1))
+    {
+        iap->m_RestoreListener = dmScript::CreateCallback(L, 1);
+    }
+
     JNIEnv* env = Attach();
     env->CallVoidMethod(g_IAP.m_IAP, g_IAP.m_Restore, g_IAP.m_IAPJNI);
     Detach();
-
-    assert(top == lua_gettop(L));
 
     lua_pushboolean(L, 1);
     return 1;
@@ -499,6 +509,11 @@ static dmExtension::Result FinalizeIAP(dmExtension::Params* params)
     if (params->m_L == dmScript::GetCallbackLuaContext(g_IAP.m_Listener)) {
         dmScript::DestroyCallback(g_IAP.m_Listener);
         g_IAP.m_Listener = 0;
+    }
+
+    if (iap->m_RestoreListener)
+    {
+        dmScript::DestroyCallback(iap->m_RestoreListener);
     }
 
     if (g_IAP.m_InitCount == 0) {
