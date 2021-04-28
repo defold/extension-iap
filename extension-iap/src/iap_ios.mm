@@ -102,7 +102,6 @@ static void IAP_FreeTransaction(IAPTransaction* transaction)
 @interface SKProductsRequestDelegate : NSObject<SKProductsRequestDelegate>
     @property dmScript::LuaCallbackInfo* m_Callback;
     @property (assign) SKProductsRequest* m_Request;
-    @property int m_Version;
 @end
 
 @implementation SKProductsRequestDelegate
