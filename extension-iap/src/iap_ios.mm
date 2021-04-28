@@ -24,6 +24,7 @@ struct IAP
         memset(this, 0, sizeof(*this));
         m_AutoFinishTransactions = true;
     }
+    int                             m_Version;
     bool                            m_AutoFinishTransactions;
     NSMutableDictionary*            m_PendingTransactions;
     dmScript::LuaCallbackInfo*      m_Listener;
@@ -102,10 +103,16 @@ static void IAP_FreeTransaction(IAPTransaction* transaction)
 @interface SKProductsRequestDelegate : NSObject<SKProductsRequestDelegate>
     @property dmScript::LuaCallbackInfo* m_Callback;
     @property (assign) SKProductsRequest* m_Request;
+    @property int m_Version;
 @end
 
 @implementation SKProductsRequestDelegate
 - (void)productsRequest:(SKProductsRequest *)request didReceiveResponse:(SKProductsResponse *)response{
+
+    if (self.m_Version != g_IAP.m_Version) {
+        dmLogWarning("Received products but the extension has been restarted")
+        return;
+    }
 
     if (!dmScript::IsCallbackValid(self.m_Callback)) {
         dmLogError("No callback set");
@@ -161,7 +168,7 @@ static void HandleProductResult(IAPCommand* cmd)
 
     IAPResponse* response = (IAPResponse*)cmd->m_Data;
 
-    lua_State* L = dmScript::GetCallbackLuaContext(g_IAP.m_Listener);
+    lua_State* L = dmScript::GetCallbackLuaContext(cmd->m_Callback);
     int top = lua_gettop(L);
 
     if (!dmScript::SetupCallback(cmd->m_Callback))
@@ -408,6 +415,7 @@ static int IAP_List(lua_State* L)
 
     delegate.m_Callback = dmScript::CreateCallback(L, 2);
     delegate.m_Request = products_request;
+    delegate.m_Version = g_IAP.m_Version;
     products_request.delegate = delegate;
     [products_request start];
 
@@ -530,6 +538,7 @@ static dmExtension::Result InitializeIAP(dmExtension::Params* params)
 {
     g_IAP.m_AutoFinishTransactions = dmConfigFile::GetInt(params->m_ConfigFile, "iap.auto_finish_transactions", 1) == 1;
     g_IAP.m_PendingTransactions = [[NSMutableDictionary alloc]initWithCapacity:2];
+    g_IAP.m_Version++;
 
     IAP_Queue_Create(&g_IAP.m_CommandQueue);
     IAP_Queue_Create(&g_IAP.m_ObservableQueue);
