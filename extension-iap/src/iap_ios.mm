@@ -169,7 +169,7 @@ static void HandleProductResult(IAPCommand* cmd)
 
     IAPResponse* response = (IAPResponse*)cmd->m_Data;
 
-    lua_State* L = dmScript::GetCallbackLuaContext(g_IAP.m_Listener);
+    lua_State* L = dmScript::GetCallbackLuaContext(cmd->m_Callback);
     int top = lua_gettop(L);
 
     if (!dmScript::SetupCallback(cmd->m_Callback))
