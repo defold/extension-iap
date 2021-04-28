@@ -30,7 +30,6 @@ struct IAP
         m_autoFinishTransactions = true;
         m_ProviderId = PROVIDER_ID_GOOGLE;
     }
-    int             m_InitCount;
     bool            m_autoFinishTransactions;
     int             m_ProviderId;
 
@@ -399,59 +398,54 @@ static void HandlePurchaseResult(const IAPCommand* cmd)
 
 static dmExtension::Result InitializeIAP(dmExtension::Params* params)
 {
-    // TODO: Life-cycle managaemnt is *budget*. No notion of "static initalization"
-    // Extend extension functionality with per system initalization?
-    if (g_IAP.m_InitCount == 0) {
-        IAP_Queue_Create(&g_IAP.m_CommandQueue);
+    IAP_Queue_Create(&g_IAP.m_CommandQueue);
 
-        g_IAP.m_autoFinishTransactions = dmConfigFile::GetInt(params->m_ConfigFile, "iap.auto_finish_transactions", 1) == 1;
+    g_IAP.m_autoFinishTransactions = dmConfigFile::GetInt(params->m_ConfigFile, "iap.auto_finish_transactions", 1) == 1;
 
-        JNIEnv* env = Attach();
+    JNIEnv* env = Attach();
 
-        jclass activity_class = env->FindClass("android/app/NativeActivity");
-        jmethodID get_class_loader = env->GetMethodID(activity_class,"getClassLoader", "()Ljava/lang/ClassLoader;");
-        jobject cls = env->CallObjectMethod(dmGraphics::GetNativeAndroidActivity(), get_class_loader);
-        jclass class_loader = env->FindClass("java/lang/ClassLoader");
-        jmethodID find_class = env->GetMethodID(class_loader, "loadClass", "(Ljava/lang/String;)Ljava/lang/Class;");
+    jclass activity_class = env->FindClass("android/app/NativeActivity");
+    jmethodID get_class_loader = env->GetMethodID(activity_class,"getClassLoader", "()Ljava/lang/ClassLoader;");
+    jobject cls = env->CallObjectMethod(dmGraphics::GetNativeAndroidActivity(), get_class_loader);
+    jclass class_loader = env->FindClass("java/lang/ClassLoader");
+    jmethodID find_class = env->GetMethodID(class_loader, "loadClass", "(Ljava/lang/String;)Ljava/lang/Class;");
 
-        const char* provider = dmConfigFile::GetString(params->m_ConfigFile, "android.iap_provider", "GooglePlay");
-        const char* class_name = "com.defold.iap.IapGooglePlay";
+    const char* provider = dmConfigFile::GetString(params->m_ConfigFile, "android.iap_provider", "GooglePlay");
+    const char* class_name = "com.defold.iap.IapGooglePlay";
 
-        g_IAP.m_ProviderId = PROVIDER_ID_GOOGLE;
-        if (!strcmp(provider, "Amazon")) {
-            g_IAP.m_ProviderId = PROVIDER_ID_AMAZON;
-            class_name = "com.defold.iap.IapAmazon";
-        }
-        else if (strcmp(provider, "GooglePlay")) {
-            dmLogWarning("Unknown IAP provider name [%s], defaulting to GooglePlay", provider);
-        }
-
-        jstring str_class_name = env->NewStringUTF(class_name);
-
-        jclass iap_class = (jclass)env->CallObjectMethod(cls, find_class, str_class_name);
-        env->DeleteLocalRef(str_class_name);
-
-        str_class_name = env->NewStringUTF("com.defold.iap.IapJNI");
-        jclass iap_jni_class = (jclass)env->CallObjectMethod(cls, find_class, str_class_name);
-        env->DeleteLocalRef(str_class_name);
-
-        g_IAP.m_List = env->GetMethodID(iap_class, "listItems", "(Ljava/lang/String;Lcom/defold/iap/IListProductsListener;J)V");
-        g_IAP.m_Buy = env->GetMethodID(iap_class, "buy", "(Ljava/lang/String;Lcom/defold/iap/IPurchaseListener;)V");
-        g_IAP.m_Restore = env->GetMethodID(iap_class, "restore", "(Lcom/defold/iap/IPurchaseListener;)V");
-        g_IAP.m_Stop = env->GetMethodID(iap_class, "stop", "()V");
-        g_IAP.m_ProcessPendingConsumables = env->GetMethodID(iap_class, "processPendingConsumables", "(Lcom/defold/iap/IPurchaseListener;)V");
-        g_IAP.m_FinishTransaction = env->GetMethodID(iap_class, "finishTransaction", "(Ljava/lang/String;Lcom/defold/iap/IPurchaseListener;)V");
-        g_IAP.m_AcknowledgeTransaction = env->GetMethodID(iap_class, "acknowledgeTransaction", "(Ljava/lang/String;Lcom/defold/iap/IPurchaseListener;)V");
-
-        jmethodID jni_constructor = env->GetMethodID(iap_class, "<init>", "(Landroid/app/Activity;Z)V");
-        g_IAP.m_IAP = env->NewGlobalRef(env->NewObject(iap_class, jni_constructor, dmGraphics::GetNativeAndroidActivity(), g_IAP.m_autoFinishTransactions));
-
-        jni_constructor = env->GetMethodID(iap_jni_class, "<init>", "()V");
-        g_IAP.m_IAPJNI = env->NewGlobalRef(env->NewObject(iap_jni_class, jni_constructor));
-
-        Detach();
+    g_IAP.m_ProviderId = PROVIDER_ID_GOOGLE;
+    if (!strcmp(provider, "Amazon")) {
+        g_IAP.m_ProviderId = PROVIDER_ID_AMAZON;
+        class_name = "com.defold.iap.IapAmazon";
     }
-    g_IAP.m_InitCount++;
+    else if (strcmp(provider, "GooglePlay")) {
+        dmLogWarning("Unknown IAP provider name [%s], defaulting to GooglePlay", provider);
+    }
+
+    jstring str_class_name = env->NewStringUTF(class_name);
+
+    jclass iap_class = (jclass)env->CallObjectMethod(cls, find_class, str_class_name);
+    env->DeleteLocalRef(str_class_name);
+
+    str_class_name = env->NewStringUTF("com.defold.iap.IapJNI");
+    jclass iap_jni_class = (jclass)env->CallObjectMethod(cls, find_class, str_class_name);
+    env->DeleteLocalRef(str_class_name);
+
+    g_IAP.m_List = env->GetMethodID(iap_class, "listItems", "(Ljava/lang/String;Lcom/defold/iap/IListProductsListener;J)V");
+    g_IAP.m_Buy = env->GetMethodID(iap_class, "buy", "(Ljava/lang/String;Lcom/defold/iap/IPurchaseListener;)V");
+    g_IAP.m_Restore = env->GetMethodID(iap_class, "restore", "(Lcom/defold/iap/IPurchaseListener;)V");
+    g_IAP.m_Stop = env->GetMethodID(iap_class, "stop", "()V");
+    g_IAP.m_ProcessPendingConsumables = env->GetMethodID(iap_class, "processPendingConsumables", "(Lcom/defold/iap/IPurchaseListener;)V");
+    g_IAP.m_FinishTransaction = env->GetMethodID(iap_class, "finishTransaction", "(Ljava/lang/String;Lcom/defold/iap/IPurchaseListener;)V");
+    g_IAP.m_AcknowledgeTransaction = env->GetMethodID(iap_class, "acknowledgeTransaction", "(Ljava/lang/String;Lcom/defold/iap/IPurchaseListener;)V");
+
+    jmethodID jni_constructor = env->GetMethodID(iap_class, "<init>", "(Landroid/app/Activity;Z)V");
+    g_IAP.m_IAP = env->NewGlobalRef(env->NewObject(iap_class, jni_constructor, dmGraphics::GetNativeAndroidActivity(), g_IAP.m_autoFinishTransactions));
+
+    jni_constructor = env->GetMethodID(iap_jni_class, "<init>", "()V");
+    g_IAP.m_IAPJNI = env->NewGlobalRef(env->NewObject(iap_jni_class, jni_constructor));
+
+    Detach();
 
     lua_State*L = params->m_L;
     int top = lua_gettop(L);
@@ -494,21 +488,18 @@ static dmExtension::Result UpdateIAP(dmExtension::Params* params)
 static dmExtension::Result FinalizeIAP(dmExtension::Params* params)
 {
     IAP_Queue_Destroy(&g_IAP.m_CommandQueue);
-    --g_IAP.m_InitCount;
 
     if (params->m_L == dmScript::GetCallbackLuaContext(g_IAP.m_Listener)) {
         dmScript::DestroyCallback(g_IAP.m_Listener);
         g_IAP.m_Listener = 0;
     }
 
-    if (g_IAP.m_InitCount == 0) {
-        JNIEnv* env = Attach();
-        env->CallVoidMethod(g_IAP.m_IAP, g_IAP.m_Stop);
-        env->DeleteGlobalRef(g_IAP.m_IAP);
-        env->DeleteGlobalRef(g_IAP.m_IAPJNI);
-        Detach();
-        g_IAP.m_IAP = NULL;
-    }
+    JNIEnv* env = Attach();
+    env->CallVoidMethod(g_IAP.m_IAP, g_IAP.m_Stop);
+    env->DeleteGlobalRef(g_IAP.m_IAP);
+    env->DeleteGlobalRef(g_IAP.m_IAPJNI);
+    Detach();
+    g_IAP.m_IAP = NULL;
     return dmExtension::RESULT_OK;
 }
 

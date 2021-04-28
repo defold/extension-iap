@@ -24,7 +24,6 @@ struct IAP
         memset(this, 0, sizeof(*this));
         m_AutoFinishTransactions = true;
     }
-    int                             m_InitCount;
     bool                            m_AutoFinishTransactions;
     NSMutableDictionary*            m_PendingTransactions;
     dmScript::LuaCallbackInfo*      m_Listener;
@@ -103,6 +102,7 @@ static void IAP_FreeTransaction(IAPTransaction* transaction)
 @interface SKProductsRequestDelegate : NSObject<SKProductsRequestDelegate>
     @property dmScript::LuaCallbackInfo* m_Callback;
     @property (assign) SKProductsRequest* m_Request;
+    @property int m_Version;
 @end
 
 @implementation SKProductsRequestDelegate
@@ -529,13 +529,8 @@ static const luaL_reg IAP_methods[] =
 
 static dmExtension::Result InitializeIAP(dmExtension::Params* params)
 {
-    // TODO: Life-cycle managaemnt is *budget*. No notion of "static initalization"
-    // Extend extension functionality with per system initalization?
-    if (g_IAP.m_InitCount == 0) {
-        g_IAP.m_AutoFinishTransactions = dmConfigFile::GetInt(params->m_ConfigFile, "iap.auto_finish_transactions", 1) == 1;
-        g_IAP.m_PendingTransactions = [[NSMutableDictionary alloc]initWithCapacity:2];
-    }
-    g_IAP.m_InitCount++;
+    g_IAP.m_AutoFinishTransactions = dmConfigFile::GetInt(params->m_ConfigFile, "iap.auto_finish_transactions", 1) == 1;
+    g_IAP.m_PendingTransactions = [[NSMutableDictionary alloc]initWithCapacity:2];
 
     IAP_Queue_Create(&g_IAP.m_CommandQueue);
     IAP_Queue_Create(&g_IAP.m_ObservableQueue);
@@ -590,26 +585,18 @@ static dmExtension::Result UpdateIAP(dmExtension::Params* params)
 
 static dmExtension::Result FinalizeIAP(dmExtension::Params* params)
 {
-    --g_IAP.m_InitCount;
+    dmScript::DestroyCallback(g_IAP.m_Listener);
+    g_IAP.m_Listener = 0;
 
-    // TODO: Should we support one listener per lua-state?
-    // Or just use a single lua-state...?
-    if (params->m_L == dmScript::GetCallbackLuaContext(g_IAP.m_Listener)) {
-        dmScript::DestroyCallback(g_IAP.m_Listener);
-        g_IAP.m_Listener = 0;
+    if (g_IAP.m_PendingTransactions) {
+         [g_IAP.m_PendingTransactions release];
+         g_IAP.m_PendingTransactions = 0;
     }
 
-    if (g_IAP.m_InitCount == 0) {
-        if (g_IAP.m_PendingTransactions) {
-             [g_IAP.m_PendingTransactions release];
-             g_IAP.m_PendingTransactions = 0;
-        }
-
-        if (g_IAP.m_Observer) {
-            [[SKPaymentQueue defaultQueue] removeTransactionObserver: g_IAP.m_Observer];
-            [g_IAP.m_Observer release];
-            g_IAP.m_Observer = 0;
-        }
+    if (g_IAP.m_Observer) {
+        [[SKPaymentQueue defaultQueue] removeTransactionObserver: g_IAP.m_Observer];
+        [g_IAP.m_Observer release];
+        g_IAP.m_Observer = 0;
     }
 
     IAP_Queue_Destroy(&g_IAP.m_CommandQueue);
