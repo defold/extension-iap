@@ -25,6 +25,7 @@ struct IAP
         m_AutoFinishTransactions = true;
     }
     int                             m_InitCount;
+    int                             m_Version;
     bool                            m_AutoFinishTransactions;
     NSMutableDictionary*            m_PendingTransactions;
     dmScript::LuaCallbackInfo*      m_Listener;
@@ -103,10 +104,16 @@ static void IAP_FreeTransaction(IAPTransaction* transaction)
 @interface SKProductsRequestDelegate : NSObject<SKProductsRequestDelegate>
     @property dmScript::LuaCallbackInfo* m_Callback;
     @property (assign) SKProductsRequest* m_Request;
+    @property int m_Version;
 @end
 
 @implementation SKProductsRequestDelegate
 - (void)productsRequest:(SKProductsRequest *)request didReceiveResponse:(SKProductsResponse *)response{
+
+    if (self.m_Version != g_IAP.m_Version) {
+        dmLogWarning("Received products but the extension has been restarted")
+        return;
+    }
 
     if (!dmScript::IsCallbackValid(self.m_Callback)) {
         dmLogError("No callback set");
@@ -409,6 +416,7 @@ static int IAP_List(lua_State* L)
 
     delegate.m_Callback = dmScript::CreateCallback(L, 2);
     delegate.m_Request = products_request;
+    delegate.m_Version = g_IAP.m_Version;
     products_request.delegate = delegate;
     [products_request start];
 
@@ -536,6 +544,7 @@ static dmExtension::Result InitializeIAP(dmExtension::Params* params)
         g_IAP.m_PendingTransactions = [[NSMutableDictionary alloc]initWithCapacity:2];
     }
     g_IAP.m_InitCount++;
+    g_IAP.m_Version++;
 
     IAP_Queue_Create(&g_IAP.m_CommandQueue);
     IAP_Queue_Create(&g_IAP.m_ObservableQueue);
