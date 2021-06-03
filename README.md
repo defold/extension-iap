@@ -1,3 +1,5 @@
+[![Actions Status Alpha](https://github.com/defold/extension-iap/actions/workflows/bob.yml/badge.svg)](https://github.com/defold/extension-iap/actions)
+
 # In-app purchase extension for Defold
 
 Defold [native extension](https://www.defold.com/manuals/extensions/) which provides access to In-app purchase functionality on iOS, Android (Google Play and Amazon) and Facebook Canvas platforms.
