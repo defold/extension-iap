@@ -11,6 +11,7 @@ import java.util.concurrent.BlockingQueue;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONArray;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -173,9 +174,13 @@ public class IapAmazon implements PurchasingListener {
         if (productDataResponse.getRequestStatus() != ProductDataResponse.RequestStatus.SUCCESSFUL) {
             listener.onProductsResult(IapJNI.BILLING_RESPONSE_RESULT_ERROR, null, commadPtr);
         } else {
+            for (final String s : productDataResponse.getUnavailableSkus()) {
+                Log.v(TAG, "Unavailable SKU: " + s);
+            }
+
             Map<String, Product> products = productDataResponse.getProductData();
             try {
-                JSONObject data = new JSONObject();
+                JSONArray data = new JSONArray();
                 for (Map.Entry<String, Product> entry : products.entrySet()) {
                     String key = entry.getKey();
                     Product product = entry.getValue();
@@ -189,7 +194,7 @@ public class IapAmazon implements PurchasingListener {
                         // Based on return values from getPrice: https://developer.amazon.com/public/binaries/content/assets/javadoc/in-app-purchasing-api/com/amazon/inapp/purchasing/item.html
                         item.put("price", priceString.replaceAll("[^0-9.,]", ""));
                     }
-                    data.put(key, item);
+                    data.put(item);
                 }
                 listener.onProductsResult(IapJNI.BILLING_RESPONSE_RESULT_OK, data.toString(), commadPtr);
             } catch (JSONException e) {
