@@ -113,7 +113,7 @@ void IAP_Queue_Push(IAPCommandQueue* queue, IAPCommand* cmd)
 
     if(queue->m_Commands.Full())
     {
-        queue->m_Commands.OffsetCapacity(2);
+        queue->m_Commands.OffsetCapacity(8);
     }
     queue->m_Commands.Push(*cmd);
 }
