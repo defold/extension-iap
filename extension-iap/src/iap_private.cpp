@@ -121,12 +121,13 @@ void IAP_Queue_Push(IAPCommandQueue* queue, IAPCommand* cmd)
 void IAP_Queue_Flush(IAPCommandQueue* queue, IAPCommandFn fn, void* ctx)
 {
     assert(fn != 0);
+
+    DM_MUTEX_SCOPED_LOCK(queue->m_Mutex);
+
     if (queue->m_Commands.Empty())
     {
         return;
     }
-
-    DM_MUTEX_SCOPED_LOCK(queue->m_Mutex);
 
     for(uint32_t i = 0; i != queue->m_Commands.Size(); ++i)
     {
