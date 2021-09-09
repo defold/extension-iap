@@ -226,6 +226,10 @@
           type: string
           desc: Apple only[icon:apple]. The original transaction. This field is only set when `state` is `TRANS_STATE_RESTORED`.
 
+        - name: original_json
+          type: string
+          desc: Android only[icon:android]. The purchase order details in JSON format.
+
         - name: signature
           type: string
           desc: Google Play only[icon:googleplay]. A string containing the signature of the purchase data that was signed with the private key of the developer.
