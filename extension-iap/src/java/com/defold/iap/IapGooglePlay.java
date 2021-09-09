@@ -102,6 +102,7 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
             p.put("date", toISO8601(new Date(purchase.getPurchaseTime())));
             p.put("receipt", purchase.getPurchaseToken());
             p.put("signature", purchase.getSignature());
+            p.put("original_json", purchase.getOriginalJson());
         }
         catch (JSONException e) {
             Log.wtf(TAG, "Failed to convert purchase", e);
