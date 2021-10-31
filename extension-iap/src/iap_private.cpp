@@ -122,18 +122,21 @@ void IAP_Queue_Flush(IAPCommandQueue* queue, IAPCommandFn fn, void* ctx)
 {
     assert(fn != 0);
 
-    DM_MUTEX_SCOPED_LOCK(queue->m_Mutex);
-
     if (queue->m_Commands.Empty())
     {
         return;
     }
 
-    for(uint32_t i = 0; i != queue->m_Commands.Size(); ++i)
+    dmArray<IAPCommand> tmp;
     {
-        fn(&queue->m_Commands[i], ctx);
+        DM_MUTEX_SCOPED_LOCK(queue->m_Mutex);
+        tmp.Swap(queue->m_Commands);
     }
-    queue->m_Commands.SetSize(0);
+
+    for(uint32_t i = 0; i != tmp.Size(); ++i)
+    {
+        fn(&tmp[i], ctx);
+    }
 }
 
 #endif // DM_PLATFORM_HTML5 || DM_PLATFORM_ANDROID || DM_PLATFORM_IOS
