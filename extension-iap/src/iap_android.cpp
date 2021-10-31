@@ -1,26 +1,14 @@
 #if defined(DM_PLATFORM_ANDROID)
 
 #include <dmsdk/sdk.h>
-#include <jni.h>
+#include <dmsdk/dlib/android.h>
+
 #include <stdlib.h>
 #include <unistd.h>
 #include "iap.h"
 #include "iap_private.h"
 
 #define LIB_NAME "iap"
-
-static JNIEnv* Attach()
-{
-    JNIEnv* env;
-    dmGraphics::GetNativeAndroidJavaVM()->AttachCurrentThread(&env, NULL);
-    return env;
-}
-
-static void Detach()
-{
-    dmGraphics::GetNativeAndroidJavaVM()->DetachCurrentThread();
-}
-
 
 struct IAP
 {
@@ -52,9 +40,9 @@ static IAP g_IAP;
 
 static int IAP_ProcessPendingTransactions(lua_State* L)
 {
-    JNIEnv* env = Attach();
+    dmAndroid::ThreadAttacher threadAttacher;
+    JNIEnv* env = threadAttacher.GetEnv();
     env->CallVoidMethod(g_IAP.m_IAP, g_IAP.m_ProcessPendingConsumables, g_IAP.m_IAPJNI);
-    Detach();
 
     return 0;
 }
@@ -69,7 +57,8 @@ static int IAP_List(lua_State* L)
         return 0;
     }
 
-    JNIEnv* env = Attach();
+    dmAndroid::ThreadAttacher threadAttacher;
+    JNIEnv* env = threadAttacher.GetEnv();
     IAPCommand* cmd = new IAPCommand;
     cmd->m_Callback = dmScript::CreateCallback(L, 2);
     cmd->m_Command = IAP_PRODUCT_RESULT;
@@ -77,7 +66,6 @@ static int IAP_List(lua_State* L)
     jstring products = env->NewStringUTF(buf);
     env->CallVoidMethod(g_IAP.m_IAP, g_IAP.m_List, products, g_IAP.m_IAPJNI, (jlong)cmd);
     env->DeleteLocalRef(products);
-    Detach();
 
     free(buf);
     assert(top == lua_gettop(L));
@@ -90,11 +78,11 @@ static int IAP_Buy(lua_State* L)
 
     const char* id = luaL_checkstring(L, 1);
 
-    JNIEnv* env = Attach();
+    dmAndroid::ThreadAttacher threadAttacher;
+    JNIEnv* env = threadAttacher.GetEnv();
     jstring ids = env->NewStringUTF(id);
     env->CallVoidMethod(g_IAP.m_IAP, g_IAP.m_Buy, ids, g_IAP.m_IAPJNI);
     env->DeleteLocalRef(ids);
-    Detach();
 
     assert(top == lua_gettop(L));
     return 0;
@@ -135,11 +123,11 @@ static int IAP_Finish(lua_State* L)
         const char * receipt = lua_tostring(L, -1);
         lua_pop(L, 1);
 
-        JNIEnv* env = Attach();
+        dmAndroid::ThreadAttacher threadAttacher;
+        JNIEnv* env = threadAttacher.GetEnv();
         jstring receiptUTF = env->NewStringUTF(receipt);
         env->CallVoidMethod(g_IAP.m_IAP, g_IAP.m_FinishTransaction, receiptUTF, g_IAP.m_IAPJNI);
         env->DeleteLocalRef(receiptUTF);
-        Detach();
     }
 
     assert(top == lua_gettop(L));
@@ -175,11 +163,11 @@ static int IAP_Acknowledge(lua_State* L)
         const char * receipt = lua_tostring(L, -1);
         lua_pop(L, 1);
 
-        JNIEnv* env = Attach();
+        dmAndroid::ThreadAttacher threadAttacher;
+        JNIEnv* env = threadAttacher.GetEnv();
         jstring receiptUTF = env->NewStringUTF(receipt);
         env->CallVoidMethod(g_IAP.m_IAP, g_IAP.m_AcknowledgeTransaction, receiptUTF, g_IAP.m_IAPJNI);
         env->DeleteLocalRef(receiptUTF);
-        Detach();
     }
 
     assert(top == lua_gettop(L));
@@ -192,9 +180,9 @@ static int IAP_Restore(lua_State* L)
     // See iap_ios.mm
 
     int top = lua_gettop(L);
-    JNIEnv* env = Attach();
+    dmAndroid::ThreadAttacher threadAttacher;
+    JNIEnv* env = threadAttacher.GetEnv();
     env->CallVoidMethod(g_IAP.m_IAP, g_IAP.m_Restore, g_IAP.m_IAPJNI);
-    Detach();
 
     assert(top == lua_gettop(L));
 
@@ -215,9 +203,9 @@ static int IAP_SetListener(lua_State* L)
 
     // On first set listener, trigger process old ones.
     if (!had_previous) {
-        JNIEnv* env = Attach();
+        dmAndroid::ThreadAttacher threadAttacher;
+        JNIEnv* env = threadAttacher.GetEnv();
         env->CallVoidMethod(g_IAP.m_IAP, g_IAP.m_ProcessPendingConsumables, g_IAP.m_IAPJNI);
-        Detach();
     }
     return 0;
 }
@@ -402,13 +390,8 @@ static dmExtension::Result InitializeIAP(dmExtension::Params* params)
 
     g_IAP.m_autoFinishTransactions = dmConfigFile::GetInt(params->m_ConfigFile, "iap.auto_finish_transactions", 1) == 1;
 
-    JNIEnv* env = Attach();
-
-    jclass activity_class = env->FindClass("android/app/NativeActivity");
-    jmethodID get_class_loader = env->GetMethodID(activity_class,"getClassLoader", "()Ljava/lang/ClassLoader;");
-    jobject cls = env->CallObjectMethod(dmGraphics::GetNativeAndroidActivity(), get_class_loader);
-    jclass class_loader = env->FindClass("java/lang/ClassLoader");
-    jmethodID find_class = env->GetMethodID(class_loader, "loadClass", "(Ljava/lang/String;)Ljava/lang/Class;");
+    dmAndroid::ThreadAttacher threadAttacher;
+    JNIEnv* env = threadAttacher.GetEnv();
 
     const char* provider = dmConfigFile::GetString(params->m_ConfigFile, "android.iap_provider", "GooglePlay");
     const char* class_name = "com.defold.iap.IapGooglePlay";
@@ -422,14 +405,8 @@ static dmExtension::Result InitializeIAP(dmExtension::Params* params)
         dmLogWarning("Unknown IAP provider name [%s], defaulting to GooglePlay", provider);
     }
 
-    jstring str_class_name = env->NewStringUTF(class_name);
-
-    jclass iap_class = (jclass)env->CallObjectMethod(cls, find_class, str_class_name);
-    env->DeleteLocalRef(str_class_name);
-
-    str_class_name = env->NewStringUTF("com.defold.iap.IapJNI");
-    jclass iap_jni_class = (jclass)env->CallObjectMethod(cls, find_class, str_class_name);
-    env->DeleteLocalRef(str_class_name);
+    jclass iap_class = dmAndroid::LoadClass(env, class_name);
+    jclass iap_jni_class = dmAndroid::LoadClass(env, "com.defold.iap.IapJNI");
 
     g_IAP.m_List = env->GetMethodID(iap_class, "listItems", "(Ljava/lang/String;Lcom/defold/iap/IListProductsListener;J)V");
     g_IAP.m_Buy = env->GetMethodID(iap_class, "buy", "(Ljava/lang/String;Lcom/defold/iap/IPurchaseListener;)V");
@@ -440,12 +417,10 @@ static dmExtension::Result InitializeIAP(dmExtension::Params* params)
     g_IAP.m_AcknowledgeTransaction = env->GetMethodID(iap_class, "acknowledgeTransaction", "(Ljava/lang/String;Lcom/defold/iap/IPurchaseListener;)V");
 
     jmethodID jni_constructor = env->GetMethodID(iap_class, "<init>", "(Landroid/app/Activity;Z)V");
-    g_IAP.m_IAP = env->NewGlobalRef(env->NewObject(iap_class, jni_constructor, dmGraphics::GetNativeAndroidActivity(), g_IAP.m_autoFinishTransactions));
+    g_IAP.m_IAP = env->NewGlobalRef(env->NewObject(iap_class, jni_constructor, threadAttacher.GetActivity()->clazz, g_IAP.m_autoFinishTransactions));
 
     jni_constructor = env->GetMethodID(iap_jni_class, "<init>", "()V");
     g_IAP.m_IAPJNI = env->NewGlobalRef(env->NewObject(iap_jni_class, jni_constructor));
-
-    Detach();
 
     lua_State*L = params->m_L;
     int top = lua_gettop(L);
@@ -494,11 +469,11 @@ static dmExtension::Result FinalizeIAP(dmExtension::Params* params)
         g_IAP.m_Listener = 0;
     }
 
-    JNIEnv* env = Attach();
+    dmAndroid::ThreadAttacher threadAttacher;
+    JNIEnv* env = threadAttacher.GetEnv();
     env->CallVoidMethod(g_IAP.m_IAP, g_IAP.m_Stop);
     env->DeleteGlobalRef(g_IAP.m_IAP);
     env->DeleteGlobalRef(g_IAP.m_IAPJNI);
-    Detach();
     g_IAP.m_IAP = NULL;
     return dmExtension::RESULT_OK;
 }
