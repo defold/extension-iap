@@ -4,9 +4,9 @@
 <uses-sdk android:minSdkVersion="{{android.minimum_sdk_version}}" android:targetSdkVersion="{{android.target_sdk_version}}" />
     <application>
         <!-- For Amazon IAP -->
-        <receiver android:exported="true" android:name = "com.amazon.device.iap.ResponseReceiver" android:permission = "com.amazon.inapp.purchasing.Permission.NOTIFY" >
+        <receiver android:exported="true" android:name="com.amazon.device.iap.ResponseReceiver" android:permission="com.amazon.inapp.purchasing.Permission.NOTIFY">
             <intent-filter>
-                <action android:name = "com.amazon.inapp.purchasing.NOTIFY" />
+                <action android:name="com.amazon.inapp.purchasing.NOTIFY" />
             </intent-filter>
         </receiver>
     </application>
