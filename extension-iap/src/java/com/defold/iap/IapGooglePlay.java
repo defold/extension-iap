@@ -19,26 +19,31 @@ import android.util.Log;
 
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClient.BillingResponseCode;
-import com.android.billingclient.api.BillingClient.SkuType;
+import com.android.billingclient.api.BillingClient.ProductType;
 import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.Purchase;
-import com.android.billingclient.api.Purchase.PurchasesResult;
 import com.android.billingclient.api.Purchase.PurchaseState;
-import com.android.billingclient.api.SkuDetails;
+import com.android.billingclient.api.ProductDetails;
+import com.android.billingclient.api.ProductDetails.OneTimePurchaseOfferDetails;
+import com.android.billingclient.api.ProductDetails.SubscriptionOfferDetails;
 import com.android.billingclient.api.ConsumeParams;
 import com.android.billingclient.api.BillingFlowParams;
-import com.android.billingclient.api.SkuDetailsParams;
+import com.android.billingclient.api.BillingFlowParams.ProductDetailsParams;
+import com.android.billingclient.api.QueryPurchasesParams;
+import com.android.billingclient.api.QueryProductDetailsParams;
+import com.android.billingclient.api.QueryProductDetailsParams.Product;
 import com.android.billingclient.api.AcknowledgePurchaseParams;
 import com.android.billingclient.api.PurchasesUpdatedListener;
 import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.ConsumeResponseListener;
-import com.android.billingclient.api.SkuDetailsResponseListener;
+import com.android.billingclient.api.PurchasesResponseListener;
+import com.android.billingclient.api.ProductDetailsResponseListener;
 import com.android.billingclient.api.AcknowledgePurchaseResponseListener;
 
 public class IapGooglePlay implements PurchasesUpdatedListener {
     public static final String TAG = "IapGooglePlay";
 
-    private Map<String, SkuDetails> products = new HashMap<String, SkuDetails>();
+    private Map<String, ProductDetails> products = new HashMap<String, ProductDetails>();
     private BillingClient billingClient;
     private IPurchaseListener purchaseListener;
     private boolean autoFinishTransactions;
@@ -110,16 +115,24 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
         return p.toString();
     }
 
-    private JSONObject convertSkuDetails(SkuDetails skuDetails) {
+    private JSONObject convertProductDetails(ProductDetails productDetails) {
         JSONObject p = new JSONObject();
         try {
-            p.put("price_string", skuDetails.getPrice());
-            p.put("ident", skuDetails.getSku());
-            p.put("currency_code", skuDetails.getPriceCurrencyCode());
-            p.put("price", skuDetails.getPriceAmountMicros() * 0.000001);
+            p.put("ident", productDetails.getProductId());
+
+            if (productDetails.getProductType() == ProductType.INAPP) {
+                OneTimePurchaseOfferDetails offerDetails = productDetails.getOneTimePurchaseOfferDetails();
+                p.put("price_string", offerDetails.getFormattedPrice());
+                p.put("currency_code", offerDetails.getPriceCurrencyCode());
+                p.put("price", offerDetails.getPriceAmountMicros() * 0.000001);
+            }
+            else if (productDetails.getProductType() == ProductType.INAPP) {
+                List<SubscriptionOfferDetails> subscriptionDetails = productDetails.getSubscriptionOfferDetails();
+
+            }
         }
         catch(JSONException e) {
-            Log.wtf(TAG, "Failed to convert sku details", e);
+            Log.wtf(TAG, "Failed to convert product details", e);
         }
         return p;
     }
@@ -185,21 +198,6 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
     }
 
     /**
-     * Query Google Play for purchases done within the app.
-     */
-    private List<Purchase> queryPurchases(final String type) {
-        PurchasesResult result = billingClient.queryPurchases(type);
-        List<Purchase> purchases = result.getPurchasesList();
-        if (purchases == null) {
-            purchases = new ArrayList<Purchase>();
-        }
-        if (result.getBillingResult().getResponseCode() != BillingResponseCode.OK) {
-            Log.e(TAG, "Unable to query pending purchases: " + result.getBillingResult().getDebugMessage());
-        }
-        return purchases;
-    }
-
-    /**
      * This method is called either explicitly from Lua or from extension code
      * when "set_listener()" is called from Lua.
      * The method will query purchases and try to handle them one by one (either
@@ -207,12 +205,32 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
      */
     public void processPendingConsumables(final IPurchaseListener purchaseListener) {
         Log.d(TAG, "processPendingConsumables()");
-        List<Purchase> purchasesList = new ArrayList<Purchase>();
-        purchasesList.addAll(queryPurchases(SkuType.INAPP));
-        purchasesList.addAll(queryPurchases(SkuType.SUBS));
-        for (Purchase purchase : purchasesList) {
-            handlePurchase(purchase, purchaseListener);
-        }
+
+
+        PurchasesResponseListener purchasesListener = new PurchasesResponseListener() {
+            private List<Purchase> allPurchases = new ArrayList<Purchase>();
+            private int queries = 2;
+
+            @Override
+            public void onQueryPurchasesResponse(BillingResult billingResult, List<Purchase> purchases) {
+                if (billingResult.getResponseCode() != BillingResponseCode.OK) {
+                    Log.e(TAG, "Unable to query pending purchases: " + billingResult.getDebugMessage());
+                }
+                if (purchases != null) {
+                    allPurchases.addAll(purchases);
+                }
+                // we're finished when we have queried for both in-app and subs
+                queries--;
+                if (queries == 0) {
+                    for (Purchase purchase : allPurchases) {
+                        handlePurchase(purchase, purchaseListener);
+                    }
+                }
+            }
+        };
+
+        billingClient.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(ProductType.INAPP).build(), purchasesListener);
+        billingClient.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(ProductType.SUBS).build(), purchasesListener);
     }
 
     /**
@@ -310,11 +328,14 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
      * Buy a product. This method stores the listener and uses it in the
      * onPurchasesUpdated() callback.
      */
-    private void buyProduct(SkuDetails sku, final IPurchaseListener purchaseListener) {
+    private void buyProduct(ProductDetails pd, final IPurchaseListener purchaseListener) {
         this.purchaseListener = purchaseListener;
 
+        List<ProductDetailsParams> productDetailsParams = new ArrayList();
+        productDetailsParams.add(ProductDetailsParams.newBuilder().setProductDetails(pd).build());
+
         BillingFlowParams billingFlowParams = BillingFlowParams.newBuilder()
-            .setSkuDetails(sku)
+            .setProductDetailsParamsList(productDetailsParams)
             .build();
 
         BillingResult billingResult = billingClient.launchBillingFlow(this.activity, billingFlowParams);
@@ -330,18 +351,18 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
     public void buy(final String product, final IPurchaseListener purchaseListener) {
         Log.d(TAG, "buy()");
 
-        SkuDetails sku = this.products.get(product);
-        if (sku != null) {
-            buyProduct(sku, purchaseListener);
+        ProductDetails pd = this.products.get(product);
+        if (pd != null) {
+            buyProduct(pd, purchaseListener);
         }
         else {
-            List<String> skuList = new ArrayList<String>();
-            skuList.add(product);
-            querySkuDetailsAsync(skuList, new SkuDetailsResponseListener() {
+            List<String> productList = new ArrayList<String>();
+            productList.add(product);
+            queryProductDetailsAsync(productList, new ProductDetailsResponseListener() {
                 @Override
-                public void onSkuDetailsResponse(BillingResult billingResult, List<SkuDetails> skuDetailsList) {
-                    if (billingResult.getResponseCode() == BillingResponseCode.OK && (skuDetailsList != null) && !skuDetailsList.isEmpty()) {
-                        buyProduct(skuDetailsList.get(0), purchaseListener);
+                public void onProductDetailsResponse(BillingResult billingResult, List<ProductDetails> productDetailsList) {
+                    if (billingResult.getResponseCode() == BillingResponseCode.OK && (productDetailsList != null) && !productDetailsList.isEmpty()) {
+                        buyProduct(productDetailsList.get(0), purchaseListener);
                     }
                     else {
                         Log.e(TAG, "Unable to get product details before buying: " + billingResult.getDebugMessage());
@@ -356,30 +377,40 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
      * Get details for a list of products. The products can be a mix of
      * in-app products and subscriptions.
      */
-    private void querySkuDetailsAsync(final List<String> skuList, final SkuDetailsResponseListener listener) {
-        SkuDetailsResponseListener detailsListener = new SkuDetailsResponseListener() {
-            private List<SkuDetails> allSkuDetails = new ArrayList<SkuDetails>();
+    private void queryProductDetailsAsync(final List<String> productList, final ProductDetailsResponseListener listener) {
+        ProductDetailsResponseListener detailsListener = new ProductDetailsResponseListener() {
+            private List<ProductDetails> allProductDetails = new ArrayList<ProductDetails>();
             private int queries = 2;
 
             @Override
-            public void onSkuDetailsResponse(BillingResult billingResult, List<SkuDetails> skuDetails) {
-                if (skuDetails != null) {
-                    // cache skus (cache will be used to speed up buying)
-                    for (SkuDetails sd : skuDetails) {
-                        IapGooglePlay.this.products.put(sd.getSku(), sd);
+            public void onProductDetailsResponse(BillingResult billingResult, List<ProductDetails> productDetails) {
+                if (productDetails != null) {
+                    // cache products (cache will be used to speed up buying)
+                    for (ProductDetails pd : productDetails) {
+                        IapGooglePlay.this.products.put(pd.getProductId(), pd);
                     }
-                    // add to list of all sku details
-                    allSkuDetails.addAll(skuDetails);
+                    // add to list of all product details
+                    allProductDetails.addAll(productDetails);
                 }
                 // we're finished when we have queried for both in-app and subs
                 queries--;
                 if (queries == 0) {
-                    listener.onSkuDetailsResponse(billingResult, allSkuDetails);
+                    listener.onProductDetailsResponse(billingResult, allProductDetails);
                 }
             }
         };
-        billingClient.querySkuDetailsAsync(SkuDetailsParams.newBuilder().setSkusList(skuList).setType(SkuType.INAPP).build(), detailsListener);
-        billingClient.querySkuDetailsAsync(SkuDetailsParams.newBuilder().setSkusList(skuList).setType(SkuType.SUBS).build(), detailsListener);
+
+        List<Product> inappProductList = new ArrayList();
+        List<Product> subsProductList = new ArrayList();
+        for (String productId : productList) {
+            inappProductList.add(Product.newBuilder().setProductId(productId).setProductType(ProductType.INAPP).build());
+            subsProductList.add(Product.newBuilder().setProductId(productId).setProductType(ProductType.SUBS).build());
+        }
+        QueryProductDetailsParams inappParams = QueryProductDetailsParams.newBuilder().setProductList(inappProductList).build();
+        QueryProductDetailsParams subsParams = QueryProductDetailsParams.newBuilder().setProductList(subsProductList).build();
+
+        billingClient.queryProductDetailsAsync(inappParams, detailsListener);
+        billingClient.queryProductDetailsAsync(subsParams, detailsListener);
     }
 
     /**
@@ -388,21 +419,21 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
     public void listItems(final String products, final IListProductsListener productsListener, final long commandPtr) {
         Log.d(TAG, "listItems()");
 
-        // create list of skus from comma separated string
-        List<String> skuList = new ArrayList<String>();
+        // create list of product ids from comma separated string
+        List<String> productList = new ArrayList<String>();
         for (String p : products.split(",")) {
             if (p.trim().length() > 0) {
-                skuList.add(p);
+                productList.add(p);
             }
         }
 
-        querySkuDetailsAsync(skuList, new SkuDetailsResponseListener() {
+        queryProductDetailsAsync(productList, new ProductDetailsResponseListener() {
             @Override
-            public void onSkuDetailsResponse(BillingResult billingResult, List<SkuDetails> skuDetails) {
+            public void onProductDetailsResponse(BillingResult billingResult, List<ProductDetails> productDetails) {
                 JSONArray a = new JSONArray();
                 if (billingResult.getResponseCode() == BillingResponseCode.OK) {
-                    for (SkuDetails sd : skuDetails) {
-                        a.put(convertSkuDetails(sd));
+                    for (ProductDetails pd : productDetails) {
+                        a.put(convertProductDetails(pd));
                     }
                 }
                 else {
