@@ -21,7 +21,7 @@ struct DM_ALIGNED(16) IAPCommand
     // Used for storing eventual callback info (if needed)
     dmScript::LuaCallbackInfo* m_Callback;
 
-    // THe actual command payload
+    // The actual command payload
     int32_t  	m_Command;
     int32_t  	m_ResponseCode;
     void*    	m_Data;

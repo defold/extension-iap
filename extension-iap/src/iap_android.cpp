@@ -40,6 +40,8 @@ static IAP g_IAP;
 
 static int IAP_ProcessPendingTransactions(lua_State* L)
 {
+    DM_LUA_STACK_CHECK(L, 0);
+
     dmAndroid::ThreadAttacher threadAttacher;
     JNIEnv* env = threadAttacher.GetEnv();
     env->CallVoidMethod(g_IAP.m_IAP, g_IAP.m_ProcessPendingConsumables, g_IAP.m_IAPJNI);
@@ -49,11 +51,11 @@ static int IAP_ProcessPendingTransactions(lua_State* L)
 
 static int IAP_List(lua_State* L)
 {
-    int top = lua_gettop(L);
+    DM_LUA_STACK_CHECK(L, 0);
+
     char* buf = IAP_List_CreateBuffer(L);
     if( buf == 0 )
     {
-        assert(top == lua_gettop(L));
         return 0;
     }
 
@@ -68,35 +70,45 @@ static int IAP_List(lua_State* L)
     env->DeleteLocalRef(products);
 
     free(buf);
-    assert(top == lua_gettop(L));
     return 0;
 }
 
 static int IAP_Buy(lua_State* L)
 {
-    int top = lua_gettop(L);
+    DM_LUA_STACK_CHECK(L, 0);
 
+    int top = lua_gettop(L);
     const char* id = luaL_checkstring(L, 1);
+    const char* token = "";
+
+    if (top >= 2 && lua_istable(L, 2)) {
+        luaL_checktype(L, 2, LUA_TTABLE);
+        lua_pushvalue(L, 2);
+        lua_getfield(L, -1, "token");
+        token = lua_isnil(L, -1) ? "" : luaL_checkstring(L, -1);
+        lua_pop(L, 2);
+    }
 
     dmAndroid::ThreadAttacher threadAttacher;
     JNIEnv* env = threadAttacher.GetEnv();
     jstring ids = env->NewStringUTF(id);
-    env->CallVoidMethod(g_IAP.m_IAP, g_IAP.m_Buy, ids, g_IAP.m_IAPJNI);
+    jstring tokens = env->NewStringUTF(token);
+    env->CallVoidMethod(g_IAP.m_IAP, g_IAP.m_Buy, ids, tokens, g_IAP.m_IAPJNI);
     env->DeleteLocalRef(ids);
+    env->DeleteLocalRef(tokens);
 
-    assert(top == lua_gettop(L));
     return 0;
 }
 
 static int IAP_Finish(lua_State* L)
 {
+    DM_LUA_STACK_CHECK(L, 0);
+
     if(g_IAP.m_autoFinishTransactions)
     {
         dmLogWarning("Calling iap.finish when autofinish transactions is enabled. Ignored.");
         return 0;
     }
-
-    int top = lua_gettop(L);
 
     luaL_checktype(L, 1, LUA_TTABLE);
 
@@ -107,7 +119,6 @@ static int IAP_Finish(lua_State* L)
         {
             dmLogError("Invalid transaction state (must be iap.TRANS_STATE_PURCHASED).");
             lua_pop(L, 1);
-            assert(top == lua_gettop(L));
             return 0;
         }
     }
@@ -130,13 +141,12 @@ static int IAP_Finish(lua_State* L)
         env->DeleteLocalRef(receiptUTF);
     }
 
-    assert(top == lua_gettop(L));
     return 0;
 }
 
 static int IAP_Acknowledge(lua_State* L)
 {
-    int top = lua_gettop(L);
+    DM_LUA_STACK_CHECK(L, 0);
 
     luaL_checktype(L, 1, LUA_TTABLE);
 
@@ -147,7 +157,6 @@ static int IAP_Acknowledge(lua_State* L)
         {
             dmLogError("Invalid transaction state (must be iap.TRANS_STATE_PURCHASED).");
             lua_pop(L, 1);
-            assert(top == lua_gettop(L));
             return 0;
         }
     }
@@ -170,7 +179,6 @@ static int IAP_Acknowledge(lua_State* L)
         env->DeleteLocalRef(receiptUTF);
     }
 
-    assert(top == lua_gettop(L));
     return 0;
 }
 
@@ -178,13 +186,11 @@ static int IAP_Restore(lua_State* L)
 {
     // TODO: Missing callback here for completion/error
     // See iap_ios.mm
+    DM_LUA_STACK_CHECK(L, 1);
 
-    int top = lua_gettop(L);
     dmAndroid::ThreadAttacher threadAttacher;
     JNIEnv* env = threadAttacher.GetEnv();
     env->CallVoidMethod(g_IAP.m_IAP, g_IAP.m_Restore, g_IAP.m_IAPJNI);
-
-    assert(top == lua_gettop(L));
 
     lua_pushboolean(L, 1);
     return 1;
@@ -192,6 +198,8 @@ static int IAP_Restore(lua_State* L)
 
 static int IAP_SetListener(lua_State* L)
 {
+    DM_LUA_STACK_CHECK(L, 0);
+
     IAP* iap = &g_IAP;
 
     bool had_previous = iap->m_Listener != 0;
@@ -212,6 +220,8 @@ static int IAP_SetListener(lua_State* L)
 
 static int IAP_GetProviderId(lua_State* L)
 {
+    DM_LUA_STACK_CHECK(L, 1);
+
     lua_pushinteger(L, g_IAP.m_ProviderId);
     return 1;
 }
@@ -409,7 +419,7 @@ static dmExtension::Result InitializeIAP(dmExtension::Params* params)
     jclass iap_jni_class = dmAndroid::LoadClass(env, "com.defold.iap.IapJNI");
 
     g_IAP.m_List = env->GetMethodID(iap_class, "listItems", "(Ljava/lang/String;Lcom/defold/iap/IListProductsListener;J)V");
-    g_IAP.m_Buy = env->GetMethodID(iap_class, "buy", "(Ljava/lang/String;Lcom/defold/iap/IPurchaseListener;)V");
+    g_IAP.m_Buy = env->GetMethodID(iap_class, "buy", "(Ljava/lang/String;Ljava/lang/String;Lcom/defold/iap/IPurchaseListener;)V");
     g_IAP.m_Restore = env->GetMethodID(iap_class, "restore", "(Lcom/defold/iap/IPurchaseListener;)V");
     g_IAP.m_Stop = env->GetMethodID(iap_class, "stop", "()V");
     g_IAP.m_ProcessPendingConsumables = env->GetMethodID(iap_class, "processPendingConsumables", "(Lcom/defold/iap/IPurchaseListener;)V");
