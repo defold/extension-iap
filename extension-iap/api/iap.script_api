@@ -181,7 +181,7 @@
 
             - name: recurrence_mode
               type: string
-              desc: FININTE, INFINITE or NONE
+              desc: FINITE, INFINITE or NONE
 
       - name: error
         type: table
