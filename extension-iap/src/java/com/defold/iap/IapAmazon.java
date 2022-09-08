@@ -81,7 +81,7 @@ public class IapAmazon implements PurchasingListener {
         }
     }
 
-    public void buy(final String product, final IPurchaseListener listener) {
+    public void buy(final String product, final String token, final IPurchaseListener listener) {
         synchronized (purchaseListeners) {
             RequestId req = PurchasingService.purchase(product);
             if (req != null) {
