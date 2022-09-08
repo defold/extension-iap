@@ -142,6 +142,8 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
         JSONObject p = new JSONObject();
         try {
             p.put("ident", productDetails.getProductId());
+            p.put("title", productDetails.getTitle());
+            p.put("description", productDetails.getDescription());
             if (productDetails.getProductType().equals(ProductType.INAPP)) {
                 OneTimePurchaseOfferDetails offerDetails = productDetails.getOneTimePurchaseOfferDetails();
                 p.put("price_string", offerDetails.getFormattedPrice());
