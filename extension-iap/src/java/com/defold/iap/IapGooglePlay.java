@@ -27,6 +27,7 @@ import com.android.billingclient.api.ProductDetails;
 import com.android.billingclient.api.ProductDetails.OneTimePurchaseOfferDetails;
 import com.android.billingclient.api.ProductDetails.PricingPhases;
 import com.android.billingclient.api.ProductDetails.PricingPhase;
+import com.android.billingclient.api.ProductDetails.RecurrenceMode;
 import com.android.billingclient.api.ProductDetails.SubscriptionOfferDetails;
 import com.android.billingclient.api.ConsumeParams;
 import com.android.billingclient.api.BillingFlowParams;
@@ -128,7 +129,18 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
                 o.put("currency_code", pricingPhase.getPriceCurrencyCode());
                 o.put("billing_period", pricingPhase.getBillingPeriod());
                 o.put("billing_cycle_count", pricingPhase.getBillingCycleCount());
-                o.put("recurrence_mode", pricingPhase.getRecurrenceMode());
+                switch (pricingPhase.getRecurrenceMode()) {
+                case RecurrenceMode.FINITE_RECURRING:
+                    o.put("recurrence_mode", "FINITE");
+                    break;
+                case RecurrenceMode.INFINITE_RECURRING:
+                    o.put("recurrence_mode", "INFINITE");
+                    break;
+                default:
+                case RecurrenceMode.NON_RECURRING:
+                    o.put("recurrence_mode", "NONE");
+                    break;
+                }
                 a.put(o);
             }
         }

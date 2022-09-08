@@ -149,6 +149,39 @@
           type: table
           desc: [icon:googleplay] List of subscription offers.
                 Each offer contains a token and a list of price and billing options.
+                See https://developer.android.com/reference/com/android/billingclient/api/ProductDetails.PricingPhase
+          members:
+          - name: token
+            type: string
+            desc: The token associated with the pricing phases for the subscription.
+
+          - name: pricing
+            type: table
+            desc: The pricing phases for the subscription.
+            members:
+            - name: price_string
+              type: string
+              desc: Formatted price for the payment cycle, including currency sign.
+
+            - name: price
+              type: number
+              desc: Price of the payment cycle in micro-units.
+
+            - name: currency_code
+              type: string
+              desc: ISO 4217 currency code
+
+            - name: billing_period
+              type: string
+              desc: Billing period of the payment cycle, specified in ISO 8601 format
+
+            - name: billing_cycle_count
+              type: number
+              desc: Number of cycles for which the billing period is applied.
+
+            - name: recurrence_mode
+              type: string
+              desc: FININTE, INFINITE or NONE
 
       - name: error
         type: table
