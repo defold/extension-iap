@@ -8,7 +8,7 @@ brief: This manual covers how to setup and use Google Play Game Services in Defo
 This extension provides a unified, simple to use interface to several different stores for in-app purchase:
 
 * Apple’s iOS Appstore - StoreKit
-* Google Play Billing 3.0
+* Google Play Billing 5.0
 * Amazon 'in-app billing' 2.0.61
 * Facebook Canvas 'game payments'
 
