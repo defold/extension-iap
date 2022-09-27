@@ -31,7 +31,7 @@ Detailed documentation from Apple, Google, Amazon and Facebook can be found here
 ## Installation
 To use this library in your Defold project, add the following URL to your `game.project` dependencies:
 
-https://github.com/defold/extension-iap/archive/master.zip
+[https://github.com/defold/extension-iap/archive/master.zip](https://github.com/defold/extension-iap/archive/master.zip)
 
 We recommend using a link to a zip file of a [specific release](https://github.com/defold/extension-iap/releases).
 
