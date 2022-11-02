@@ -306,23 +306,8 @@ static void HandleProductResult(const IAPCommand* cmd)
     }
 
     if (cmd->m_ResponseCode == BILLING_RESPONSE_RESULT_OK) {
-        dmJson::Document doc;
-        dmJson::Result r = dmJson::Parse((const char*) cmd->m_Data, &doc);
-        if (r == dmJson::RESULT_OK && doc.m_NodeCount > 0) {
-            char err_str[128];
-            if (dmScript::JsonToLua(L, &doc, 0, err_str, sizeof(err_str)) < 0) {
-                dmLogError("Failed converting product result JSON to Lua; %s", err_str);
-                lua_pushnil(L);
-                IAP_PushError(L, "failed to convert JSON to Lua for product response", REASON_UNSPECIFIED);
-            } else {
-                lua_pushnil(L);
-            }
-        } else {
-            dmLogError("Failed to parse product response (%d)", r);
-            lua_pushnil(L);
-            IAP_PushError(L, "failed to parse product response", REASON_UNSPECIFIED);
-        }
-        dmJson::Free(&doc);
+        const char* json = (const char*)cmd->m_Data;
+        dmScript::JsonToLua(L, json, strlen(json)); // throws lua error if it fails
     } else {
         dmLogError("IAP error %d", cmd->m_ResponseCode);
         lua_pushnil(L);
@@ -356,23 +341,8 @@ static void HandlePurchaseResult(const IAPCommand* cmd)
 
     if (cmd->m_ResponseCode == BILLING_RESPONSE_RESULT_OK) {
         if (cmd->m_Data != 0) {
-            dmJson::Document doc;
-            dmJson::Result r = dmJson::Parse((const char*) cmd->m_Data, &doc);
-            if (r == dmJson::RESULT_OK && doc.m_NodeCount > 0) {
-                char err_str[128];
-                if (dmScript::JsonToLua(L, &doc, 0, err_str, sizeof(err_str)) < 0) {
-                    dmLogError("Failed converting purchase JSON result to Lua; %s", err_str);
-                    lua_pushnil(L);
-                    IAP_PushError(L, "failed to convert purchase response JSON to Lua", REASON_UNSPECIFIED);
-                } else {
-                    lua_pushnil(L);
-                }
-            } else {
-                dmLogError("Failed to parse purchase response (%d)", r);
-                lua_pushnil(L);
-                IAP_PushError(L, "failed to parse purchase response", REASON_UNSPECIFIED);
-            }
-            dmJson::Free(&doc);
+            const char* json = (const char*)cmd->m_Data;
+            dmScript::JsonToLua(L, json, strlen(json)); // throws lua error if it fails
         } else {
             dmLogError("IAP error, purchase response was null");
             lua_pushnil(L);
