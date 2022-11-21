@@ -308,6 +308,7 @@ static void HandleProductResult(const IAPCommand* cmd)
     if (cmd->m_ResponseCode == BILLING_RESPONSE_RESULT_OK) {
         const char* json = (const char*)cmd->m_Data;
         dmScript::JsonToLua(L, json, strlen(json)); // throws lua error if it fails
+        lua_pushnil(L);
     } else {
         dmLogError("IAP error %d", cmd->m_ResponseCode);
         lua_pushnil(L);
@@ -343,6 +344,7 @@ static void HandlePurchaseResult(const IAPCommand* cmd)
         if (cmd->m_Data != 0) {
             const char* json = (const char*)cmd->m_Data;
             dmScript::JsonToLua(L, json, strlen(json)); // throws lua error if it fails
+            lua_pushnil(L);
         } else {
             dmLogError("IAP error, purchase response was null");
             lua_pushnil(L);

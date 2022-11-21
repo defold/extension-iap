@@ -47,6 +47,7 @@ static void IAPList_Callback(void* luacallback, const char* result_json)
     if(result_json != 0)
     {
         dmScript::JsonToLua(L, result_json, strlen(result_json)); // throws lua error if it fails
+        lua_pushnil(L);
     }
     else
     {
@@ -97,6 +98,7 @@ static void IAPListener_Callback(void* luacallback, const char* result_json, int
 
     if (result_json) {
         dmScript::JsonToLua(L, result_json, strlen(result_json)); // throws lua error if it fails
+        lua_pushnil(L);
     } else {
         lua_pushnil(L);
         switch(error_code)
