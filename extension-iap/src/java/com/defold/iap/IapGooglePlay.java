@@ -362,9 +362,13 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
      */
     @Override
     public void onPurchasesUpdated(BillingResult billingResult, List<Purchase> purchases) {
-        if (billingResult.getResponseCode() == BillingResponseCode.OK && purchases != null) {
-            for (Purchase purchase : purchases) {
-                handlePurchase(purchase, this.purchaseListener);
+        if (billingResult.getResponseCode() == BillingResponseCode.OK) {
+            if (purchases != null && !purchases.isEmpty()) {
+                for (Purchase purchase : purchases) {
+                    if (purchase != null) {
+                        handlePurchase(purchase, this.purchaseListener);
+                    }
+                }
             }
         }
         else {
@@ -413,7 +417,12 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
                 @Override
                 public void onProductDetailsResponse(BillingResult billingResult, List<ProductDetails> productDetailsList) {
                     if (billingResult.getResponseCode() == BillingResponseCode.OK && (productDetailsList != null) && !productDetailsList.isEmpty()) {
-                        buyProduct(productDetailsList.get(0), token, purchaseListener);
+                        for (ProductDetails productDetails : productDetailsList) {
+                            if (productDetails != null) {
+                                buyProduct(productDetails, token, purchaseListener);
+                                break;
+                            }
+                        }
                     }
                     else {
                         Log.e(TAG, "Unable to get product details before buying: " + billingResult.getDebugMessage());
@@ -435,10 +444,12 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
 
             @Override
             public void onProductDetailsResponse(BillingResult billingResult, List<ProductDetails> productDetails) {
-                if (productDetails != null) {
+                if (productDetails != null && !productDetails.isEmpty()) {
                     // cache products (cache will be used to speed up buying)
                     for (ProductDetails pd : productDetails) {
-                        IapGooglePlay.this.products.put(pd.getProductId(), pd);
+                        if (pd != null) {
+                            IapGooglePlay.this.products.put(pd.getProductId(), pd);
+                        }
                     }
                     // add to list of all product details
                     allProductDetails.addAll(productDetails);
@@ -485,9 +496,11 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
             @Override
             public void onProductDetailsResponse(BillingResult billingResult, List<ProductDetails> productDetails) {
                 JSONArray a = new JSONArray();
-                if (billingResult.getResponseCode() == BillingResponseCode.OK) {
+                if ((billingResult.getResponseCode() == BillingResponseCode.OK) && (productDetails != null) && !productDetails.isEmpty()) {
                     for (ProductDetails pd : productDetails) {
-                        a.put(convertProductDetails(pd));
+                        if (pd != null) {
+                            a.put(convertProductDetails(pd));
+                        }
                     }
                 }
                 else {

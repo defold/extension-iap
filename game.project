@@ -16,7 +16,7 @@ target_sdk_version = 29
 
 [project]
 title = extension-iap
-dependencies = https://github.com/andsve/dirtylarry/archive/master.zip
+dependencies#0 = https://github.com/andsve/dirtylarry/archive/master.zip
 
 [library]
 include_dirs = extension-iap
