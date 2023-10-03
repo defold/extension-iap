@@ -1,6 +1,6 @@
 ---
 title: Defold In-app purchase extension API documentation
-brief: This manual covers how to setup and use Google Play Game Services in Defold.
+brief: This manual covers how to setup and use In-App Purchases in Defold.
 ---
 
 # Defold In-app purchase extension API documentation
