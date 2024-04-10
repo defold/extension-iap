@@ -71,7 +71,7 @@ var LibraryFacebookIAP = {
 
                     if(url_index == product_count-1) {
                         var productsJSON = JSON.stringify(products);
-                        var res_buf = allocate(intArrayFromString(productsJSON), 'i8', ALLOC_STACK);
+                        var res_buf = stringToUTF8OnStack(productsJSON);
                         {{{ makeDynCall('vii', 'callback')}}}(lua_callback, res_buf);
                     } else {
                         var xmlhttp = new XMLHttpRequest();
@@ -143,7 +143,7 @@ var LibraryFacebookIAP = {
 	                    }
 
 	                    var productsJSON = JSON.stringify(result)
-	                    var res_buf = allocate(intArrayFromString(productsJSON), 'i8', ALLOC_STACK);
+	                    var res_buf = stringToUTF8OnStack(productsJSON);
 	                    {{{ makeDynCall('viii', 'callback')}}}(lua_callback, res_buf, 0);
 
 	                } else {
@@ -166,4 +166,4 @@ var LibraryFacebookIAP = {
 }
 
 autoAddDeps(LibraryFacebookIAP, '$FBinner');
-mergeInto(LibraryManager.library, LibraryFacebookIAP);
+addToLibrary(LibraryFacebookIAP);
