@@ -3,7 +3,7 @@ local dirtylarry = require "dirtylarry/dirtylarry"
 local GOLDBARS_SMALL = "com.defold.iap.goldbar.small"
 local GOLDBARS_MEDIUM = "com.defold.iap.goldbar.medium"
 local GOLDBARS_LARGE = "com.defold.iap.goldbar.large"
-local SUBSCRIPTION = "com.defold.iap.subscription"
+local SUBSCRIPTION = "com.defold.iap.subscription.one"
 local NON_CONSUMABLE = "com.defold.iap.removeads"
 
 local items = {
@@ -66,6 +66,7 @@ local function list()
 		for k,p in pairs(products) do
 			available_items[p.ident] = p
 			log("Item %s", p.ident)
+			pprint(p)
 			local button = item_buttons[p.ident]
 			if button then
 				gui.set_color(gui.get_node(button.."/larrylabel"), vmath.vector4(1,1,1,1))

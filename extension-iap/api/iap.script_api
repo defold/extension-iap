@@ -21,8 +21,12 @@
         members:
         - name: request_id
           type: string
-          desc: Facebook only. [icon:facebook] Optional custom unique request id to
+          desc: Facebook only [icon:facebook]. Optional custom unique request id to
                 set for this transaction. The id becomes attached to the payment within the Graph API.
+        - name: token
+          type: string
+          desc: Google Play only [icon:googleplay]. Which subscription offer to use when buying a subscription. The token can be retrieved from
+                the subscriptions table returned when calling iap.list()
 
     examples:
       - desc: |-
@@ -128,15 +132,56 @@
         - name: price
           type: number
           desc: The price of the product.
+                For Google Play [icon:googleplay] this is used only for in-app products
 
         - name: price_string
           type: string
           desc: The price of the product, as a formatted string (amount and currency symbol).
+                For Google Play [icon:googleplay] this is used only for in-app products
 
         - name: currency_code
           type: string
-          desc: The currency code. On Google Play, this reflects the merchant's locale, instead of the user's.
-                [icon:ios] [icon:googleplay] [icon:facebook]
+          desc: The currency code.
+                For Google Play [icon:googleplay] this is the merchant's locale, instead of the user's.
+                For Google Play [icon:googleplay] this is used only for in-app products
+
+        - name: subscriptions
+          type: table
+          desc: Only available for Google Play [icon:googleplay]. List of subscription offers.
+                Each offer contains a token and a list of price and billing options.
+                See https://developer.android.com/reference/com/android/billingclient/api/ProductDetails.PricingPhase
+          members:
+          - name: token
+            type: string
+            desc: The token associated with the pricing phases for the subscription.
+
+          - name: pricing
+            type: table
+            desc: The pricing phases for the subscription.
+            members:
+            - name: price_string
+              type: string
+              desc: Formatted price for the payment cycle, including currency sign.
+
+            - name: price
+              type: number
+              desc: Price of the payment cycle in micro-units.
+
+            - name: currency_code
+              type: string
+              desc: ISO 4217 currency code
+
+            - name: billing_period
+              type: string
+              desc: Billing period of the payment cycle, specified in ISO 8601 format
+
+            - name: billing_cycle_count
+              type: number
+              desc: Number of cycles for which the billing period is applied.
+
+            - name: recurrence_mode
+              type: string
+              desc: FINITE, INFINITE or NONE
 
       - name: error
         type: table
@@ -224,32 +269,36 @@
 
         - name: original_trans
           type: string
-          desc: Apple only[icon:apple]. The original transaction. This field is only set when `state` is `TRANS_STATE_RESTORED`.
+          desc: Apple only [icon:apple]. The original transaction. This field is only set when `state` is `TRANS_STATE_RESTORED`.
+
+        - name: original_json
+          type: string
+          desc: Android only [icon:android]. The purchase order details in JSON format.
 
         - name: signature
           type: string
-          desc: Google Play only[icon:googleplay]. A string containing the signature of the purchase data that was signed with the private key of the developer.
+          desc: Google Play only [icon:googleplay]. A string containing the signature of the purchase data that was signed with the private key of the developer.
 
         - name: request_id
           type: string
-          desc: Facebook only[icon:facebook]. This field is set to the optional custom unique request id `request_id` if set in the `iap.buy()` call parameters.
+          desc: Facebook only [icon:facebook]. This field is set to the optional custom unique request id `request_id` if set in the `iap.buy()` call parameters.
 
         - name: user_id
           type: string
-          desc: Amazon Pay only[icon:amazon]. The user ID.
+          desc: Amazon Pay only [icon:amazon]. The user ID.
 
         - name: is_sandbox_mode
           type: boolean
-          desc: Amazon Pay only[icon:amazon]. If `true`, the SDK is running in Sandbox mode.
+          desc: Amazon Pay only [icon:amazon]. If `true`, the SDK is running in Sandbox mode.
                 This only allows interactions with the Amazon AppTester. Use this mode only for testing locally.
 
         - name: cancel_date
           type: string
-          desc: Amazon Pay only[icon:amazon]. The cancel date for the purchase. This field is only set if the purchase is canceled.
+          desc: Amazon Pay only [icon:amazon]. The cancel date for the purchase. This field is only set if the purchase is canceled.
 
         - name: canceled
           type: string
-          desc: Amazon Pay only[icon:amazon]. Is set to `true` if the receipt was canceled or has expired; otherwise `false`.
+          desc: Amazon Pay only [icon:amazon]. Is set to `true` if the receipt was canceled or has expired; otherwise `false`.
 
       - name: error
         type: table

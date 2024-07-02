@@ -1,6 +1,6 @@
 ---
 title: Defold In-app purchase extension API documentation
-brief: This manual covers how to setup and use Google Play Game Services in Defold.
+brief: This manual covers how to setup and use In-App Purchases in Defold.
 ---
 
 # Defold In-app purchase extension API documentation
@@ -8,7 +8,7 @@ brief: This manual covers how to setup and use Google Play Game Services in Defo
 This extension provides a unified, simple to use interface to several different stores for in-app purchase:
 
 * Apple’s iOS Appstore - StoreKit
-* Google Play Billing 3.0
+* Google Play Billing 5.0
 * Amazon 'in-app billing' 2.0.61
 * Facebook Canvas 'game payments'
 
@@ -31,7 +31,7 @@ Detailed documentation from Apple, Google, Amazon and Facebook can be found here
 ## Installation
 To use this library in your Defold project, add the following URL to your `game.project` dependencies:
 
-https://github.com/defold/extension-iap/archive/master.zip
+[https://github.com/defold/extension-iap/archive/master.zip](https://github.com/defold/extension-iap/archive/master.zip)
 
 We recommend using a link to a zip file of a [specific release](https://github.com/defold/extension-iap/releases).
 

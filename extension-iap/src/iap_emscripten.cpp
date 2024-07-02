@@ -46,23 +46,8 @@ static void IAPList_Callback(void* luacallback, const char* result_json)
 
     if(result_json != 0)
     {
-        dmJson::Document doc;
-        dmJson::Result r = dmJson::Parse(result_json, &doc);
-        if (r == dmJson::RESULT_OK && doc.m_NodeCount > 0) {
-            char err_str[128];
-            if (dmScript::JsonToLua(L, &doc, 0, err_str, sizeof(err_str)) < 0) {
-                dmLogError("Failed converting list result JSON to Lua; %s", err_str);
-                lua_pushnil(L);
-                IAP_PushError(L, "Failed converting list result JSON to Lua", REASON_UNSPECIFIED);
-            } else {
-                lua_pushnil(L);
-            }
-        } else {
-            dmLogError("Failed to parse list result JSON (%d)", r);
-            lua_pushnil(L);
-            IAP_PushError(L, "Failed to parse list result JSON", REASON_UNSPECIFIED);
-        }
-        dmJson::Free(&doc);
+        dmScript::JsonToLua(L, result_json, strlen(result_json)); // throws lua error if it fails
+        lua_pushnil(L);
     }
     else
     {
@@ -112,23 +97,8 @@ static void IAPListener_Callback(void* luacallback, const char* result_json, int
     }
 
     if (result_json) {
-        dmJson::Document doc;
-        dmJson::Result r = dmJson::Parse(result_json, &doc);
-        if (r == dmJson::RESULT_OK && doc.m_NodeCount > 0) {
-            char err_str[128];
-            if (dmScript::JsonToLua(L, &doc, 0, err_str, sizeof(err_str)) < 0) {
-                dmLogError("Failed converting purchase result JSON to Lua; %s", err_str);
-                lua_pushnil(L);
-                IAP_PushError(L, "failed converting purchase result JSON to Lua", REASON_UNSPECIFIED);
-            } else {
-                lua_pushnil(L);
-            }
-        } else {
-            dmLogError("Failed to parse purchase response (%d)", r);
-            lua_pushnil(L);
-            IAP_PushError(L, "failed to parse purchase response", REASON_UNSPECIFIED);
-        }
-        dmJson::Free(&doc);
+        dmScript::JsonToLua(L, result_json, strlen(result_json)); // throws lua error if it fails
+        lua_pushnil(L);
     } else {
         lua_pushnil(L);
         switch(error_code)
