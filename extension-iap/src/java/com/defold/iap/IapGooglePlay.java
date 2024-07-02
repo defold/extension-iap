@@ -221,13 +221,15 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
             case BillingResponseCode.OK:
                 defoldResponse = IapJNI.BILLING_RESPONSE_RESULT_OK;
                 break;
-            case BillingResponseCode.SERVICE_TIMEOUT:
             case BillingResponseCode.SERVICE_UNAVAILABLE:
             case BillingResponseCode.SERVICE_DISCONNECTED:
                 defoldResponse = IapJNI.BILLING_RESPONSE_RESULT_SERVICE_UNAVAILABLE;
                 break;
             case BillingResponseCode.USER_CANCELED:
                 defoldResponse = IapJNI.BILLING_RESPONSE_RESULT_USER_CANCELED;
+                break;
+            case BillingResponseCode.NETWORK_ERROR:  // new in Play Billing Library 6.0.0
+                defoldResponse = IapJNI.BILLING_RESPONSE_RESULT_NETWORK_ERROR;
                 break;
             case BillingResponseCode.FEATURE_NOT_SUPPORTED:
             case BillingResponseCode.ERROR:
