@@ -44,7 +44,13 @@ end
 
 local function buy(id)
 	log("iap.buy() " .. id)
-	iap.buy(id)
+	local options = {}
+	local item = available_items[id]
+	if item.subscriptions then
+		local subscription = item.subscriptions[1]
+		options.token = subscription.token
+	end
+	iap.buy(id, options)
 end
 
 local function restore()

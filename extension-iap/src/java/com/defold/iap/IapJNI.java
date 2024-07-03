@@ -18,6 +18,7 @@ public class IapJNI implements IListProductsListener, IPurchaseListener {
     public static final int BILLING_RESPONSE_RESULT_ERROR = 6;
     public static final int BILLING_RESPONSE_RESULT_ITEM_ALREADY_OWNED = 7;
     public static final int BILLING_RESPONSE_RESULT_ITEM_NOT_OWNED = 8;
+    public static final int BILLING_RESPONSE_RESULT_NETWORK_ERROR = 9;
 
     public IapJNI() {
     }
