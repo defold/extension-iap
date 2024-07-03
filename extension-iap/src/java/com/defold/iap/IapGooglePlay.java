@@ -21,6 +21,7 @@ import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClient.BillingResponseCode;
 import com.android.billingclient.api.BillingClient.ProductType;
 import com.android.billingclient.api.BillingResult;
+import com.android.billingclient.api.PendingPurchasesParams;
 import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.Purchase.PurchaseState;
 import com.android.billingclient.api.ProductDetails;
@@ -56,7 +57,8 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
         this.activity = activity;
         this.autoFinishTransactions = autoFinishTransactions;
 
-        billingClient = BillingClient.newBuilder(activity).setListener(this).enablePendingPurchases().build();
+        PendingPurchasesParams pendingPurchasesParams = PendingPurchasesParams.newBuilder().enableOneTimeProducts().build();
+        billingClient = BillingClient.newBuilder(activity).setListener(this).enablePendingPurchases(pendingPurchasesParams).build();
         billingClient.startConnection(new BillingClientStateListener() {
             @Override
             public void onBillingSetupFinished(BillingResult billingResult) {
