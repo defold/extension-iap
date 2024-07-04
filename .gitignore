@@ -9,3 +9,5 @@ Thumbs.db
 .cproject
 builtins
 _site
+manifest.private.der
+manifest.public.der
