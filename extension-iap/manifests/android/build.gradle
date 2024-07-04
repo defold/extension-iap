@@ -3,5 +3,5 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.android.billingclient:billing:6.0.0'
+    implementation 'com.android.billingclient:billing:6.2.1'
 }
