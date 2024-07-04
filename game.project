@@ -12,7 +12,6 @@ height = 1136
 input_method = HiddenInputField
 package = com.defold.extension.iap
 version_code = 7
-target_sdk_version = 29
 
 [project]
 title = extension-iap
