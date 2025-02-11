@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dream_ph_body_contact_p1sscustomer_servicep2ss_for_more_information_n_nerror_code_c_p3ss">Lidhu me %1$sShërbimin e klientit%2$s për më shumë informacion.\n\nKodi i gabimit: %3$s</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_enable_the_galaxy_store_in_settings">Për ta përfunduar këtë blerje, duhet të aftësosh Galaxy Store që nga Cilësimet.</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_update_the_galaxy_store">Për ta përfunduar këtë blerje, duhet të përditësosh Galaxy Store.</string>
+    <string name="dream_ph_pheader_couldnt_complete_purchase">S’e përfundova dot blerjen</string>
+    <string name="dream_sapps_body_authenticating_ing">Duke autentifikuar\u2026</string>
+    <string name="dream_sapps_body_contact_customer_service_to_complete_your_purchase">Lidhu me Shërbimin e klientit për ta kompletuar blerjen.</string>
+    <string name="dream_sapps_body_your_purchase_is_complete">Blerja jote u krye.</string>
+    <string name="ids_com_body_error_code_c">Kodi i gabimit:</string>
+    <string name="mids_sapps_body_waiting_ing">Duke pritur\u2026</string>
+    <string name="mids_sapps_header_samsung_in_app_purchase_abb">Blerja nga app-i Samsung</string>
+    <string name="mids_sapps_header_update_galaxy_apps">Përditëso Galaxy Apps</string>
+    <string name="mids_sapps_pop_a_new_version_is_available_galaxy_apps_will_be_updated_to_the_latest_version_to_complete_this_purchase">Ka një version të ri. Për ta përfunduar këtë blerje, Galaxy Apps do të përditësohet në versionin më të fundit.</string>
+    <string name="mids_sapps_pop_an_invalid_value_has_been_provided_for_samsung_in_app_purchase">Është futur një vlerë e pavlefshme për Blerjen që nga aplikacionet Samsung.</string>
+    <string name="mids_sapps_pop_payment_canceled">Pagesa u anulua.</string>
+    <string name="mids_sapps_pop_to_purchase_items_you_need_to_install_samsung_in_app_purchase_install_q">Për të blerë gjëra, duhet të instalosh Blerjen që nga aplikacionet Samsung. Ta instaloj?</string>
+    <string name="mids_sapps_pop_unable_to_open_samsung_in_app_purchase_msg">Nuk mund të hap Blerjen që nga aplikacioni Samsung. Shko te Lejet, pastaj jep lejet e nevojshme dhe provo sërish.</string>
+    <string name="mids_sapps_pop_unknown_error_occurred">Ndodhi gabim i panjohur.</string>
+</resources>

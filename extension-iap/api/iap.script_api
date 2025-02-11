@@ -95,6 +95,8 @@
 
                - `iap.PROVIDER_ID_FACEBOOK`
 
+               - `iap.PROVIDER_ID_FACEBOOK`
+
 #*****************************************************************************************************
 
   - name: list
@@ -326,6 +328,10 @@
   - name: PROVIDER_ID_GOOGLE
     type: number
     desc: iap provider id for Google
+
+  - name: PROVIDER_ID_SAMSUNG
+    type: number
+    desc: iap provider id for Samsung
 
   - name: REASON_UNSPECIFIED
     type: number

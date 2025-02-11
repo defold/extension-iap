@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="dialog_button_pressed">#29000000</color>
+    <color name="dialog_button_separation_color">#e6e6e6</color>
+    <color name="dialog_button_text">#0074d4</color>
+    <color name="dialog_button_text_dark">#008cff</color>
+    <color name="dialog_message">#505050</color>
+    <color name="dialog_message_dark">#e5e5e5</color>
+    <color name="dialog_message_extra">#9a9a9a</color>
+    <color name="dialog_title">#252525</color>
+    <color name="dialog_title_dark">#fafafa</color>
+    <color name="transparent">#00000000</color>
+    <dimen name="base_dialog_body_lineSpacingExtra">4dp</dimen>
+    <dimen name="base_dialog_checkbox_bottom_margin">24dp</dimen>
+    <dimen name="base_dialog_checkbox_text_margin">19dp</dimen>
+    <dimen name="base_dialog_checkbox_text_padding">8dp</dimen>
+    <dimen name="base_dialog_message_bottom_margin">8dp</dimen>
+    <dimen name="base_dialog_message_left_right_margin">24dp</dimen>
+    <dimen name="base_dialog_message_top_margin">24dp</dimen>
+    <dimen name="base_dialog_title_paddingTop">3dp</dimen>
+    <dimen name="page_loading_textview_textsize">15dp</dimen>
+    <dimen name="popup_bottom_buttons_height">36dp</dimen>
+    <dimen name="style_textview_dialog_body_textsize">19dp</dimen>
+    <item format="float" name="dialog_width_percentage" type="integer">1.0</item>
+    <item format="float" name="dim_dark" type="integer">0.80</item>
+    <item format="float" name="dim_light" type="integer">0.65</item>
+    <string did="DREAM_PH_BODY_CONTACT_P1SSCUSTOMER_SERVICEP2SS_FOR_MORE_INFORMATION_N_NERROR_CODE_C_P3SS" name="dream_ph_body_contact_p1sscustomer_servicep2ss_for_more_information_n_nerror_code_c_p3ss">Contact %1$sCustomer Service%2$s for more information.\n\nError code: %3$s</string>
+    <string did="DREAM_PH_BODY_TO_COMPLETE_THIS_PURCHASE_YOU_NEED_TO_ENABLE_THE_GALAXY_STORE_IN_SETTINGS" name="dream_ph_body_to_complete_this_purchase_you_need_to_enable_the_galaxy_store_in_settings">To complete this purchase, you need to enable the Galaxy Store in Settings.</string>
+    <string did="DREAM_PH_BODY_TO_COMPLETE_THIS_PURCHASE_YOU_NEED_TO_UPDATE_THE_GALAXY_STORE" name="dream_ph_body_to_complete_this_purchase_you_need_to_update_the_galaxy_store">To complete this purchase, you need to update the Galaxy Store.</string>
+    <string did="DREAM_PH_PHEADER_COULDNT_COMPLETE_PURCHASE" name="dream_ph_pheader_couldnt_complete_purchase">Couldn\'t complete purchase</string>
+    <string did="DREAM_SAPPS_BODY_AUTHENTICATING_ING" name="dream_sapps_body_authenticating_ing">Authenticating...</string>
+    <string did="DREAM_SAPPS_BODY_CONTACT_CUSTOMER_SERVICE_TO_COMPLETE_YOUR_PURCHASE" name="dream_sapps_body_contact_customer_service_to_complete_your_purchase">Contact Customer Service to complete your purchase.</string>
+    <string did="DREAM_SAPPS_BODY_YOUR_PURCHASE_IS_COMPLETE" name="dream_sapps_body_your_purchase_is_complete">Your purchase is complete.</string>
+    <string did="IDS_COM_BODY_ERROR_CODE_C" name="ids_com_body_error_code_c">Error code:</string>
+    <string did="MIDS_SAPPS_BODY_WAITING_ING" name="mids_sapps_body_waiting_ing">Waiting...</string>
+    <string did="MIDS_SAPPS_HEADER_SAMSUNG_IN_APP_PURCHASE_ABB" name="mids_sapps_header_samsung_in_app_purchase_abb">Samsung In-App Purchase</string>
+    <string did="MIDS_SAPPS_HEADER_UPDATE_GALAXY_APPS" name="mids_sapps_header_update_galaxy_apps">Update Galaxy Apps </string>
+    <string did="MIDS_SAPPS_POP_A_NEW_VERSION_IS_AVAILABLE_GALAXY_APPS_WILL_BE_UPDATED_TO_THE_LATEST_VERSION_TO_COMPLETE_THIS_PURCHASE" name="mids_sapps_pop_a_new_version_is_available_galaxy_apps_will_be_updated_to_the_latest_version_to_complete_this_purchase">A new version is available. Galaxy Apps will be updated to the latest version to complete this purchase.</string>
+    <string did="MIDS_SAPPS_POP_AN_INVALID_VALUE_HAS_BEEN_PROVIDED_FOR_SAMSUNG_IN_APP_PURCHASE" name="mids_sapps_pop_an_invalid_value_has_been_provided_for_samsung_in_app_purchase">An invalid value has been provided for Samsung In-App Purchase.</string>
+    <string did="MIDS_SAPPS_POP_PAYMENT_CANCELLED" name="mids_sapps_pop_payment_canceled">Payment cancelled.</string>
+    <string did="MIDS_SAPPS_POP_TO_PURCHASE_ITEMS_YOU_NEED_TO_INSTALL_SAMSUNG_IN_APP_PURCHASE_INSTALL_Q" name="mids_sapps_pop_to_purchase_items_you_need_to_install_samsung_in_app_purchase_install_q">To purchase items, you need to install Samsung In-App Purchase. Install?</string>
+    <string did="MIDS_SAPPS_POP_UNABLE_TO_OPEN_SAMSUNG_IN_APP_PURCHASE_MSG" name="mids_sapps_pop_unable_to_open_samsung_in_app_purchase_msg">Unable to open Samsung In-App Purchase. Go to Permissions, then allow the required permissions and try again.</string>
+    <string did="MIDS_SAPPS_POP_UNKNOWN_ERROR_OCCURRED" name="mids_sapps_pop_unknown_error_occurred">Unknown error occurred.</string>
+    <style name="AppBaseTheme" parent="android:Theme.Light">
+        
+    </style>
+    <style name="AppTheme" parent="AppBaseTheme">
+        
+    </style>
+    <style name="DialogButton">
+        <item name="android:minHeight">36dp</item>
+        <item name="android:maxHeight">36dp</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:gravity">center</item>
+        <item name="android:background">@drawable/dialog_button_animation</item>
+        <item name="android:longClickable">false</item>
+        <item name="android:focusable">true</item>
+        <item name="android:fontFamily">sec-roboto-light</item>
+    </style>
+    <style name="IapProgressBar" parent="android:Widget.ProgressBar">
+        <item name="android:indeterminateDrawable">@drawable/progressbar_middle</item>
+        <item name="android:minWidth">26dip</item>
+        <item name="android:maxWidth">26dip</item>
+        <item name="android:minHeight">26dip</item>
+        <item name="android:maxHeight">26dip</item>
+    </style>
+    <style name="Theme.DialogTransparent" parent="android:Theme">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:layout_marginBottom">16dp</item>
+    </style>
+    <style name="Theme.Empty" parent="AppTheme">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:windowDisablePreview">true</item>
+    </style>
+    <style name="Theme.Transparent" parent="android:Theme">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
+</resources>

@@ -383,6 +383,10 @@ static dmExtension::Result InitializeIAP(dmExtension::Params* params)
         g_IAP.m_ProviderId = PROVIDER_ID_AMAZON;
         class_name = "com.defold.iap.IapAmazon";
     }
+    else if (!strcmp(provider, "Samsung")) {
+        g_IAP.m_ProviderId = PROVIDER_ID_SAMSUNG;
+        class_name = "com.defold.iap.IapSamsung";
+    }
     else if (strcmp(provider, "GooglePlay")) {
         dmLogWarning("Unknown IAP provider name [%s], defaulting to GooglePlay", provider);
     }

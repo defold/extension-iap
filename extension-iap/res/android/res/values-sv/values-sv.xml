@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dream_ph_body_contact_p1sscustomer_servicep2ss_for_more_information_n_nerror_code_c_p3ss">Kontakta %1$skundtjänsten%2$s om du vill ha mer information.\n\nFelkod: %3$s</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_enable_the_galaxy_store_in_settings">Slutför köpet genom att aktivera Galaxy Store i Inställningar.</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_update_the_galaxy_store">Om du vill slutföra köpet måste du uppdatera Galaxy Store.</string>
+    <string name="dream_ph_pheader_couldnt_complete_purchase">Det gick inte att slutföra köpet</string>
+    <string name="dream_sapps_body_authenticating_ing">Autentiserar \u2026</string>
+    <string name="dream_sapps_body_contact_customer_service_to_complete_your_purchase">Kontakta kundtjänsten om du vill slutföra ditt köp.</string>
+    <string name="dream_sapps_body_your_purchase_is_complete">Köpet är klart.</string>
+    <string name="ids_com_body_error_code_c">Felkod:</string>
+    <string name="mids_sapps_body_waiting_ing">Väntar \u2026</string>
+    <string name="mids_sapps_header_samsung_in_app_purchase_abb">Samsung-pr. f. köp i pr.</string>
+    <string name="mids_sapps_header_update_galaxy_apps">Uppdatera Galaxy Apps</string>
+    <string name="mids_sapps_pop_a_new_version_is_available_galaxy_apps_will_be_updated_to_the_latest_version_to_complete_this_purchase">En ny version är tillgänglig. Galaxy Apps uppdateras till den senaste versionen så att du kan slutföra köpet.</string>
+    <string name="mids_sapps_pop_an_invalid_value_has_been_provided_for_samsung_in_app_purchase">Ett ogiltigt värde har tillhandahållits för Samsung-appen för att köpa i appar.</string>
+    <string name="mids_sapps_pop_payment_canceled">Betalningen avbröts.</string>
+    <string name="mids_sapps_pop_to_purchase_items_you_need_to_install_samsung_in_app_purchase_install_q">Om du vill köpa objekt måste du installera Samsung-appen för att köpa i appar. Vill du installera?</string>
+    <string name="mids_sapps_pop_unable_to_open_samsung_in_app_purchase_msg">Det går inte att öppna Samsung-appen för att köpa i appar. Öppna Behörigheter och tillåt sedan de nödvändiga behörigheterna innan du försöker igen.</string>
+    <string name="mids_sapps_pop_unknown_error_occurred">Okänt fel inträffade.</string>
+</resources>

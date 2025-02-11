@@ -40,6 +40,7 @@ enum ProviderId
     PROVIDER_ID_AMAZON = 1,
     PROVIDER_ID_APPLE = 2,
     PROVIDER_ID_FACEBOOK = 3,
+    PROVIDER_ID_SAMSUNG = 4,
 };
 
 #endif // DM_IAP_EXTENSION

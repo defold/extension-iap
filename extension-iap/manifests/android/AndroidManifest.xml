@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="{{android.package}}">
 <uses-sdk android:minSdkVersion="{{android.minimum_sdk_version}}" android:targetSdkVersion="{{android.target_sdk_version}}" />
+    <queries>
+        <package android:name="com.sec.android.app.samsungapps" />
+    </queries>
+
     <application>
         <!-- For Amazon IAP -->
         <receiver android:exported="true" android:name="com.amazon.device.iap.ResponseReceiver" android:permission="com.amazon.inapp.purchasing.Permission.NOTIFY">
@@ -9,5 +13,27 @@
                 <action android:name="com.amazon.inapp.purchasing.NOTIFY" />
             </intent-filter>
         </receiver>
+
+        <!-- For Samsung IAP -->
+        <activity
+                android:name="com.samsung.android.sdk.iap.lib.activity.DialogActivity"
+                android:configChanges="orientation|screenSize"
+                android:theme="@style/Theme.Empty" />
+        <activity
+                android:name="com.samsung.android.sdk.iap.lib.activity.CheckPackageActivity"
+                android:configChanges="orientation|screenSize"
+                android:theme="@style/Theme.Empty" />
+        <activity
+                android:name="com.samsung.android.sdk.iap.lib.activity.PaymentActivity"
+                android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|locale|uiMode|fontScale|density"
+                android:excludeFromRecents="true"
+                android:theme="@style/Theme.Empty" />
+        <activity
+                android:name="com.samsung.android.sdk.iap.lib.activity.ChangeSubscriptionPlanActivity"
+                android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|locale|uiMode|fontScale|density"
+                android:excludeFromRecents="true"
+                android:theme="@style/Theme.Empty" />
     </application>
+
+    <uses-permission android:name="com.samsung.android.iap.permission.BILLING"/>
 </manifest>

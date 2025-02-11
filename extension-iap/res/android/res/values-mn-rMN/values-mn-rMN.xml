@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dream_ph_body_contact_p1sscustomer_servicep2ss_for_more_information_n_nerror_code_c_p3ss">Илүү их мэдээлэл авахын тулд %1$sХэрэглэгчийн үйлчилгээ%2$s рүү холбогдоно уу.\n\nАлдаатай код: %3$s</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_enable_the_galaxy_store_in_settings">Энэ худалдан авалтыг дуусгахын тулд та Тохиргоо дотроос Galaxy Store-г идэвхжүүлэх хэрэгтэй.</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_update_the_galaxy_store">Энэ худалдан авалтыг дуусгахын тулд та Galaxy Store-г шинэчлэх хэрэгтэй.</string>
+    <string name="dream_ph_pheader_couldnt_complete_purchase">Худалдан авалтыг гүйцээж чадсангүй</string>
+    <string name="dream_sapps_body_authenticating_ing">Баталгаажуулж байна\u2026</string>
+    <string name="dream_sapps_body_contact_customer_service_to_complete_your_purchase">Худалдан авалтаа дуусгахын тулд Үйлчилгээний албатай холбогдоно уу.</string>
+    <string name="dream_sapps_body_your_purchase_is_complete">Таны худалдан авалт хийгдсэн.</string>
+    <string name="ids_com_body_error_code_c">Алдааны код:</string>
+    <string name="mids_sapps_body_waiting_ing">Хүлээж байна\u2026</string>
+    <string name="mids_sapps_header_samsung_in_app_purchase_abb">Samsung In-App Purchase</string>
+    <string name="mids_sapps_header_update_galaxy_apps">Galaxy Apps шинэчлэх</string>
+    <string name="mids_sapps_pop_a_new_version_is_available_galaxy_apps_will_be_updated_to_the_latest_version_to_complete_this_purchase">Шинэ хувилбар боломжтой. Энэ худалдан авалтыг дуусгахын тулд Galaxy Apps-г сүүлийн хувилбарт шинэчлэнэ.</string>
+    <string name="mids_sapps_pop_an_invalid_value_has_been_provided_for_samsung_in_app_purchase">Samsung In-App Purchase-д хүчингүй утга өгөгдсөн</string>
+    <string name="mids_sapps_pop_payment_canceled">Төлбөр цуцалсан.</string>
+    <string name="mids_sapps_pop_to_purchase_items_you_need_to_install_samsung_in_app_purchase_install_q">Зүйлс худалдан авахын тулд, та Samsung In-App Purchase суулгах шаардлагатай. Суулгах уу?</string>
+    <string name="mids_sapps_pop_unable_to_open_samsung_in_app_purchase_msg">Samsung In-App Purchase-г нээх боломжгүй. Зөвшөөрөл рүү ороод шаардлагатай зөвшөөрлийг олгоод дахин оролд.</string>
+    <string name="mids_sapps_pop_unknown_error_occurred">Үл мэдэх алдаа гарав</string>
+</resources>
