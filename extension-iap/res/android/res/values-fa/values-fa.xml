@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dream_ph_body_contact_p1sscustomer_servicep2ss_for_more_information_n_nerror_code_c_p3ss">برای اطلاعات بیشتر با %1$sخدمات مشتریان%2$s تماس بگیرید.\n\nکد خطا: %3$s</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_enable_the_galaxy_store_in_settings">برای تکمیل این خرید، باید Galaxy Store را در تنظیمات فعال کنید.</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_update_the_galaxy_store">برای تکمیل این خرید، باید Galaxy Store را به‌روز کنید.</string>
+    <string name="dream_ph_pheader_couldnt_complete_purchase">خرید کامل نشد</string>
+    <string name="dream_sapps_body_authenticating_ing">در حال تایید اعتبار\u2026</string>
+    <string name="dream_sapps_body_contact_customer_service_to_complete_your_purchase">برای تکمیل خرید خود، با خدمات مشتریان تماس بگیرید.</string>
+    <string name="dream_sapps_body_your_purchase_is_complete">خریدتان کامل شد.</string>
+    <string name="ids_com_body_error_code_c">کد خطا:</string>
+    <string name="mids_sapps_body_waiting_ing">در انتظار\u2026</string>
+    <string name="mids_sapps_header_samsung_in_app_purchase_abb">خرید درون برنامه سامسونگ</string>
+    <string name="mids_sapps_header_update_galaxy_apps">به‌روزرسانی Galaxy Apps</string>
+    <string name="mids_sapps_pop_a_new_version_is_available_galaxy_apps_will_be_updated_to_the_latest_version_to_complete_this_purchase">نسخه جدیدی در دسترس است. برای تکمیل این خرید، Galaxy Apps به جدیدترین نسخه به‌روزرسانی خواهد شد.</string>
+    <string name="mids_sapps_pop_an_invalid_value_has_been_provided_for_samsung_in_app_purchase">یک مقدار نادرست برای خرید درون برنامه سامسونگ ارائه شده است.</string>
+    <string name="mids_sapps_pop_payment_canceled">پرداخت لغو شد.</string>
+    <string name="mids_sapps_pop_to_purchase_items_you_need_to_install_samsung_in_app_purchase_install_q">برای خرید موارد، باید خرید درون برنامه سامسونگ را نصب کنید. نصب شود؟</string>
+    <string name="mids_sapps_pop_unable_to_open_samsung_in_app_purchase_msg">باز کردن خرید درون برنامه سامسونگ ممکن نیست. به مجوزها بروید، سپس به مجوزهای مورد نیاز اجازه داده و دوباره امتحان کنید.</string>
+    <string name="mids_sapps_pop_unknown_error_occurred">خطای نامشخصی رخ داد.</string>
+</resources>

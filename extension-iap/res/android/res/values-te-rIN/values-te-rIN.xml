@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dream_ph_body_contact_p1sscustomer_servicep2ss_for_more_information_n_nerror_code_c_p3ss">మరింత సమాచారం కోసం %1$sకస్టమర్ సర్వీస్%2$sను సంప్రదించండి.\n\nదోషం కోడ్: %3$s</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_enable_the_galaxy_store_in_settings">ఈ కొనుగోలును పూర్తిచేయడానికి, మీరు సెట్టింగ్‌లలో Galaxy Storeను ప్రారంభించాల్సి ఉంటుంది.</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_update_the_galaxy_store">ఈ కొనుగోలును పూర్తిచేయడానికి, మీరు Galaxy Storeని అప్‌డేట్ చేయాల్సి ఉంటుంది.</string>
+    <string name="dream_ph_pheader_couldnt_complete_purchase">కొనుగోలుని పూర్తి చేయడం సాధ్యం కాదు</string>
+    <string name="dream_sapps_body_authenticating_ing">ప్రమాణీకరిస్తోంది\u2026</string>
+    <string name="dream_sapps_body_contact_customer_service_to_complete_your_purchase">మీ కొనుగోలును పూర్తి చేయడానికి కస్టమర్ సర్వీస్‌ను సంప్రదించండి.</string>
+    <string name="dream_sapps_body_your_purchase_is_complete">మీ కొనుగోలు పూర్తయింది.</string>
+    <string name="ids_com_body_error_code_c">లోపం కోడ్:</string>
+    <string name="mids_sapps_body_waiting_ing">వేచి ఉంది\u2026</string>
+    <string name="mids_sapps_header_samsung_in_app_purchase_abb">స్యామ్‌సంగ్ ఇన్-అప్లికేషన్ కొనుగోలు</string>
+    <string name="mids_sapps_header_update_galaxy_apps">Galaxy Appsని అప్‌డేట్ చేయి</string>
+    <string name="mids_sapps_pop_a_new_version_is_available_galaxy_apps_will_be_updated_to_the_latest_version_to_complete_this_purchase">కొత్త వెర్షన్ అందుబాటులో ఉంది. ఈ కొనుగోలును పూర్తి చేయడం కోసం Galaxy Apps ఇటీవలి వెర్షన్‌కు అప్‌డేట్ చేయబడుతుంది.</string>
+    <string name="mids_sapps_pop_an_invalid_value_has_been_provided_for_samsung_in_app_purchase">స్యామ్‌సంగ్ ఇన్-అప్లికేషన్ కొనుగోలు కోసం చెల్లని విలువ అందించబడింది.</string>
+    <string name="mids_sapps_pop_payment_canceled">చెల్లింపు విఫలమైంది.</string>
+    <string name="mids_sapps_pop_to_purchase_items_you_need_to_install_samsung_in_app_purchase_install_q">ఐటెమ్‌లను కొనుగోలు చేయడానికి, మీరు స్యామ్‌సంగ్ ఇన్-యాప్ కొనుగోలును వ్యవస్థాపించాలి. వ్యవస్థాపించాలా?</string>
+    <string name="mids_sapps_pop_unable_to_open_samsung_in_app_purchase_msg">స్యామ్‌సంగ్ ఇన్-యాప్ కొనుగోలును తెరవడం సాధ్యం కాదు. అనుమతులకు వెళ్లి, ఆపై అవసరమైన అనుమతులను అనుమతించి, మళ్లీ ప్రయత్నించండి.</string>
+    <string name="mids_sapps_pop_unknown_error_occurred">తెలియని లోపం ఏర్పడింది.</string>
+</resources>

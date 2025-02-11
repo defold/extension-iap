@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dream_ph_body_contact_p1sscustomer_servicep2ss_for_more_information_n_nerror_code_c_p3ss">დამატებითი ინფორმაციისთვის მიმართეთ %1$sმომხმარებელთა მომსახურების სამსახურს%2$s.\n\nშეცდომის კოდი: %3$s</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_enable_the_galaxy_store_in_settings">ამ შეძენის შესასრულებლად, პარამეტრებში უნდა ჩართოთ Galaxy Store.</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_update_the_galaxy_store">ამ შეძენის შესასრულებლად, უნდა დააინსტალიროთ Galaxy Store.</string>
+    <string name="dream_ph_pheader_couldnt_complete_purchase">შეძენა ვერ შესრულდა</string>
+    <string name="dream_sapps_body_authenticating_ing">მიმდინარეობს ავტორიზაცია\u2026</string>
+    <string name="dream_sapps_body_contact_customer_service_to_complete_your_purchase">შეძენის შესასრულებლად, მიმართეთ მომხმარებელთა მომსახურების სამსახურს.</string>
+    <string name="dream_sapps_body_your_purchase_is_complete">შეძენა დასრულდა.</string>
+    <string name="ids_com_body_error_code_c">შეცდომის კოდი:</string>
+    <string name="mids_sapps_body_waiting_ing">ელოდება\u2026</string>
+    <string name="mids_sapps_header_samsung_in_app_purchase_abb">Samsung In-App Purchase</string>
+    <string name="mids_sapps_header_update_galaxy_apps">Galaxy Apps-ის განახლება</string>
+    <string name="mids_sapps_pop_a_new_version_is_available_galaxy_apps_will_be_updated_to_the_latest_version_to_complete_this_purchase">გამოვიდა ახალი ვერსია. Galaxy Apps განახლდება უახლესი ვერსიით, რომ შესრულდეს ეს შეძენა.</string>
+    <string name="mids_sapps_pop_an_invalid_value_has_been_provided_for_samsung_in_app_purchase">არასწორი მნიშვნელობაა მითითებული Samsung In-App Purchase სისტემაში.</string>
+    <string name="mids_sapps_pop_payment_canceled">გადახდა გაუქმდა.</string>
+    <string name="mids_sapps_pop_to_purchase_items_you_need_to_install_samsung_in_app_purchase_install_q">ელემენტების შესაძენად უნდა დააინსტალიროთ Samsung In-App Purchase. დაინსტალირდეს?</string>
+    <string name="mids_sapps_pop_unable_to_open_samsung_in_app_purchase_msg">Samsung In-App Purchase-ს გახსნა შეუძლებელია. გახსენით „ნებართვები“, შემდეგ კი დართეთ საჭირო ნებართვები და ისევ სცადეთ.</string>
+    <string name="mids_sapps_pop_unknown_error_occurred">მოხდა უცნობი შეცდომა.</string>
+</resources>

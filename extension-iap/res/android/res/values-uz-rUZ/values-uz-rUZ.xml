@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dream_ph_body_contact_p1sscustomer_servicep2ss_for_more_information_n_nerror_code_c_p3ss">Qo‘shimcha ma’lumot olish uchun %1$sMijozlarga xizmat ko‘rsatish markazi%2$s bilan bog‘laning.\n\nXato kodi: %3$s</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_enable_the_galaxy_store_in_settings">Bu xaridni yakunlash uchun Parametrlarda Galaxy Store’ni yoqishingiz zarur.</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_update_the_galaxy_store">Bu xaridni yakunlash uchun Galaxy Store’ni yangilashingiz zarur.</string>
+    <string name="dream_ph_pheader_couldnt_complete_purchase">Xaridni amalga oshirib bo‘lmadi</string>
+    <string name="dream_sapps_body_authenticating_ing">Haqiqiylik tekshirilmoqda\u2026</string>
+    <string name="dream_sapps_body_contact_customer_service_to_complete_your_purchase">Xaridni amalga oshirish uchun Mijozlarga xizmat ko‘rsatish markazi bilan bog‘laning.</string>
+    <string name="dream_sapps_body_your_purchase_is_complete">Xaridingiz amalga oshirildi.</string>
+    <string name="ids_com_body_error_code_c">Xato kodi:</string>
+    <string name="mids_sapps_body_waiting_ing">Kutilmoqda\u2026</string>
+    <string name="mids_sapps_header_samsung_in_app_purchase_abb">Samsung In-App Purchase</string>
+    <string name="mids_sapps_header_update_galaxy_apps">Galaxy Apps’ni yangilash</string>
+    <string name="mids_sapps_pop_a_new_version_is_available_galaxy_apps_will_be_updated_to_the_latest_version_to_complete_this_purchase">Yangi versiya mavjud. Ushbu xaridni nihoyasiga yetkazish uchun Galaxy Apps eng oxirgi versiyaga yangilanadi.</string>
+    <string name="mids_sapps_pop_an_invalid_value_has_been_provided_for_samsung_in_app_purchase">Samsung In-App Purchase uchun mumkin bo‘lmagan qiymat taqdim etilgan.</string>
+    <string name="mids_sapps_pop_payment_canceled">To‘lov bekor qilindi.</string>
+    <string name="mids_sapps_pop_to_purchase_items_you_need_to_install_samsung_in_app_purchase_install_q">Elementlarni xarid qilish uchun Samsung In-App Purchase-ni o‘rnating. O‘rnatilsinmi?</string>
+    <string name="mids_sapps_pop_unable_to_open_samsung_in_app_purchase_msg">Samsung In-App Purchase’ni ochib bo‘lmaydi. Ruxsatlarga o‘ting, so‘ngra quyidagi ruxsatlarga ijozat bering va qayta urinib ko‘ring.</string>
+    <string name="mids_sapps_pop_unknown_error_occurred">Noma’lum xato yuz berdi.</string>
+</resources>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dream_sapps_body_authenticating_ing">Authenticating\u2026</string>
+    <string name="dream_sapps_body_contact_customer_service_to_complete_your_purchase">Contact Customer Service to complete your purchase.</string>
+    <string name="dream_sapps_body_your_purchase_is_complete">Your purchase is complete.</string>
+    <string name="mids_sapps_body_waiting_ing">Ilindile\u2026</string>
+    <string name="mids_sapps_header_samsung_in_app_purchase_abb">Samsung In-App Purchase</string>
+    <string name="mids_sapps_header_update_galaxy_apps">Update Galaxy Apps</string>
+    <string name="mids_sapps_pop_a_new_version_is_available_galaxy_apps_will_be_updated_to_the_latest_version_to_complete_this_purchase">A new version is available. Galaxy Apps will be updated to the latest version to complete this purchase.</string>
+    <string name="mids_sapps_pop_an_invalid_value_has_been_provided_for_samsung_in_app_purchase">An invalid value has been provided for Samsung In-App Purchase.</string>
+    <string name="mids_sapps_pop_payment_canceled">Payment cancelled.</string>
+    <string name="mids_sapps_pop_to_purchase_items_you_need_to_install_samsung_in_app_purchase_install_q">To purchase items, you need to install Samsung In-App Purchase. Install?</string>
+    <string name="mids_sapps_pop_unable_to_open_samsung_in_app_purchase_msg">Unable to open Samsung In-App Purchase. Go to Permissions, then allow the required permissions and try again.</string>
+    <string name="mids_sapps_pop_unknown_error_occurred">Kuvule iphutha elingaziwa.</string>
+</resources>

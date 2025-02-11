@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dream_ph_body_contact_p1sscustomer_servicep2ss_for_more_information_n_nerror_code_c_p3ss">자세한 내용은 %1$s고객 서비스 센터%2$s에 문의해 주세요.\n\n오류 코드: %3$s</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_enable_the_galaxy_store_in_settings">구매를 완료하려면 설정에서 Galaxy Store를 사용하도록 설정해 주세요.</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_update_the_galaxy_store">구매를 완료하려면 Galaxy Store를 업데이트해 주세요.</string>
+    <string name="dream_ph_pheader_couldnt_complete_purchase">구매를 완료할 수 없음</string>
+    <string name="dream_sapps_body_authenticating_ing">인증 중\u2026</string>
+    <string name="dream_sapps_body_contact_customer_service_to_complete_your_purchase">구매를 완료하려면 고객 서비스 센터에 문의하세요.</string>
+    <string name="dream_sapps_body_your_purchase_is_complete">구매를 완료했습니다.</string>
+    <string name="ids_com_body_error_code_c">오류 코드:</string>
+    <string name="mids_sapps_body_waiting_ing">대기 중\u2026</string>
+    <string name="mids_sapps_header_samsung_in_app_purchase_abb">삼성 인앱결제</string>
+    <string name="mids_sapps_header_update_galaxy_apps">Galaxy Apps 업데이트</string>
+    <string name="mids_sapps_pop_a_new_version_is_available_galaxy_apps_will_be_updated_to_the_latest_version_to_complete_this_purchase">Galaxy Apps의 새 버전이 있습니다. 구매를 완료하기 위해 Galaxy Apps를 최신 버전으로 업데이트합니다.</string>
+    <string name="mids_sapps_pop_an_invalid_value_has_been_provided_for_samsung_in_app_purchase">삼성 인앱결제에 입력한 값이 바르지 않습니다.</string>
+    <string name="mids_sapps_pop_payment_canceled">결제를 취소합니다.</string>
+    <string name="mids_sapps_pop_to_purchase_items_you_need_to_install_samsung_in_app_purchase_install_q">상품을 구매하려면 [삼성 인앱결제]이 필요합니다. 설치할까요?</string>
+    <string name="mids_sapps_pop_unable_to_open_samsung_in_app_purchase_msg">삼성 인앱결제를 열 수 없습니다. [권한]에서 다음 권한을 허용하고 다시 해보세요.</string>
+    <string name="mids_sapps_pop_unknown_error_occurred">알 수 없는 오류가 발생했습니다.</string>
+</resources>
