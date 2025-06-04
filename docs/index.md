@@ -234,6 +234,3 @@ On iOS, the "price_string" field contains '~' characters
 ## Source code
 
 The source code is available on [GitHub](https://github.com/defold/extension-iap)
-
-
-## API reference
