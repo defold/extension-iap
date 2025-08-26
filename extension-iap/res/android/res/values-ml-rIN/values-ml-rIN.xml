@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dream_ph_body_contact_p1sscustomer_servicep2ss_for_more_information_n_nerror_code_c_p3ss">കൂടുതൽ വിവരങ്ങൾക്ക് %1$sഉപഭോക്തൃ സേവനത്തെ%2$s ബന്ധപ്പെടുക.\n\nപിശക് കോഡ്: %3$s</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_enable_the_galaxy_store_in_settings">ഈ വാങ്ങൽ പൂർത്തിയാക്കുന്നതിന്, ക്രമീകരണങ്ങൾ എന്നതിൽ നിങ്ങൾ Galaxy Store പ്രാപ്തമാക്കേണ്ടതാണ്.</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_update_the_galaxy_store">ഈ വാങ്ങൽ പൂർത്തിയാക്കുന്നതിന്, നിങ്ങൾ Galaxy Store അപ്ഡേറ്റ് ചെയ്യേണ്ടതാണ്.</string>
+    <string name="dream_ph_pheader_couldnt_complete_purchase">വാങ്ങൽ പൂർത്തിയാക്കാനായില്ല</string>
+    <string name="dream_sapps_body_authenticating_ing">ആധികാരികമാക്കുന്നു\u2026</string>
+    <string name="dream_sapps_body_contact_customer_service_to_complete_your_purchase">നിങ്ങളുടെ വാങ്ങൽ പൂർത്തിയാഭിക്കുന്നതിന് ഉപഭോക്തൃ സേവനത്തെ ബന്ധപ്പെടുക.</string>
+    <string name="dream_sapps_body_your_purchase_is_complete">നിങ്ങളുടെ വാങ്ങല്‍ പൂര്‍ത്തിയായി.</string>
+    <string name="ids_com_body_error_code_c">പിശക് കോഡ്:</string>
+    <string name="mids_sapps_body_waiting_ing">കാക്കുന്നു\u2026</string>
+    <string name="mids_sapps_header_samsung_in_app_purchase_abb">സാംസങ്ങ് ഇൻ-ആപ്ലിക്കേഷൻ വാങ്ങൽ</string>
+    <string name="mids_sapps_header_update_galaxy_apps">Galaxy Apps അപ്ഡേറ്റ് ചെയ്യുക</string>
+    <string name="mids_sapps_pop_a_new_version_is_available_galaxy_apps_will_be_updated_to_the_latest_version_to_complete_this_purchase">പുതിയൊരു പതിപ്പ് ലഭ്യമാണ്. ഈ വാങ്ങൽ പൂർത്തിയാക്കുന്നതിനായി Galaxy Apps ഏറ്റവും പുതിയ പതിപ്പിലേക്ക് അപ്ഡേറ്റ് ചെയ്യപ്പെടും.</string>
+    <string name="mids_sapps_pop_an_invalid_value_has_been_provided_for_samsung_in_app_purchase">സാംസംഗ് ഇൻ-ആപ്ലിക്കേഷൻ വാങ്ങലിന് ലഭ്യമാക്കിയത് അസാധുവായ ഒരു മൂല്യമാണ്.</string>
+    <string name="mids_sapps_pop_payment_canceled">പണമടയ്ക്കല്‍ റദ്ദാക്കി.</string>
+    <string name="mids_sapps_pop_to_purchase_items_you_need_to_install_samsung_in_app_purchase_install_q">ഇനങ്ങള്‍ വാങ്ങുന്നതിന്, നിങ്ങള്‍ സാംസംഗ് ഇന്‍-ആപ്ലിക്കേഷന്‍ പര്‍ച്ചെയ്സ് ഇന്‍സ്റ്റാള്‍ ചെയ്യേണ്ടതുണ്ട്. ഇന്‍സ്റ്റാള്‍ ചെയ്യണോ?</string>
+    <string name="mids_sapps_pop_unable_to_open_samsung_in_app_purchase_msg">സാംസങ്ങ് ഇൻ-ആപ്ലിക്കേഷൻ വാങ്ങൽ തുറക്കാനാവില്ല. അനുമതികൾ എന്നതിലേക്ക് പോവുക, തുടർന്ന് ആവശ്യമായ അനുമതികൾ അനുവദിച്ച ശേഷം വീണ്ടും ശ്രമിക്കുക.</string>
+    <string name="mids_sapps_pop_unknown_error_occurred">അജ്ഞാത പിശക് സംഭവിച്ചു.</string>
+</resources>

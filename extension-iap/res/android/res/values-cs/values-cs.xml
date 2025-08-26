@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dream_ph_body_contact_p1sscustomer_servicep2ss_for_more_information_n_nerror_code_c_p3ss">Další informace získáte na oddělení %1$sZákaznických služeb%2$s.\n\nKód chyby: %3$s</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_enable_the_galaxy_store_in_settings">Abyste mohli dokončit nákup, musíte v Nastavení zapnout Galaxy Store.</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_update_the_galaxy_store">Abyste mohli dokončit nákup, musíte v Nastavení aktualizovat Galaxy Store.</string>
+    <string name="dream_ph_pheader_couldnt_complete_purchase">Nákup nelze dokončit</string>
+    <string name="dream_sapps_body_authenticating_ing">Ověřování\u2026</string>
+    <string name="dream_sapps_body_contact_customer_service_to_complete_your_purchase">Kontaktujte Zákaznické služby, abyste dokončili nákup.</string>
+    <string name="dream_sapps_body_your_purchase_is_complete">Nákup byl dokončen.</string>
+    <string name="ids_com_body_error_code_c">Kód chyby:</string>
+    <string name="mids_sapps_body_waiting_ing">Čekám\u2026</string>
+    <string name="mids_sapps_header_samsung_in_app_purchase_abb">Nákup z aplikace Samsung</string>
+    <string name="mids_sapps_header_update_galaxy_apps">Aktualizovat Galaxy Apps</string>
+    <string name="mids_sapps_pop_a_new_version_is_available_galaxy_apps_will_be_updated_to_the_latest_version_to_complete_this_purchase">K dispozici je nová verze. Aby byl dokončen tento nákup, aplikace Galaxy Apps bude aktualizována na nejnovější verzi.</string>
+    <string name="mids_sapps_pop_an_invalid_value_has_been_provided_for_samsung_in_app_purchase">Byla poskytnuta neplatná hodnota pro nákup z aplikace Samsung.</string>
+    <string name="mids_sapps_pop_payment_canceled">Platba byla zrušena.</string>
+    <string name="mids_sapps_pop_to_purchase_items_you_need_to_install_samsung_in_app_purchase_install_q">Chcete-li nakupovat, musíte nainstalovat modul nákupu z aplikace od společnosti Samsung. Instalovat?</string>
+    <string name="mids_sapps_pop_unable_to_open_samsung_in_app_purchase_msg">Nepodařilo se spustit Nákup z aplikace Samsung. Přejděte na Oprávnění a potom povolte požadovaná oprávnění a opakujte akci.</string>
+    <string name="mids_sapps_pop_unknown_error_occurred">Došlo k neznámé chybě.</string>
+</resources>

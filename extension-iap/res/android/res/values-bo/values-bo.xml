@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dream_ph_body_contact_p1sscustomer_servicep2ss_for_more_information_n_nerror_code_c_p3ss">%1$sསྐུ་མགྲོན་ཞབས་ཞུ%2$s ལ་འབྲེལ་གཏུག་བྱེད་ནས་ཆ་འཕྲིན་དེ་བས་མང་བ་ཐོབ་པར་བྱེད།\n\nནོར་འཁྲུལ་ཚབ་གྲངས།%3$s</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_enable_the_galaxy_store_in_settings">ཉོ་སྒྲུབ་འདི་རྫོགས་དགོས་ན།ཁྱེད་ཀྱིས་སྒྲིག་འགོད་ཁྲོད་ནས Galaxy ཚོང་ཁང་ཁ་འབྱེད་དགོས།</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_update_the_galaxy_store">ཉོ་སྒྲུབ་འདི་རྫོགས་དགོས་ན།ཁྱེད་ཀྱིས Galaxy ཚོང་ཁང་སྒྲིག་འཇུག་བྱེད་དགོས།</string>
+    <string name="dream_ph_pheader_couldnt_complete_purchase">ཉོ་མི་ཐུབ།</string>
+    <string name="dream_sapps_body_authenticating_ing">ར་སྤྲོད་བྱེད་བཞིན་འདུག</string>
+    <string name="dream_sapps_body_contact_customer_service_to_complete_your_purchase">མགྲོན་ཞབས་ལ་འབྲེལ་བ་བྱས་ནས་སྤྲོད་གཏོང་འགྲུབ་པར་བྱེད་རོགས།</string>
+    <string name="dream_sapps_body_your_purchase_is_complete">ཁྱེད་ཀྱི་བླུ་ཉོ་འགྲུབ་པར་བྱས་ཟིན།</string>
+    <string name="ids_com_body_error_code_c">གསང་ཡིག་འཛོལ་བ</string>
+    <string name="mids_sapps_body_waiting_ing">སྒུག་བཞིན་པ</string>
+    <string name="mids_sapps_header_samsung_in_app_purchase_abb">Samsung In-App Purchase</string>
+    <string name="mids_sapps_header_update_galaxy_apps">Galaxy་ཉེར་སྤྱོད་ཚོང་ཁང་གསར་སྒྱུར་བྱེད།</string>
+    <string name="mids_sapps_pop_a_new_version_is_available_galaxy_apps_will_be_updated_to_the_latest_version_to_complete_this_purchase">པར་གཞི་གསར་བ་འདུགGalaxy་ཉེར་སྤྱོད་ཚོང་ཁང་གིས་པར་གཞི་གསར་ཤོས་སུ་གསར་སྒྱུར་བྱས་ནས་ཐེངས་འདིའི་དངོས་ཉོ་འགྲུབ་པར་བྱེད།</string>
+    <string name="mids_sapps_pop_an_invalid_value_has_been_provided_for_samsung_in_app_purchase">Samsung In-App Purchaseལ་ཕན་མེད་གྲངས་ཞིག་ཐོབ་ཡོད།</string>
+    <string name="mids_sapps_pop_payment_canceled">དངུལ་སྤྲོད་བྲིས་སུབ་གཏོང་བ།</string>
+    <string name="mids_sapps_pop_to_purchase_items_you_need_to_install_samsung_in_app_purchase_install_q">གལ་ཏེ་ཉོ་སྒྲུབ་ཚོང་ཟོག།ཁྱེད་ནས་Samsung In-App Purchaseསྒྲིག་འཇུག་བྱེད་དགོས།སྒྲིག་འཇུག་བྱེད་དམ།</string>
+    <string name="mids_sapps_pop_unable_to_open_samsung_in_app_purchase_msg">Samsung In-App Purchaseཁ་ཕྱེ་མི་ཐུབ།༼དབང་ཚད་༽ནང་ཞུགས་དགོས།དེ་རྗེས་གཤམ་གྱི་དབང་ཚད་སྤྲད་ནས་བསྐྱར་ཚོད་བྱེད་དགོས།</string>
+    <string name="mids_sapps_pop_unknown_error_occurred">རྒྱུས་མེད་ནོར་འཁྲུལ་བྱུང༌།</string>
+</resources>

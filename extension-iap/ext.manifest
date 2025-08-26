@@ -9,3 +9,9 @@ platforms:
         context:
             weakFrameworks: ['StoreKit', 'UIKit', 'Foundation']
             
+    armv7-android:
+        context:
+            aaptExtraPackages: ['com.samsung.android.sdk.iap.lib']
+    arm64-android:
+        context:
+            aaptExtraPackages: ['com.samsung.android.sdk.iap.lib']
