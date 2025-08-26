@@ -593,11 +593,9 @@ static dmExtension::Result UpdateIAP(dmExtension::Params* params)
 
 static dmExtension::Result FinalizeIAP(dmExtension::Params* params)
 {
-    if (g_IAP.m_Listener)
-    {
-        dmScript::DestroyCallback(g_IAP.m_Listener);
+    if(g_IAP.m_Listener) {
+         dmScript::DestroyCallback(g_IAP.m_Listener);
     }
-
     g_IAP.m_Listener = 0;
 
     if (g_IAP.m_PendingTransactions) {
