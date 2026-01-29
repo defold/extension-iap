@@ -11,3 +11,4 @@ builtins
 _site
 manifest.private.der
 manifest.public.der
+/.editor_settings
