@@ -114,11 +114,6 @@ static void IAP_FreeTransaction(IAPTransaction* transaction)
         return;
     }
 
-    if (!dmScript::IsCallbackValid(self.m_Callback)) {
-        dmLogError("No callback set");
-        return;
-    }
-
     NSArray* skProducts = response.products;
 
     IAPResponse* iap_response = new IAPResponse;
@@ -168,6 +163,12 @@ static void HandleProductResult(IAPCommand* cmd)
 
     IAPResponse* response = (IAPResponse*)cmd->m_Data;
 
+    if (!dmScript::IsCallbackValid(cmd->m_Callback)) {
+        dmLogError("No callback set");
+        delete response;
+        return;
+    }
+
     lua_State* L = dmScript::GetCallbackLuaContext(cmd->m_Callback);
     int top = lua_gettop(L);
 
@@ -216,11 +217,6 @@ static void HandleProductResult(IAPCommand* cmd)
 
 - (void)request:(SKRequest *)request didFailWithError:(NSError *)error{
     dmLogWarning("SKProductsRequest failed: %s", [error.localizedDescription UTF8String]);
-
-    if (!dmScript::IsCallbackValid(self.m_Callback)) {
-        dmLogError("No callback set");
-        return;
-    }
 
     IAPResponse* response = new IAPResponse;
     response->error = strdup([error.localizedDescription UTF8String]);
@@ -315,6 +311,11 @@ static void PushTransaction(lua_State* L, IAPTransaction* transaction)
 static void HandlePurchaseResult(IAPCommand* cmd)
 {
     IAPTransaction* transaction = (IAPTransaction*)cmd->m_Data;
+
+    if (!dmScript::IsCallbackValid(cmd->m_Callback)) {
+        dmLogError("No callback set");
+        return;
+    }
 
     lua_State* L = dmScript::GetCallbackLuaContext(cmd->m_Callback);
     int top = lua_gettop(L);
