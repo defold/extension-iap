@@ -25,6 +25,7 @@ import com.android.billingclient.api.PendingPurchasesParams;
 import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.Purchase.PurchaseState;
 import com.android.billingclient.api.ProductDetails;
+import com.android.billingclient.api.UnfetchedProduct;
 import com.android.billingclient.api.ProductDetails.OneTimePurchaseOfferDetails;
 import com.android.billingclient.api.ProductDetails.PricingPhases;
 import com.android.billingclient.api.ProductDetails.PricingPhase;
@@ -36,6 +37,7 @@ import com.android.billingclient.api.BillingFlowParams.ProductDetailsParams;
 import com.android.billingclient.api.QueryPurchasesParams;
 import com.android.billingclient.api.QueryProductDetailsParams;
 import com.android.billingclient.api.QueryProductDetailsParams.Product;
+import com.android.billingclient.api.QueryProductDetailsResult;
 import com.android.billingclient.api.AcknowledgePurchaseParams;
 import com.android.billingclient.api.PurchasesUpdatedListener;
 import com.android.billingclient.api.BillingClientStateListener;
@@ -163,10 +165,16 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
             p.put("title", productDetails.getTitle());
             p.put("description", productDetails.getDescription());
             if (productDetails.getProductType().equals(ProductType.INAPP)) {
-                OneTimePurchaseOfferDetails offerDetails = productDetails.getOneTimePurchaseOfferDetails();
-                p.put("price_string", offerDetails.getFormattedPrice());
-                p.put("currency_code", offerDetails.getPriceCurrencyCode());
-                p.put("price", offerDetails.getPriceAmountMicros() * 0.000001);
+                List<OneTimePurchaseOfferDetails> offerDetailsList = productDetails.getOneTimePurchaseOfferDetailsList();
+                if (offerDetailsList != null && !offerDetailsList.isEmpty()) {
+                    OneTimePurchaseOfferDetails offerDetails = offerDetailsList.get(0);
+                    p.put("price_string", offerDetails.getFormattedPrice());
+                    p.put("currency_code", offerDetails.getPriceCurrencyCode());
+                    p.put("price", offerDetails.getPriceAmountMicros() * 0.000001);
+                    p.put("token", offerDetails.getOfferToken());
+                } else {
+                    Log.w(TAG, "No one-time purchase offers returned for product " + productDetails.getProductId());
+                }
             }
             else if (productDetails.getProductType().equals(ProductType.SUBS)) {
                 List<SubscriptionOfferDetails> subscriptionOfferDetails = productDetails.getSubscriptionOfferDetails();
@@ -437,7 +445,9 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
             productList.add(product);
             queryProductDetailsAsync(productList, new ProductDetailsResponseListener() {
                 @Override
-                public void onProductDetailsResponse(BillingResult billingResult, List<ProductDetails> productDetailsList) {
+                public void onProductDetailsResponse(BillingResult billingResult, QueryProductDetailsResult productDetailsResult) {
+                    List<ProductDetails> productDetailsList = productDetailsResult.getProductDetailsList();
+                    // TODO: productDetailsResult.getUnfetchedProductList()
                     if (billingResult.getResponseCode() == BillingResponseCode.OK && (productDetailsList != null) && !productDetailsList.isEmpty()) {
                         for (ProductDetails productDetails : productDetailsList) {
                             if (productDetails != null) {
@@ -462,10 +472,12 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
     private void queryProductDetailsAsync(final List<String> productList, final ProductDetailsResponseListener listener) {
         ProductDetailsResponseListener detailsListener = new ProductDetailsResponseListener() {
             private List<ProductDetails> allProductDetails = new ArrayList<ProductDetails>();
+            private List<UnfetchedProduct> allUnfecthedProducts = new ArrayList<UnfetchedProduct>();
             private int queries = 2;
 
             @Override
-            public void onProductDetailsResponse(BillingResult billingResult, List<ProductDetails> productDetails) {
+            public void onProductDetailsResponse(BillingResult billingResult, QueryProductDetailsResult queryProductDetailsResult) {
+                List<ProductDetails> productDetails = queryProductDetailsResult.getProductDetailsList();
                 if (productDetails != null && !productDetails.isEmpty()) {
                     // cache products (cache will be used to speed up buying)
                     for (ProductDetails pd : productDetails) {
@@ -476,10 +488,18 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
                     // add to list of all product details
                     allProductDetails.addAll(productDetails);
                 }
+
+                List<UnfetchedProduct> unfetchedProducts = queryProductDetailsResult.getUnfetchedProductList();
+                if (unfetchedProducts != null && !unfetchedProducts.isEmpty()) {
+                    // add to list of all unfetched products
+                    allUnfecthedProducts.addAll(unfetchedProducts);
+                }
+
                 // we're finished when we have queried for both in-app and subs
                 queries--;
                 if (queries == 0) {
-                    listener.onProductDetailsResponse(billingResult, allProductDetails);
+                    QueryProductDetailsResult allResults = QueryProductDetailsResult.create(allProductDetails, allUnfecthedProducts);
+                    listener.onProductDetailsResponse(billingResult, allResults);
                 }
             }
         };
@@ -516,7 +536,8 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
 
         queryProductDetailsAsync(productList, new ProductDetailsResponseListener() {
             @Override
-            public void onProductDetailsResponse(BillingResult billingResult, List<ProductDetails> productDetails) {
+            public void onProductDetailsResponse(BillingResult billingResult, QueryProductDetailsResult queryProductDetailsResult) {
+                List<ProductDetails> productDetails = queryProductDetailsResult.getProductDetailsList();
                 JSONArray a = new JSONArray();
                 if ((billingResult.getResponseCode() == BillingResponseCode.OK) && (productDetails != null) && !productDetails.isEmpty()) {
                     for (ProductDetails pd : productDetails) {
