@@ -58,7 +58,11 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
         this.autoFinishTransactions = autoFinishTransactions;
 
         PendingPurchasesParams pendingPurchasesParams = PendingPurchasesParams.newBuilder().enableOneTimeProducts().build();
-        billingClient = BillingClient.newBuilder(activity).setListener(this).enablePendingPurchases(pendingPurchasesParams).build();
+        billingClient = BillingClient.newBuilder(activity)
+            .setListener(this)
+            .enablePendingPurchases(pendingPurchasesParams)
+            .enableAutoServiceReconnection()
+            .build();
         billingClient.startConnection(new BillingClientStateListener() {
             @Override
             public void onBillingSetupFinished(BillingResult billingResult) {
