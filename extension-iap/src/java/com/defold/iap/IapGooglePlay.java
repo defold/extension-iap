@@ -447,7 +447,6 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
                 @Override
                 public void onProductDetailsResponse(BillingResult billingResult, QueryProductDetailsResult productDetailsResult) {
                     List<ProductDetails> productDetailsList = productDetailsResult.getProductDetailsList();
-                    // TODO: productDetailsResult.getUnfetchedProductList()
                     if (billingResult.getResponseCode() == BillingResponseCode.OK && (productDetailsList != null) && !productDetailsList.isEmpty()) {
                         for (ProductDetails productDetails : productDetailsList) {
                             if (productDetails != null) {
