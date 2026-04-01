@@ -145,6 +145,26 @@
                 For Google Play [icon:googleplay] this is the merchant's locale, instead of the user's.
                 For Google Play [icon:googleplay] this is used only for in-app products
 
+        - name: onetime
+          type: table
+          desc: Only available for Google Play [icon:googleplay]. List of one-time purchase offers.
+          members:
+          - name: token
+            type: string
+            desc: The token associated with the offer.
+
+          - name: price
+            type: number
+            desc: The price of the product.
+
+          - name: price_string
+            type: string
+            desc: The price of the product, as a formatted string (amount and currency symbol).
+
+          - name: currency_code
+            type: string
+            desc: The currency code.
+
         - name: subscriptions
           type: table
           desc: Only available for Google Play [icon:googleplay]. List of subscription offers.
