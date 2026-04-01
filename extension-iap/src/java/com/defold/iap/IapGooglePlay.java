@@ -158,6 +158,28 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
         return a;
     }
 
+    private void addOneTimeOfferDetailsToJSON(OneTimePurchaseOfferDetails offerDetails, JSONObject p) throws JSONException {
+        p.put("price_string", offerDetails.getFormattedPrice());
+        p.put("currency_code", offerDetails.getPriceCurrencyCode());
+        p.put("price", offerDetails.getPriceAmountMicros() * 0.000001);
+        p.put("token", offerDetails.getOfferToken());
+    }
+    private JSONObject oneTimeOfferDetailsToJSON(OneTimePurchaseOfferDetails offerDetails) throws JSONException {
+        JSONObject p = new JSONObject();
+        addOneTimeOfferDetailsToJSON(offerDetails, p);
+        return p;
+    }
+
+    private void addSubscriptionOfferDetailsToJSON(SubscriptionOfferDetails offerDetails, JSONObject p) throws JSONException {
+        p.put("token", offerDetails.getOfferToken());
+        p.put("pricing", convertSubscriptionOfferPricingPhases(offerDetails));
+    }
+    private JSONObject subscriptionOfferDetailsToJSON(SubscriptionOfferDetails offerDetails) throws JSONException {
+        JSONObject p = new JSONObject();
+        addSubscriptionOfferDetailsToJSON(offerDetails, p);
+        return p;
+    }
+
     private JSONObject convertProductDetails(ProductDetails productDetails) {
         JSONObject p = new JSONObject();
         try {
@@ -167,25 +189,31 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
             if (productDetails.getProductType().equals(ProductType.INAPP)) {
                 List<OneTimePurchaseOfferDetails> offerDetailsList = productDetails.getOneTimePurchaseOfferDetailsList();
                 if (offerDetailsList != null && !offerDetailsList.isEmpty()) {
-                    OneTimePurchaseOfferDetails offerDetails = offerDetailsList.get(0);
-                    p.put("price_string", offerDetails.getFormattedPrice());
-                    p.put("currency_code", offerDetails.getPriceCurrencyCode());
-                    p.put("price", offerDetails.getPriceAmountMicros() * 0.000001);
-                    p.put("token", offerDetails.getOfferToken());
-                } else {
+                    addOneTimeOfferDetailsToJSON(offerDetailsList.get(0), p);
+                    JSONArray a = new JSONArray();
+                    for (OneTimePurchaseOfferDetails offerDetails : offerDetailsList)
+                    {
+                        a.put(oneTimeOfferDetailsToJSON(offerDetails));
+                    }
+                    p.put("onetime", a);
+                }
+                else {
                     Log.w(TAG, "No one-time purchase offers returned for product " + productDetails.getProductId());
                 }
             }
             else if (productDetails.getProductType().equals(ProductType.SUBS)) {
-                List<SubscriptionOfferDetails> subscriptionOfferDetails = productDetails.getSubscriptionOfferDetails();
-                JSONArray a = new JSONArray();
-                for (SubscriptionOfferDetails offerDetails : subscriptionOfferDetails) {
-                    JSONObject o = new JSONObject();
-                    o.put("token", offerDetails.getOfferToken());
-                    o.put("pricing", convertSubscriptionOfferPricingPhases(offerDetails));
-                    a.put(o);
+                List<SubscriptionOfferDetails> offerDetailsList = productDetails.getSubscriptionOfferDetails();
+                if (offerDetailsList != null && !offerDetailsList.isEmpty())
+                {
+                    JSONArray a = new JSONArray();
+                    for (SubscriptionOfferDetails offerDetails : offerDetailsList) {
+                        a.put(subscriptionOfferDetailsToJSON(offerDetails));
+                    }
+                    p.put("subscriptions", a);
                 }
-                p.put("subscriptions", a);
+                else {
+                    Log.w(TAG, "No subscription offers returned for product " + productDetails.getProductId());
+                }
             }
             else {
                 Log.i(TAG, "convertProductDetails() unknown product type " + productDetails.getProductType());
@@ -447,12 +475,25 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
                 @Override
                 public void onProductDetailsResponse(BillingResult billingResult, QueryProductDetailsResult productDetailsResult) {
                     List<ProductDetails> productDetailsList = productDetailsResult.getProductDetailsList();
-                    if (billingResult.getResponseCode() == BillingResponseCode.OK && (productDetailsList != null) && !productDetailsList.isEmpty()) {
-                        for (ProductDetails productDetails : productDetailsList) {
-                            if (productDetails != null) {
-                                buyProduct(productDetails, token, purchaseListener);
-                                break;
+                    if (billingResult.getResponseCode() == BillingResponseCode.OK) {
+                        if ((productDetailsList != null) && !productDetailsList.isEmpty())
+                        {
+                            for (ProductDetails productDetails : productDetailsList) {
+                                if (productDetails != null) {
+                                    buyProduct(productDetails, token, purchaseListener);
+                                    break;
+                                }
                             }
+                        }
+                        else
+                        {
+                            billingResult = BillingResult.newBuilder()
+                                                .setResponseCode(BillingResponseCode.BILLING_UNAVAILABLE)
+                                                .setDebugMessage("Product details list was empty")
+                                                .build();
+
+                            Log.e(TAG, "Unable to get product details before buying: " + billingResult.getDebugMessage());
+                            invokeOnPurchaseResultListener(purchaseListener, billingResult);
                         }
                     }
                     else {
