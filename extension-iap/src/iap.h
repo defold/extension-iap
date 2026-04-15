@@ -19,6 +19,7 @@ enum ErrorReason
 {
     REASON_UNSPECIFIED = 0,
     REASON_USER_CANCELED = 1,
+    REASON_ITEM_ALREADY_OWNED = 2,
 };
 
 enum BillingResponse

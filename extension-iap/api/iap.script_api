@@ -329,6 +329,8 @@
 
                - `iap.REASON_USER_CANCELED`
 
+               - `iap.REASON_ITEM_ALREADY_OWNED`
+
 #*****************************************************************************************************
 
   - name: PROVIDER_ID_AMAZON
@@ -354,6 +356,10 @@
   - name: REASON_USER_CANCELED
     type: number
     desc: user canceled reason
+
+  - name: REASON_ITEM_ALREADY_OWNED
+    type: number
+    desc: the item is already owned by the user
 
   - name: TRANS_STATE_FAILED
     type: number
