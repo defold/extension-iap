@@ -288,6 +288,19 @@ JNIEXPORT void JNICALL Java_com_defold_iap_IapJNI_onPurchaseResult__ILjava_lang_
 }
 #endif
 
+static ErrorReason BillingResponseToErrorReason(BillingResponse response)
+{
+    switch (response)
+    {
+    case BILLING_RESPONSE_RESULT_ITEM_ALREADY_OWNED:
+        return REASON_ITEM_ALREADY_OWNED;
+    case BILLING_RESPONSE_RESULT_USER_CANCELED:
+        return REASON_USER_CANCELED;
+    default:
+        return REASON_UNSPECIFIED;
+    }
+}
+
 static void HandleProductResult(const IAPCommand* cmd)
 {
     if (cmd->m_Callback == 0)
@@ -312,7 +325,7 @@ static void HandleProductResult(const IAPCommand* cmd)
     } else {
         dmLogError("IAP error %d", cmd->m_ResponseCode);
         lua_pushnil(L);
-        IAP_PushError(L, "failed to fetch product", REASON_UNSPECIFIED);
+        IAP_PushError(L, "failed to fetch product", BillingResponseToErrorReason((BillingResponse)cmd->m_ResponseCode));
     }
 
     dmScript::PCall(L, 3, 0);
@@ -356,7 +369,7 @@ static void HandlePurchaseResult(const IAPCommand* cmd)
     } else {
         dmLogError("IAP error %d", cmd->m_ResponseCode);
         lua_pushnil(L);
-        IAP_PushError(L, "failed to buy product", REASON_UNSPECIFIED);
+        IAP_PushError(L, "failed to buy product", BillingResponseToErrorReason((BillingResponse)cmd->m_ResponseCode));
     }
 
     dmScript::PCall(L, 3, 0);

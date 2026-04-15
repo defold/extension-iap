@@ -108,7 +108,7 @@ static void IAPListener_Callback(void* luacallback, const char* result_json, int
                 break;
 
             case BILLING_RESPONSE_RESULT_ITEM_ALREADY_OWNED:
-                IAP_PushError(L, "product already owned", REASON_UNSPECIFIED);
+                IAP_PushError(L, "product already owned", REASON_ITEM_ALREADY_OWNED);
                 break;
 
             default:
