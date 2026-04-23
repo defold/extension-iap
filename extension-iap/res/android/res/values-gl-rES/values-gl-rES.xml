@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dream_ph_body_contact_p1sscustomer_servicep2ss_for_more_information_n_nerror_code_c_p3ss">Ponte en contacto co %1$sServizo de atención ao cliente%2$s para obter máis información.\n\nCódigo de erro: %3$s</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_enable_the_galaxy_store_in_settings">Para rematar esta compra, activa Galaxy Store en Axustes.</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_update_the_galaxy_store">Para rematar esta compra, actualiza Galaxy Store.</string>
+    <string name="dream_ph_pheader_couldnt_complete_purchase">Non se puido completar a compra</string>
+    <string name="dream_sapps_body_authenticating_ing">Autenticando\u2026</string>
+    <string name="dream_sapps_body_contact_customer_service_to_complete_your_purchase">Ponte en contacto co Servizo de atención ao cliente para completar a compra.</string>
+    <string name="dream_sapps_body_your_purchase_is_complete">Completouse a túa compra.</string>
+    <string name="ids_com_body_error_code_c">Código de erro:</string>
+    <string name="mids_sapps_body_waiting_ing">Esperando\u2026</string>
+    <string name="mids_sapps_header_samsung_in_app_purchase_abb">Samsung In-App Purchase</string>
+    <string name="mids_sapps_header_update_galaxy_apps">Actualizar Galaxy Apps</string>
+    <string name="mids_sapps_pop_a_new_version_is_available_galaxy_apps_will_be_updated_to_the_latest_version_to_complete_this_purchase">Hai unha nova versión dispoñible. Galaxy Apps actualizarase á versión máis recente para completar esta compra.</string>
+    <string name="mids_sapps_pop_an_invalid_value_has_been_provided_for_samsung_in_app_purchase">Forneceuse un valor non válido para Samsung In-App Purchase</string>
+    <string name="mids_sapps_pop_payment_canceled">Pagamento cancelado</string>
+    <string name="mids_sapps_pop_to_purchase_items_you_need_to_install_samsung_in_app_purchase_install_q">Para mercar elementos, precisas instalar Compra de aplicacións interna de Samsung. Desexas instalalo?</string>
+    <string name="mids_sapps_pop_unable_to_open_samsung_in_app_purchase_msg">Non se pode abrir Samsung In-App Purchase. Vai a Permisos e, a continuación, concede os permisos necesarios e téntao outra vez.</string>
+    <string name="mids_sapps_pop_unknown_error_occurred">Houbo un erro descoñecido</string>
+</resources>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dream_ph_body_contact_p1sscustomer_servicep2ss_for_more_information_n_nerror_code_c_p3ss">Қосымша ақпарат алу үшін %1$sТұтынушыларға қызмет көрсету орталығына%2$s хабарласыңыз.\n\nҚате коды: %3$s</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_enable_the_galaxy_store_in_settings">Осы сатып алуды аяқтау үшін, “Параметрлер” мәзірінде Galaxy Store қызметін қосуыңыз қажет.</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_update_the_galaxy_store">Осы сатып алуды аяқтау үшін, Galaxy Store қолданбасын жаңартуыңыз қажет.</string>
+    <string name="dream_ph_pheader_couldnt_complete_purchase">Сатып алуды аяқтау мүмкін болмады</string>
+    <string name="dream_sapps_body_authenticating_ing">Аутентификациялануда\u2026</string>
+    <string name="dream_sapps_body_contact_customer_service_to_complete_your_purchase">Сатып алуыңызды аяқтау үшін Тұтынушыларға қызмет көрсету орталығына хабарласыңыз.</string>
+    <string name="dream_sapps_body_your_purchase_is_complete">Сатып алуыңыз аяқталды.</string>
+    <string name="ids_com_body_error_code_c">Қате коды:</string>
+    <string name="mids_sapps_body_waiting_ing">Күтуде\u2026</string>
+    <string name="mids_sapps_header_samsung_in_app_purchase_abb">Samsung In-App Purchase</string>
+    <string name="mids_sapps_header_update_galaxy_apps">Galaxy Apps қолданбасын жаңарту</string>
+    <string name="mids_sapps_pop_a_new_version_is_available_galaxy_apps_will_be_updated_to_the_latest_version_to_complete_this_purchase">Жаңа нұсқа қолжетімді. Осы сатып алуды аяқтау үшін, Galaxy Apps қолданбасы ең соңғы нұсқаға жаңартылады.</string>
+    <string name="mids_sapps_pop_an_invalid_value_has_been_provided_for_samsung_in_app_purchase">Samsung In-App Purchase бағдарламасы үшін жарамсыз мән көрсетілген.</string>
+    <string name="mids_sapps_pop_payment_canceled">Төлемнен бас тартылды.</string>
+    <string name="mids_sapps_pop_to_purchase_items_you_need_to_install_samsung_in_app_purchase_install_q">Элементтерді сатып алу үшін Samsung In-App Purchase бағдарламасын орнату керек. Орнату керек пе?</string>
+    <string name="mids_sapps_pop_unable_to_open_samsung_in_app_purchase_msg">Samsung In-App Purchase ашу мүмкін болмады. “Рұқсаттар” бөліміне өтіп, қажетті рұқсаттарды беріңіз, кейін әрекетті қайталаңыз.</string>
+    <string name="mids_sapps_pop_unknown_error_occurred">Белгісіз қате пайда болды.</string>
+</resources>

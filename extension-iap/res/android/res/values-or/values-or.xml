@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dream_ph_body_contact_p1sscustomer_servicep2ss_for_more_information_n_nerror_code_c_p3ss">ଅଧିକ ସୂଚନା ପାଇଁ %1$sଗ୍ରାହାକ ସେବା%2$sକୁ ସମ୍ପର୍କ କରନ୍ତୁ।\n\nତ୍ରୁଟି କୋଡ୍: %3$s</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_enable_the_galaxy_store_in_settings">ଏହି କ୍ରୟ ସମ୍ପୂର୍ଣ୍ଣ କରିବାକୁ, ଆପଣଙ୍କୁ ସେଟିଂସରେ Galaxy Store ସକ୍ଷମ କରିବା ଆବଶ୍ୟକ।</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_update_the_galaxy_store">ଏହି କ୍ରୟ ସମ୍ପୂର୍ଣ୍ଣ କରିବାକୁ, ଆପଣଙ୍କୁ Galaxy Store ଅପଡେଟ୍ କରିବା ଆବଶ୍ୟକ।</string>
+    <string name="dream_ph_pheader_couldnt_complete_purchase">କ୍ରୟ ସମ୍ପୂର୍ଣ୍ଣ କରାଯାଇ ପାରିଲା ନାହିଁ</string>
+    <string name="dream_sapps_body_authenticating_ing">ପ୍ରାମାଣିକ କରୁଛି\u2026</string>
+    <string name="dream_sapps_body_contact_customer_service_to_complete_your_purchase">ଆପଣଙ୍କ କ୍ରୟ ସମ୍ପୂର୍ଣ୍ଣ କରିବାକୁ ଗ୍ରାହାକ ସେବାକୁ ସମ୍ପର୍କ କରନ୍ତୁ।</string>
+    <string name="dream_sapps_body_your_purchase_is_complete">ଆପଣଙ୍କ କ୍ରୟ ସମୂର୍ଣ୍ଣ ହୋଇଛି।</string>
+    <string name="ids_com_body_error_code_c">ତ୍ରୁଟି କୋଡ୍:</string>
+    <string name="mids_sapps_body_waiting_ing">ଅପେକ୍ଷା କରୁଛି\u2026</string>
+    <string name="mids_sapps_header_samsung_in_app_purchase_abb">ସାମସଙ୍ଗ ଇନ-ଆପସ୍ କ୍ରୟ</string>
+    <string name="mids_sapps_header_update_galaxy_apps">Galaxy Apps ଅପଡେଟ୍‌ କରନ୍ତୁ</string>
+    <string name="mids_sapps_pop_a_new_version_is_available_galaxy_apps_will_be_updated_to_the_latest_version_to_complete_this_purchase">ଏକ ନୂତନ ସଂସ୍କରଣ ଉପଲବ୍ଧ। Galaxy Apps ଏହି କ୍ରୟ ସମ୍ପୂର୍ଣ୍ଣ କରିବାକୁ ନବୀନତ୍ତମ ସଂସ୍କରଣକୁ ଅପଡେଟ୍‌ ହେବ।</string>
+    <string name="mids_sapps_pop_an_invalid_value_has_been_provided_for_samsung_in_app_purchase">Samsung In-App Purchase ପାଇଁ ଏକ ଅବୈଧ ମୂଲ୍ୟ ପ୍ରଦାନ କରାଯାଇଛି।</string>
+    <string name="mids_sapps_pop_payment_canceled">ଦେୟ ବାତିଲ୍ ହୋଇଛି।</string>
+    <string name="mids_sapps_pop_to_purchase_items_you_need_to_install_samsung_in_app_purchase_install_q">ଆଇଟମ୍ କ୍ରୟ କରିବାକୁ, ଆପଣ ସାମ୍‌ସଙ୍ଗ ଇନ୍-ଆପ୍ କ୍ରୟସଂସ୍ଥାପନ କରିବା ଆବଶ୍ୟକ କରନ୍ତି। ସଂସ୍ଥାପନ କରିବେ?</string>
+    <string name="mids_sapps_pop_unable_to_open_samsung_in_app_purchase_msg">ସାମସଙ୍ଗ ଇନ-ଆପସ୍ କ୍ରୟ ଖୋଲିବାକୁ ଅସମର୍ଥ। ଅନୁମତିଗୁଡିକୁ ଯାଆନ୍ତୁ, ତାପରେ ଆବଶ୍ୟକୀୟ ଅନୁମତିଗୁଡିକ ଅନୁମତି ଦିଅନ୍ତୁ ଏବଂ ପୁନଃଚେଷ୍ଟା କରନ୍ତୁ।</string>
+    <string name="mids_sapps_pop_unknown_error_occurred">ଅଜଣା ତ୍ରୁଟି ଘଟିଛି।</string>
+</resources>

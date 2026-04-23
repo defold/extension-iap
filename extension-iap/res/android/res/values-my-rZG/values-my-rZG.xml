@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dream_ph_body_contact_p1sscustomer_servicep2ss_for_more_information_n_nerror_code_c_p3ss">ေနာက္ထပ္ အခ်က္အလက္မ်ားအတြက္ %1$sေဖာက္သည္ ဝန္ေဆာင္မႈ%2$sထံ ဆက္သြယ္ပါ။\n\nခ်ိဳ႕ယြင္းခ်က္ ကုဒ္ : %3$s</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_enable_the_galaxy_store_in_settings">ဤဝယ္ယူမႈ ၿပီးဆုံးေစရန္ သတ္မွတ္ခ်က္မ်ားထဲတြင္ Galaxy Store ကို ဖြင့္ရန္ လိုသည္။</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_update_the_galaxy_store">ဤဝယ္ယူမႈ ၿပီးဆုံးေစရန္ Galaxy Store ကို အပ္ဒိတ္လုပ္ရန္ လိုသည္။</string>
+    <string name="dream_ph_pheader_couldnt_complete_purchase">ဝယ္ယူမႈ မၿပီးေျမာက္ႏိုင္ပါ</string>
+    <string name="dream_sapps_body_authenticating_ing">စစ္မွန္ေၾကာင္းအေထာက္အထားစစ္ေဆးေနသည္\u2026</string>
+    <string name="dream_sapps_body_contact_customer_service_to_complete_your_purchase">ဝယ္ယူမႈ ၿပီးေျမာက္ေစရန္ ေဖာက္သည္ဝန္ေဆာင္မႈသို႔ ဆက္သြယ္ပါ။</string>
+    <string name="dream_sapps_body_your_purchase_is_complete">သင့္ ဝယ္ယူမႈ ၿပီးသြားပါၿပီ။</string>
+    <string name="ids_com_body_error_code_c">အမွားကုဒ္ :</string>
+    <string name="mids_sapps_body_waiting_ing">ေစာင့္ေနဆဲ\u2026</string>
+    <string name="mids_sapps_header_samsung_in_app_purchase_abb">Samsung In-App ဝယ္ယူမႈ</string>
+    <string name="mids_sapps_header_update_galaxy_apps">Galaxy Apps ကုိ အပ္ဒိတ္လုပ္ပါ</string>
+    <string name="mids_sapps_pop_a_new_version_is_available_galaxy_apps_will_be_updated_to_the_latest_version_to_complete_this_purchase">ဗားရွင္း အသစ္တစ္ခု အရန္သင့္ ရႏိုင္ပါသည္။ ဤဝယ္ယူမႈ ၿပီးေျမာက္ေစရန္ Galaxy Apps ကို ေနာက္ဆုံးထုတ္ ဗားရွင္းသို႔ အပ္ဒိတ္လုပ္ပါလိမ့္မည္။</string>
+    <string name="mids_sapps_pop_an_invalid_value_has_been_provided_for_samsung_in_app_purchase">Samsung In-App ဝယ္ယူမႈအတြက္ အက်ဳံးမဝင္ေသာ တန္ဖိုးတစ္ခု ေပးထားသည္။</string>
+    <string name="mids_sapps_pop_payment_canceled">ေပးေခ်မႈ ပယ္ဖ်က္ထားသည္။</string>
+    <string name="mids_sapps_pop_to_purchase_items_you_need_to_install_samsung_in_app_purchase_install_q">ပစၥည္းမ်ား ဝယ္ရန္ Samsung In-App ဝယ္ယူမႈ တပ္ဆင္ဖို႔ လိုသည္။ တပ္ဆင္မည္လား?</string>
+    <string name="mids_sapps_pop_unable_to_open_samsung_in_app_purchase_msg">Samsung In-App ဝယ္ယူမႈကို ဖြင့္၍မရႏိုင္ပါ။ ခြင့္ျပဳခ်က္မ်ားသို႔သြားၿပီးေနာက္ လိုအပ္သည့္ ခြင့္ျပဳခ်က္မ်ားကို ခြင့္ျပဳၿပီး ထပ္မံႀကိဳးစားပါ။</string>
+    <string name="mids_sapps_pop_unknown_error_occurred">မသိရေသာ အမွား ျဖစ္ပြားသည္။</string>
+</resources>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dream_ph_body_contact_p1sscustomer_servicep2ss_for_more_information_n_nerror_code_c_p3ss">ਹੋਰ ਜਾਣਕਾਰੀ ਲਈ %1$sਗਾਹਕ ਸੇਵਾ%2$s ਨਾਲ ਸੰਪਰਕ ਕਰੋ।\n\nਤਰੁੱਟੀ ਕੋਡ: %3$s</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_enable_the_galaxy_store_in_settings">ਇਸ ਖਰੀਦਦਾਰੀ ਨੂੰ ਪੂਰਾ ਕਰਨ ਲਈ, ਤੁਹਾਨੂੰ ਸੈੱਟਿੰਗਸ ਵਿੱਚ Galaxy Store ਨੂੰ ਸਮਰੱਥ ਕਰਨ ਦੀ ਲੋੜ ਹੈ।</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_update_the_galaxy_store">ਇਸ ਖਰੀਦਦਾਰੀ ਨੂੰ ਪੂਰਾ ਕਰਨ ਲਈ, ਤੁਹਾਨੂੰ Galaxy Store ਨੂੰ ਅਪਡੇਟ ਕਰਨ ਦੀ ਲੋੜ ਹੈ।</string>
+    <string name="dream_ph_pheader_couldnt_complete_purchase">ਖਰੀਦਦਾਰੀ ਨੂੰ ਪੂਰਾ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ</string>
+    <string name="dream_sapps_body_authenticating_ing">ਪ੍ਰਮਾਣਿਤ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ\u2026</string>
+    <string name="dream_sapps_body_contact_customer_service_to_complete_your_purchase">ਆਪਣੀ ਖਰੀਦ ਨੂੰ ਪੂਰਾ ਕਰਨ ਲਈ ਗਾਹਕ ਸੇਵਾ ਨਾਲ ਸੰਪਰਕ ਕਰੋ।</string>
+    <string name="dream_sapps_body_your_purchase_is_complete">ਤੁਹਾਡੀ ਖਰੀਦਦਾਰੀ ਪੂਰੀ ਹੋ ਗਈ ਹੈ।</string>
+    <string name="ids_com_body_error_code_c">ਤਰੁੱਟੀ ਕੋਡ:</string>
+    <string name="mids_sapps_body_waiting_ing">ਉਡੀਕ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ\u2026</string>
+    <string name="mids_sapps_header_samsung_in_app_purchase_abb">ਸੈਮਸੰਗ ਇਨ-ਐਪ ਖਰੀਦਦਾਰੀ</string>
+    <string name="mids_sapps_header_update_galaxy_apps">Galaxy Apps ਨੂੰ ਅਪਡੇਟ ਕਰੋ</string>
+    <string name="mids_sapps_pop_a_new_version_is_available_galaxy_apps_will_be_updated_to_the_latest_version_to_complete_this_purchase">ਇੱਕ ਨਵਾਂ ਸੰਸਕਰਣ ਉਪਲਬਧ ਹੈ। ਇਸ ਖਰੀਦਦਾਰੀ ਨੂੰ ਪੂਰਾ ਕਰਨ ਲਈ Galaxy Apps ਨੂੰ ਨਵੀਨਤਮ ਸੰਸਕਰਣ ਤੇ ਅਪਡੇਟ ਕੀਤਾ ਜਾਵੇਗਾ।</string>
+    <string name="mids_sapps_pop_an_invalid_value_has_been_provided_for_samsung_in_app_purchase">ਸੈਮਸੰਗ ਇਨ-ਐਪ ਪਰਚੇਜ਼ ਦੇ ਲਈ ਇੱਕ ਅਵੈਧ ਮਾਨ ਪ੍ਰਦਾਨ ਕੀਤਾ ਗਿਆ ਹੈ।</string>
+    <string name="mids_sapps_pop_payment_canceled">ਭੁਗਤਾਨ ਰੱਦ ਕੀਤੀ ਗਈ।</string>
+    <string name="mids_sapps_pop_to_purchase_items_you_need_to_install_samsung_in_app_purchase_install_q">ਆਈਟਮ ਖਰੀਦਣ ਦੇ ਲਈ, ਤੁਹਾਨੂੰ ਸੈਮਸੰਗ ਇਨ-ਐਪ ਪਰਚੇਜ਼ ਸਥਾਪਿਤ ਕਰਨ ਦੀ ਲੋੜ ਹੈ। ਸਥਾਪਿਤ ਕਰੋ?</string>
+    <string name="mids_sapps_pop_unable_to_open_samsung_in_app_purchase_msg">ਸੈਮਸੰਗ ਇਨ-ਐਪ ਭੁਗਤਾਨ ਨੂੰ ਖੋਲ੍ਹਣ ਵਿੱਚ ਅਸਮਰੱਥ। ਅਨੁਮਤੀਆਂ ਤੇ ਜਾਉ, ਫਿਰ ਲੋੜੀਂਦੀਆਂ ਅਨੁਮਤੀਆਂ ਨੂੰ ਆਗਿਆ ਦਿਉ ਅਤੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।</string>
+    <string name="mids_sapps_pop_unknown_error_occurred">ਅਗਿਆਤ ਤਰੁੱਟੀ ਉਤਪੰਨ ਹੋਈ।</string>
+</resources>

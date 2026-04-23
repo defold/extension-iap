@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dream_ph_body_contact_p1sscustomer_servicep2ss_for_more_information_n_nerror_code_c_p3ss">Επικοινωνήστε με την %1$sΥπηρεσία εξυπηρέτησης πελατών%2$s για περισσότερες πληροφορίες.\n\nΚωδικός σφάλματος: %3$s</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_enable_the_galaxy_store_in_settings">Για να ολοκληρώσετε αυτήν την αγορά, θα πρέπει να ενεργοποιήσετε το Galaxy Store από τις Ρυθμίσεις.</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_update_the_galaxy_store">Για να ολοκληρώσετε αυτήν την αγορά, θα πρέπει να ενημερώσετε το Galaxy Store.</string>
+    <string name="dream_ph_pheader_couldnt_complete_purchase">Δεν ήταν δυνατή η ολοκλήρωση της αγοράς</string>
+    <string name="dream_sapps_body_authenticating_ing">Έλεγχος ταυτότητας\u2026</string>
+    <string name="dream_sapps_body_contact_customer_service_to_complete_your_purchase">Επικοινωνήστε με την υπηρεσία εξυπηρέτησης πελατών, για να ολοκληρώσετε την αγορά σας.</string>
+    <string name="dream_sapps_body_your_purchase_is_complete">Η αγορά σας ολοκληρώθηκε.</string>
+    <string name="ids_com_body_error_code_c">Κωδικός σφάλματος:</string>
+    <string name="mids_sapps_body_waiting_ing">Αναμονή\u2026</string>
+    <string name="mids_sapps_header_samsung_in_app_purchase_abb">Samsung In-App Purchase</string>
+    <string name="mids_sapps_header_update_galaxy_apps">Ενημέρωση Galaxy Apps</string>
+    <string name="mids_sapps_pop_a_new_version_is_available_galaxy_apps_will_be_updated_to_the_latest_version_to_complete_this_purchase">Υπάρχει διαθέσιμη νέα έκδοση. Για την ολοκλήρωση αυτής της αγοράς, το Galaxy Apps θα ενημερωθεί στην πιο πρόσφατη έκδοση.</string>
+    <string name="mids_sapps_pop_an_invalid_value_has_been_provided_for_samsung_in_app_purchase">Δόθηκε μη έγκυρη τιμή για την αγορά εντός της εφαρμογής Samsung.</string>
+    <string name="mids_sapps_pop_payment_canceled">Η πληρωμή ακυρώθηκε.</string>
+    <string name="mids_sapps_pop_to_purchase_items_you_need_to_install_samsung_in_app_purchase_install_q">Πρέπει να εγκαταστήσετε το εργαλείο αγοράς εντός εφαρμογής της Samsung για να αγοράσετε στοιχεία. Να εγκατασταθεί;</string>
+    <string name="mids_sapps_pop_unable_to_open_samsung_in_app_purchase_msg">Δεν είναι δυνατό το άνοιγμα του Samsung In-App Purchase. Μεταβείτε στα Δικαιώματα, παραχωρήστε τα παρακάτω δικαιώματα και, στη συνέχεια, δοκιμάστε ξανά.</string>
+    <string name="mids_sapps_pop_unknown_error_occurred">Παρουσιάστηκε άγνωστο σφάλμα.</string>
+</resources>
