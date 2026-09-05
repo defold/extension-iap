@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dream_ph_body_contact_p1sscustomer_servicep2ss_for_more_information_n_nerror_code_c_p3ss">Pogŏdej z %1$sôbsugōm klijynta%2$s, coby dostać wiyncyj info.\n\nKod feleru: %3$s</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_enable_the_galaxy_store_in_settings">Coby dokōńczyć tyn sprŏwōnek, trza załōnczyć ôpcyjŏ Galaxy Store w Sztalowaniu.</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_update_the_galaxy_store">Coby dokōńczyć tyn sprŏwōnek, trza zeaktualizować Galaxy Store.</string>
+    <string name="dream_ph_pheader_couldnt_complete_purchase">Feler kōńczynio sprŏwōnku</string>
+    <string name="dream_sapps_body_authenticating_ing">Przituplowanie…</string>
+    <string name="dream_sapps_body_contact_customer_service_to_complete_your_purchase">Pogŏdej z Ôbsugōm klijynta coby sprŏwunek bōł fertich.</string>
+    <string name="dream_sapps_body_your_purchase_is_complete">Sprŏwunki sōm fertich.</string>
+    <string name="ids_com_body_error_code_c">Kod ôd felera:</string>
+    <string name="mids_sapps_body_waiting_ing">Czekanie…</string>
+    <string name="mids_sapps_header_samsung_in_app_purchase_abb">Sprowōnki rajn apl. Samsung</string>
+    <string name="mids_sapps_header_update_galaxy_apps">Uaktualniynie Galaxy Apps</string>
+    <string name="mids_sapps_pop_a_new_version_is_available_galaxy_apps_will_be_updated_to_the_latest_version_to_complete_this_purchase">Do chycynio je nowo wersyjo. Aplikacyjo Galaxy Apps bydzie uaktualniōno do nojnowszyj wersyji coby zrobić tyn sprŏwōnek.</string>
+    <string name="mids_sapps_pop_an_invalid_value_has_been_provided_for_samsung_in_app_purchase">Do usugi Zakupy w aplikacyji gyszeftu Samsung dostarczōno niyprawŏ wartość.</string>
+    <string name="mids_sapps_pop_payment_canceled">Płat pociepany.</string>
+    <string name="mids_sapps_pop_to_purchase_items_you_need_to_install_samsung_in_app_purchase_install_q">Cobyś poradziōł kupować elemynty, trza zainsztalować usuga Zakupy w aplikacyji gyszeftu Samsung. Zainsztalować?</string>
+    <string name="mids_sapps_pop_unable_to_open_samsung_in_app_purchase_msg">Niy idzie ôdewrzić aplikacyji Sprŏwōnki we strzodku aplikacyji fyrmy Samsung. Przelyź do Uprŏwniyń, a potym załōncz wymŏgane uprŏwniynia i badnij drugi rŏz.</string>
+    <string name="mids_sapps_pop_unknown_error_occurred">Zaszeł niyznany feler</string>
+</resources>

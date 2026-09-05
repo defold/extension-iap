@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dream_ph_body_contact_p1sscustomer_servicep2ss_for_more_information_n_nerror_code_c_p3ss">වැඩිදුර තොරතුරු සඳහා %1$sපාරිභෝගික සේවය%2$s අමතන්න.\n\nදෝෂ කේතය: %3$s</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_enable_the_galaxy_store_in_settings">මෙම මිල දී ගැනීම සම්පූර්ණ කිරීමට, ඔබට සැකසුම් තුළ Galaxy Store සබල කිරීමට අවශ්‍යයි.</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_update_the_galaxy_store">මෙම මිල දී ගැනීම සම්පූර්ණ කිරීමට, ඔබට Galaxy Store යාවත්කාලයට අවශ්‍යයි.</string>
+    <string name="dream_ph_pheader_couldnt_complete_purchase">මිලට ගැනුම සම්පූර්ණ කළ නොහැකි විය</string>
+    <string name="dream_sapps_body_authenticating_ing">සත්‍යාපනය කරමින්\u2026</string>
+    <string name="dream_sapps_body_contact_customer_service_to_complete_your_purchase">ඔබේ මිල දී ගැනීම සම්පූර්ණ කිරීමට පාරිභෝගික සේවාව සම්බන්ධ කර ගන්න.</string>
+    <string name="dream_sapps_body_your_purchase_is_complete">ඔබේ මිල දී ගැනීම සම්පූර්ණයි.</string>
+    <string name="ids_com_body_error_code_c">දෝෂ කේතය:</string>
+    <string name="mids_sapps_body_waiting_ing">රැඳී සිටිමින්\u2026</string>
+    <string name="mids_sapps_header_samsung_in_app_purchase_abb">Samsung අ.-යෙදුම් මි. ගැ.</string>
+    <string name="mids_sapps_header_update_galaxy_apps">Galaxy Apps යාවත්කාලය</string>
+    <string name="mids_sapps_pop_a_new_version_is_available_galaxy_apps_will_be_updated_to_the_latest_version_to_complete_this_purchase">නව අනුවාදයක් ඇත. මෙම මිලට ගැනුම සම්පූර්ණ කිරීමට Galaxy Apps නවතම අනුවාදයට යාවත්කාල වනු ඇත.</string>
+    <string name="mids_sapps_pop_an_invalid_value_has_been_provided_for_samsung_in_app_purchase">Samsung Apps-තුළ මිලදී ගැනීම් සඳහා අවලංගු අගයක් සපයා ඇත.</string>
+    <string name="mids_sapps_pop_payment_canceled">ගෙවීම අවලංගු විය.</string>
+    <string name="mids_sapps_pop_to_purchase_items_you_need_to_install_samsung_in_app_purchase_install_q">අයිතම මිල දී ගැනීමට ඔබ Samsung Apps-තුළ මිලදී ගැනීම ස්ථාපනය කරගත යුතුය. ස්ථාපනය කරන්නද?</string>
+    <string name="mids_sapps_pop_unable_to_open_samsung_in_app_purchase_msg">Samsung අන්තර්-යෙදුම් මිලට ගැනුම විවෘත කළ නොහැක. අවසර වෙත යන්න, එවිට අවශ්‍ය අවසරයන්ට ඉඩ දී නැවත උත්සාහ කරන්න.</string>
+    <string name="mids_sapps_pop_unknown_error_occurred">නොදන්නා දෝෂයක් ඇතිවිය.</string>
+</resources>

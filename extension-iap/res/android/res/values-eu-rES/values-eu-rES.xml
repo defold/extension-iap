@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dream_ph_body_contact_p1sscustomer_servicep2ss_for_more_information_n_nerror_code_c_p3ss">Informazio gehiago lortzeko, jarri %1$sBezeroentzako zerbitzuarekin%2$s harremanetan.\n\nErrore kodea: %3$s</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_enable_the_galaxy_store_in_settings">Erosketa osatzeko, Galaxy Store gaitu behar duzu Ezarpenak atalean.</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_update_the_galaxy_store">Erosketa osatzeko, Galaxy Store eguneratu behar duzu.</string>
+    <string name="dream_ph_pheader_couldnt_complete_purchase">Ezin izan da osatu erosketa</string>
+    <string name="dream_sapps_body_authenticating_ing">Autentifikatzen\u2026</string>
+    <string name="dream_sapps_body_contact_customer_service_to_complete_your_purchase">Erosketa osatzeko, jarri harremanetan Bezeroentzako zerbitzuarekin.</string>
+    <string name="dream_sapps_body_your_purchase_is_complete">Osatu da erosketa.</string>
+    <string name="ids_com_body_error_code_c">Errore kodea:</string>
+    <string name="mids_sapps_body_waiting_ing">Itxaroten\u2026</string>
+    <string name="mids_sapps_header_samsung_in_app_purchase_abb">Samsung In-App Purchase</string>
+    <string name="mids_sapps_header_update_galaxy_apps">Eguneratu Galaxy Apps</string>
+    <string name="mids_sapps_pop_a_new_version_is_available_galaxy_apps_will_be_updated_to_the_latest_version_to_complete_this_purchase">Bertsio berri bat dago erabilgarri. Galaxy Apps bertsio berrienera eguneratuko da erosketa hau osatzearren.</string>
+    <string name="mids_sapps_pop_an_invalid_value_has_been_provided_for_samsung_in_app_purchase">Balio baliogabea eman da Samsung In-App erosketan</string>
+    <string name="mids_sapps_pop_payment_canceled">Ordainketa utzita</string>
+    <string name="mids_sapps_pop_to_purchase_items_you_need_to_install_samsung_in_app_purchase_install_q">Elementuak erosteko, Samsung In-App Erosketa instalatu behar duzu. Instalatu?</string>
+    <string name="mids_sapps_pop_unable_to_open_samsung_in_app_purchase_msg">Ezin da Samsung In-App Purchase ireki. Joan Baimenak atalera, onartu beharrezko baimenak eta saiatu berriz.</string>
+    <string name="mids_sapps_pop_unknown_error_occurred">Errore ezezaguna gertatu da</string>
+</resources>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dream_ph_body_contact_p1sscustomer_servicep2ss_for_more_information_n_nerror_code_c_p3ss">অধিক তথ্যৰ বাবে %1$sগ্ৰাহক সেৱা%2$s সৈতে সম্পৰ্ক কৰক।\n\nত্ৰুটি ক\'ড: %3$s</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_enable_the_galaxy_store_in_settings">এই ক্ৰয় সম্পূৰ্ণ কৰিবলৈ, আপুনি ছেটিংছত Galaxy Store সক্ষম কৰাৰ প্ৰয়োজন।</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_update_the_galaxy_store">এই ক্ৰয় সম্পূৰ্ণ কৰিবলৈ, আপুনি Galaxy Store আপডেট কৰাৰ প্ৰয়োজন।</string>
+    <string name="dream_ph_pheader_couldnt_complete_purchase">ক্ৰয় সম্পূৰ্ণ কৰিব পৰা নগ\'ল</string>
+    <string name="dream_sapps_body_authenticating_ing">প্ৰমাণিকৃত কৰি আছে\u2026</string>
+    <string name="dream_sapps_body_contact_customer_service_to_complete_your_purchase">আপোনাৰ ক্ৰয় সম্পূৰ্ণ কৰিবলৈ গ্ৰাহক সেৱাৰ সৈতে সম্পৰ্ক কৰক।</string>
+    <string name="dream_sapps_body_your_purchase_is_complete">আপোনাৰ ক্ৰয় সম্পূৰ্ণ হ\'ল।</string>
+    <string name="ids_com_body_error_code_c">ত্ৰুটি ক\'ড:</string>
+    <string name="mids_sapps_body_waiting_ing">অপেক্ষাৰত\u2026</string>
+    <string name="mids_sapps_header_samsung_in_app_purchase_abb">চেমচাং ইন-এপ্প্‌ ক্ৰয়</string>
+    <string name="mids_sapps_header_update_galaxy_apps">Galaxy Apps আপডেট কৰক</string>
+    <string name="mids_sapps_pop_a_new_version_is_available_galaxy_apps_will_be_updated_to_the_latest_version_to_complete_this_purchase">এটা নতুন সংস্কৰণ উপলব্ধ। এই ক্ৰয় সম্পূৰ্ণ কৰিবলৈ Galaxy Apps-ক শেহতীয়া সংস্কৰণলৈ আপডেট কৰা হ\'ব।</string>
+    <string name="mids_sapps_pop_an_invalid_value_has_been_provided_for_samsung_in_app_purchase">চেমচাং ইন-এপ্প্‌ ক্ৰয়ৰ বাবে এটা অমান্য মান প্ৰদান কৰা হৈছে৷</string>
+    <string name="mids_sapps_pop_payment_canceled">পৰিশোধ বাতিল কৰা হৈছে৷</string>
+    <string name="mids_sapps_pop_to_purchase_items_you_need_to_install_samsung_in_app_purchase_install_q">আইটেমসমূহ ক্ৰয় কৰিবলৈ, আপুনি চেমচাং ইন-এপ্প্‌ পাৰচেজ ইনষ্টল কৰাটো প্ৰয়োজন। ইনষ্টল কৰিবনে?</string>
+    <string name="mids_sapps_pop_unable_to_open_samsung_in_app_purchase_msg">চেমচাং ইন-এপ্প্‌ ক্ৰয় খোলাত অক্ষম। অনুমতিলৈ যাওক, তাৰপিছত আৱশ্যকীয় অনুমতি অনুমোদন কৰক আৰু পুনঃচেষ্টা কৰক।</string>
+    <string name="mids_sapps_pop_unknown_error_occurred">অজ্ঞাত ত্ৰুটি ঘটিছে৷</string>
+</resources>

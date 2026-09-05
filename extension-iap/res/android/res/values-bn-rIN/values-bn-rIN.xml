@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dream_ph_body_contact_p1sscustomer_servicep2ss_for_more_information_n_nerror_code_c_p3ss">আরও তথ্যের জন্য %1$sগ্রাহক পরিষেবায়%2$s যোগাযোগ করুন।\n\nত্রুটি কোড: %3$s</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_enable_the_galaxy_store_in_settings">এই কেনাকাটা সম্পূর্ণ করতে আপনাকে সেটিংসে Galaxy Store সক্ষম করতে হবে।</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_update_the_galaxy_store">এই কেনাকাটা সম্পূর্ণ করতে আপনাকে Galaxy Store আপডেট করতে হবে।</string>
+    <string name="dream_ph_pheader_couldnt_complete_purchase">কেনাকাটা সম্পূর্ণ করা যায়নি</string>
+    <string name="dream_sapps_body_authenticating_ing">প্রমাণীকরণ করা হচ্ছে\u2026</string>
+    <string name="dream_sapps_body_contact_customer_service_to_complete_your_purchase">আপনার কেনাকাটা সম্পূর্ণ করতে গ্রাহক পরিষেবার সাথে যোগাযোগ করুন।</string>
+    <string name="dream_sapps_body_your_purchase_is_complete">আপনার কেনাকাটা সম্পূর্ণ।</string>
+    <string name="ids_com_body_error_code_c">ত্রুটি কোড:</string>
+    <string name="mids_sapps_body_waiting_ing">অপেক্ষা করা হচ্ছে\u2026</string>
+    <string name="mids_sapps_header_samsung_in_app_purchase_abb">স্যামসাং ইন-অ্যাপ পারচেস</string>
+    <string name="mids_sapps_header_update_galaxy_apps">Galaxy Apps আপডেট করুন</string>
+    <string name="mids_sapps_pop_a_new_version_is_available_galaxy_apps_will_be_updated_to_the_latest_version_to_complete_this_purchase">একটি নতুন সংস্করণ সুলভ। এই কেনাকাটা সম্পূর্ণ করতে, Galaxy Apps সাম্প্রতিকতম সংস্করণে আপডেট হবে।</string>
+    <string name="mids_sapps_pop_an_invalid_value_has_been_provided_for_samsung_in_app_purchase">স্যামসাং ইন-অ্যাপ ক্রয়ের জন্য একটি অবৈধ মান সরবরাহিত হয়েছে।</string>
+    <string name="mids_sapps_pop_payment_canceled">প্রদান বাতিল হয়েছে।</string>
+    <string name="mids_sapps_pop_to_purchase_items_you_need_to_install_samsung_in_app_purchase_install_q">আইটেমগুলি কিনতে আপনার স্যামসাং ইন-অ্যাপ ক্রয় ইনস্টল করা প্রয়োজন৷ ইনস্টল করবেন?</string>
+    <string name="mids_sapps_pop_unable_to_open_samsung_in_app_purchase_msg">স্যামসাং ইন-অ্যাপ পারচেজ খুলতে অক্ষম। অনুমতিগুলিতে যান, তারপর প্রয়োজনীয় অনুমতিগুলি মঞ্জুর করুন এবং আবার চেষ্টা করুন।</string>
+    <string name="mids_sapps_pop_unknown_error_occurred">অজানা ত্রুটি ঘটেছে।</string>
+</resources>

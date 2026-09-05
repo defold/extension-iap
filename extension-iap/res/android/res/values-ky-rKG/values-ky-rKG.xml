@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dream_ph_body_contact_p1sscustomer_servicep2ss_for_more_information_n_nerror_code_c_p3ss">Кеңири маалымат алуу үчүн, %1$sКардарлар Кызматы%2$s менен байланышыңыз.\n\nКата коду: %3$s</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_enable_the_galaxy_store_in_settings">Сатып алуу үчүн, Жөндөөлөрдөн Galaxy Store кызматын иштетиңиз.</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_update_the_galaxy_store">Сатып алуу үчүн, Galaxy Store кызматын жаңыртыңыз.</string>
+    <string name="dream_ph_pheader_couldnt_complete_purchase">Сатып алуу аякталбай койду</string>
+    <string name="dream_sapps_body_authenticating_ing">Накталыкты текшерүү\u2026</string>
+    <string name="dream_sapps_body_contact_customer_service_to_complete_your_purchase">Сатып алууңузду аяктоо үчүн Кардарлар Кызматыңыз менен байланышыңыз.</string>
+    <string name="dream_sapps_body_your_purchase_is_complete">Сатып алууңуз аягына чыкты.</string>
+    <string name="ids_com_body_error_code_c">Ката коду:</string>
+    <string name="mids_sapps_body_waiting_ing">Күтүүдө\u2026</string>
+    <string name="mids_sapps_header_samsung_in_app_purchase_abb">Samsung In-App Purchase</string>
+    <string name="mids_sapps_header_update_galaxy_apps">Galaxy Apps\'ты жаңыртуу</string>
+    <string name="mids_sapps_pop_a_new_version_is_available_galaxy_apps_will_be_updated_to_the_latest_version_to_complete_this_purchase">Жаңы нуска жеткиликтүү. Galaxy Apps эң акыркы нускасына жаңыланып, бул сатып алууну аяктайт.</string>
+    <string name="mids_sapps_pop_an_invalid_value_has_been_provided_for_samsung_in_app_purchase">Samsung In-App Purchase үчүн орунсуз нарк берилди</string>
+    <string name="mids_sapps_pop_payment_canceled">Төлөм токтотулду</string>
+    <string name="mids_sapps_pop_to_purchase_items_you_need_to_install_samsung_in_app_purchase_install_q">Нерселерди сатып алуу үчүн, сизге Samsung In-App Purchase орнотуу керек. Орнотуубу?</string>
+    <string name="mids_sapps_pop_unable_to_open_samsung_in_app_purchase_msg">Samsung In-App Purchase\'ди ачуу мүмкүн эмес. Уруксаттарга барыңыз, андан соң төмөнкүлөргө уруксат берип, дагы аракеттениңиз.</string>
+    <string name="mids_sapps_pop_unknown_error_occurred">Белгисиз ката пайда болду</string>
+</resources>

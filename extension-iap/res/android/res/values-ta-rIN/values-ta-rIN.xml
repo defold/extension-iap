@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dream_ph_body_contact_p1sscustomer_servicep2ss_for_more_information_n_nerror_code_c_p3ss">மேலும் விவரங்களுக்கு %1$sவாடிக்கையாளர் சேவையைத்%2$s தொடர்பு கொள்ளவும்.\n\nபிழைக் குறியீடு: %3$s</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_enable_the_galaxy_store_in_settings">இந்த வாங்குதலை நிறைவு செய்வதற்கு, அமைவுகளில் நீங்கள் Galaxy Store-ஐச் செயல்படுத்த வேண்டும்.</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_update_the_galaxy_store">இந்த வாங்குதலை நிறைவு செய்வதற்கு, நீங்கள் Galaxy Store-ஐ நிறுவ வேண்டும்.</string>
+    <string name="dream_ph_pheader_couldnt_complete_purchase">வாங்குதலை முடிக்க இயலவில்லை</string>
+    <string name="dream_sapps_body_authenticating_ing">அங்கீகரிக்கிறது\u2026</string>
+    <string name="dream_sapps_body_contact_customer_service_to_complete_your_purchase">உங்கள் வாங்குதலை முடிக்க, வாடிக்கையாளர் சேவையைத் தொடர்புகொள்ளவும்.</string>
+    <string name="dream_sapps_body_your_purchase_is_complete">உங்கள் வாங்குதல் முடிந்தது.</string>
+    <string name="ids_com_body_error_code_c">பிழை குறியீடு:</string>
+    <string name="mids_sapps_body_waiting_ing">காத்திருக்கிறது\u2026</string>
+    <string name="mids_sapps_header_samsung_in_app_purchase_abb">சாம்சங் இன்-ஆப் வாங்குதல்</string>
+    <string name="mids_sapps_header_update_galaxy_apps">Galaxy Apps-ஐ புதுப்பிக்கவும்</string>
+    <string name="mids_sapps_pop_a_new_version_is_available_galaxy_apps_will_be_updated_to_the_latest_version_to_complete_this_purchase">புதிய பதிப்பு கிடைக்கிறது. இந்த வாங்குதலை முடிப்பதற்காக Galaxy Apps அதன் சமீபத்திய பதிப்பிற்குப் புதுப்பிக்கப்படும்.</string>
+    <string name="mids_sapps_pop_an_invalid_value_has_been_provided_for_samsung_in_app_purchase">சாம்சங் பயன்பாட்டுக்கு உள்ளான வாங்குதலுக்கு ஒரு தவறான மதிப்பு வழங்கப்பட்டது.</string>
+    <string name="mids_sapps_pop_payment_canceled">கட்டணத்தொகை ரத்து செய்யப்பட்டது.</string>
+    <string name="mids_sapps_pop_to_purchase_items_you_need_to_install_samsung_in_app_purchase_install_q">உருப்படிகளை வாங்க சாம்சங் உள்-ப.பாட்டு வாங்குதலை நீங்கள் நிறுவ வேண்டும். நிறுவவா?</string>
+    <string name="mids_sapps_pop_unable_to_open_samsung_in_app_purchase_msg">சாம்சங் இன்-ஆப் வாங்குதலை திறக்க இயலவில்லை. அனுமதிகள் என்பதற்குச் சென்று, பிறகு தேவையான அனுமதிகளை அனுமதித்து, மீண்டும் முயலவும்.</string>
+    <string name="mids_sapps_pop_unknown_error_occurred">தெரியாத பிழை ஏற்பட்டுள்ளது.</string>
+</resources>

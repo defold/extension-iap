@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dream_ph_body_contact_p1sscustomer_servicep2ss_for_more_information_n_nerror_code_c_p3ss">További információért forduljon az %1$sügyfélszolgálathoz%2$s.\n\nHibakód: %3$s</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_enable_the_galaxy_store_in_settings">A vásárlás befejezéséhez engedélyezni kell a Galaxy Store alkalmazást a Beállításokban.</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_update_the_galaxy_store">A vásárlás befejezéséhez frissíteni kell a Galaxy Store alkalmazást.</string>
+    <string name="dream_ph_pheader_couldnt_complete_purchase">Nem sikerült befejezni a vásárlást</string>
+    <string name="dream_sapps_body_authenticating_ing">Hitelesítés\u2026</string>
+    <string name="dream_sapps_body_contact_customer_service_to_complete_your_purchase">A vásárlás befejezéséhez lépjen kapcsolatba az ügyfélszolgálattal.</string>
+    <string name="dream_sapps_body_your_purchase_is_complete">A vásárlás befejeződött.</string>
+    <string name="ids_com_body_error_code_c">Hibakód:</string>
+    <string name="mids_sapps_body_waiting_ing">Várakozás\u2026</string>
+    <string name="mids_sapps_header_samsung_in_app_purchase_abb">Samsung Beépített bolt</string>
+    <string name="mids_sapps_header_update_galaxy_apps">Galaxy Apps frissítése</string>
+    <string name="mids_sapps_pop_a_new_version_is_available_galaxy_apps_will_be_updated_to_the_latest_version_to_complete_this_purchase">Rendelkezésre áll egy új verzió. A vásárlás befejezéséhez a rendszer a legújabb verzióra frissíti a Galaxy Apps alkalmazást.</string>
+    <string name="mids_sapps_pop_an_invalid_value_has_been_provided_for_samsung_in_app_purchase">Érvénytelen érték lett megadva a Samsung Beépített bolt számára.</string>
+    <string name="mids_sapps_pop_payment_canceled">Fizetés megszakítva.</string>
+    <string name="mids_sapps_pop_to_purchase_items_you_need_to_install_samsung_in_app_purchase_install_q">Vásárláshoz telepítenie kell a Samsung beépített bolt alkalmazást. Telepíti?</string>
+    <string name="mids_sapps_pop_unable_to_open_samsung_in_app_purchase_msg">Nem lehet megnyitni a Samsung Beépített bolt alkalmazást. Lépjen be az Engedélyek menüpontba, adja meg a szükséges engedélyeket, majd próbálja újra.</string>
+    <string name="mids_sapps_pop_unknown_error_occurred">Ismeretlen eredetű hiba történt.</string>
+</resources>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dream_ph_body_contact_p1sscustomer_servicep2ss_for_more_information_n_nerror_code_c_p3ss">Pentru mai multe informații, contactați %1$sServiciul de asistență pentru clienți%2$s.\n\nCod de eroare: %3$s</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_enable_the_galaxy_store_in_settings">Pentru a finaliza achiziția, este necesar să activați Galaxy Store din meniul Setări.</string>
+    <string name="dream_ph_body_to_complete_this_purchase_you_need_to_update_the_galaxy_store">Pentru a finaliza achiziția, este necesar să actualizați Galaxy Store.</string>
+    <string name="dream_ph_pheader_couldnt_complete_purchase">Nu s-a putut finaliza achiziția</string>
+    <string name="dream_sapps_body_authenticating_ing">În curs de autentificare\u2026</string>
+    <string name="dream_sapps_body_contact_customer_service_to_complete_your_purchase">Pentru a finaliza achiziția, contactați Serviciul de asistență pentru clienți.</string>
+    <string name="dream_sapps_body_your_purchase_is_complete">Achiziția s-a finalizat.</string>
+    <string name="ids_com_body_error_code_c">Cod eroare:</string>
+    <string name="mids_sapps_body_waiting_ing">Se aşteaptă\u2026</string>
+    <string name="mids_sapps_header_samsung_in_app_purchase_abb">Achiz. Samsung din apl.</string>
+    <string name="mids_sapps_header_update_galaxy_apps">Actualizare Galaxy Apps</string>
+    <string name="mids_sapps_pop_a_new_version_is_available_galaxy_apps_will_be_updated_to_the_latest_version_to_complete_this_purchase">Este disponibilă o nouă versiune. Galaxy Apps se va actualiza la cea mai recentă versiune pentru a finaliza achiziția.</string>
+    <string name="mids_sapps_pop_an_invalid_value_has_been_provided_for_samsung_in_app_purchase">A fost furnizată o valoare nevalidă pentru Achiziţionarea Samsung din cadrul aplicaţiilor.</string>
+    <string name="mids_sapps_pop_payment_canceled">Plată anulată</string>
+    <string name="mids_sapps_pop_to_purchase_items_you_need_to_install_samsung_in_app_purchase_install_q">Pentru a achiziţiona elemente, trebuie să instalaţi Achiziţionarea Samsung din cadrul aplicaţiilor. Instalaţi?</string>
+    <string name="mids_sapps_pop_unable_to_open_samsung_in_app_purchase_msg">Nu se poate deschide Achiziţionare Samsung din cadrul aplicaţiilor. Accesaţi Permisiuni, apoi acordaţi permisiunile necesare şi încercaţi din nou.</string>
+    <string name="mids_sapps_pop_unknown_error_occurred">A avut loc o eroare necunoscută.</string>
+</resources>
