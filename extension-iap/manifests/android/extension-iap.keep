@@ -1,0 +1,8 @@
+# Native code loads the Defold IAP classes and invokes their methods by name.
+-keep,allowoptimization class com.defold.iap.** { *; }
+
+# The Amazon Appstore IAP SDK uses reflection and requires these rules.
+# https://developer.amazon.com/docs/in-app-purchasing/iap-obfuscate-the-code.html
+-dontwarn com.amazon.**
+-keep class com.amazon.** { *; }
+-keepattributes *Annotation*
