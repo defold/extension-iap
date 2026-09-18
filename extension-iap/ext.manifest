@@ -1,11 +1,7 @@
 name: IAPExt
 
 platforms:
-    arm64-ios:
+    ios:
         context:
             weakFrameworks: ['StoreKit', 'UIKit', 'Foundation']
 
-    x86_64-ios:
-        context:
-            weakFrameworks: ['StoreKit', 'UIKit', 'Foundation']
-            
