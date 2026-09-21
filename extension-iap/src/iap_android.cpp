@@ -10,6 +10,12 @@
 
 #define LIB_NAME "iap"
 
+struct IAPPendingRequest
+{
+    uint64_t m_Id;
+    dmScript::LuaCallbackInfo* m_Callback;
+};
+
 struct IAP
 {
     IAP()
@@ -27,6 +33,7 @@ struct IAP
     jobject         m_IAPJNI;
     jmethodID       m_List;
     jmethodID       m_Stop;
+    jmethodID       m_Invalidate;
     jmethodID       m_Buy;
     jmethodID       m_Restore;
     jmethodID       m_ProcessPendingConsumables;
@@ -34,6 +41,8 @@ struct IAP
     jmethodID       m_FinishTransaction;
 
     IAPCommandQueue m_CommandQueue;
+    dmArray<IAPPendingRequest> m_PendingRequests;
+    uint64_t m_NextRequestId;
 };
 
 static IAP g_IAP;
@@ -61,12 +70,15 @@ static int IAP_List(lua_State* L)
 
     dmAndroid::ThreadAttacher threadAttacher;
     JNIEnv* env = threadAttacher.GetEnv();
-    IAPCommand* cmd = new IAPCommand;
-    cmd->m_Callback = dmScript::CreateCallback(L, 2);
-    cmd->m_Command = IAP_PRODUCT_RESULT;
+    IAPPendingRequest request;
+    request.m_Callback = dmScript::CreateCallback(L, 2);
+    request.m_Id = ++g_IAP.m_NextRequestId;
+    if (g_IAP.m_PendingRequests.Full())
+        g_IAP.m_PendingRequests.OffsetCapacity(4);
+    g_IAP.m_PendingRequests.Push(request);
 
     jstring products = env->NewStringUTF(buf);
-    env->CallVoidMethod(g_IAP.m_IAP, g_IAP.m_List, products, g_IAP.m_IAPJNI, (jlong)cmd);
+    env->CallVoidMethod(g_IAP.m_IAP, g_IAP.m_List, products, g_IAP.m_IAPJNI, (jlong)request.m_Id);
     env->DeleteLocalRef(products);
 
     free(buf);
@@ -245,7 +257,7 @@ extern "C" {
 #endif
 
 
-JNIEXPORT void JNICALL Java_com_defold_iap_IapJNI_onProductsResult(JNIEnv* env, jobject, jint responseCode, jstring productList, jlong cmdHandle)
+JNIEXPORT void JNICALL Java_com_defold_iap_IapJNI_nativeOnProductsResult(JNIEnv* env, jobject, jint responseCode, jstring productList, jlong requestId)
 {
     const char* pl = 0;
     if (productList)
@@ -253,19 +265,21 @@ JNIEXPORT void JNICALL Java_com_defold_iap_IapJNI_onProductsResult(JNIEnv* env, 
         pl = env->GetStringUTFChars(productList, 0);
     }
 
-    IAPCommand* cmd = (IAPCommand*)cmdHandle;
-    cmd->m_ResponseCode = responseCode;
+    IAPCommand cmd;
+    cmd.m_Command = IAP_PRODUCT_RESULT;
+    cmd.m_RequestId = (uint64_t)requestId;
+    cmd.m_ResponseCode = responseCode;
     if (pl)
     {
-        cmd->m_Data = strdup(pl);
+        cmd.m_Data = strdup(pl);
         env->ReleaseStringUTFChars(productList, pl);
     }
-    IAP_Queue_Push(&g_IAP.m_CommandQueue, cmd);
+    IAP_Queue_Push(&g_IAP.m_CommandQueue, &cmd);
 }
 
-JNIEXPORT void JNICALL Java_com_defold_iap_IapJNI_onPurchaseResult__ILjava_lang_String_2(JNIEnv* env, jobject, jint responseCode, jstring purchaseData)
+JNIEXPORT void JNICALL Java_com_defold_iap_IapJNI_nativeOnPurchaseResult(JNIEnv* env, jobject, jint responseCode, jstring purchaseData)
 {
-    dmLogInfo("Java_com_defold_iap_IapJNI_onPurchaseResult__ILjava_lang_String_2 %d", (int)responseCode);
+    dmLogInfo("Java_com_defold_iap_IapJNI_nativeOnPurchaseResult %d", (int)responseCode);
     const char* pd = 0;
     if (purchaseData)
     {
@@ -273,7 +287,6 @@ JNIEXPORT void JNICALL Java_com_defold_iap_IapJNI_onPurchaseResult__ILjava_lang_
     }
 
     IAPCommand cmd;
-    cmd.m_Callback = g_IAP.m_Listener;
     cmd.m_Command = IAP_PURCHASE_RESULT;
     cmd.m_ResponseCode = responseCode;
     if (pd)
@@ -303,17 +316,29 @@ static ErrorReason BillingResponseToErrorReason(BillingResponse response)
 
 static void HandleProductResult(const IAPCommand* cmd)
 {
-    if (cmd->m_Callback == 0)
+    dmScript::LuaCallbackInfo* callback = 0;
+    for (uint32_t i = 0; i < g_IAP.m_PendingRequests.Size(); ++i)
     {
-        dmLogWarning("Received product list but no listener was set!");
+        if (g_IAP.m_PendingRequests[i].m_Id == cmd->m_RequestId)
+        {
+            callback = g_IAP.m_PendingRequests[i].m_Callback;
+            g_IAP.m_PendingRequests.EraseSwap(i);
+            break;
+        }
+    }
+
+    if (callback == 0)
+    {
+        dmLogWarning("Received product list for an unknown or completed request");
         return;
     }
 
-    lua_State* L = dmScript::GetCallbackLuaContext(cmd->m_Callback);
+    lua_State* L = dmScript::GetCallbackLuaContext(callback);
     int top = lua_gettop(L);
 
-    if (!dmScript::SetupCallback(cmd->m_Callback))
+    if (!dmScript::SetupCallback(callback))
     {
+        dmScript::DestroyCallback(callback);
         assert(top == lua_gettop(L));
         return;
     }
@@ -330,24 +355,25 @@ static void HandleProductResult(const IAPCommand* cmd)
 
     dmScript::PCall(L, 3, 0);
 
-    dmScript::TeardownCallback(cmd->m_Callback);
-    dmScript::DestroyCallback(cmd->m_Callback);
+    dmScript::TeardownCallback(callback);
+    dmScript::DestroyCallback(callback);
 
     assert(top == lua_gettop(L));
 }
 
 static void HandlePurchaseResult(const IAPCommand* cmd)
 {
-    if (cmd->m_Callback == 0)
+    dmScript::LuaCallbackInfo* callback = g_IAP.m_Listener;
+    if (callback == 0)
     {
         dmLogWarning("Received purchase result but no listener was set!");
         return;
     }
 
-    lua_State* L = dmScript::GetCallbackLuaContext(cmd->m_Callback);
+    lua_State* L = dmScript::GetCallbackLuaContext(callback);
     int top = lua_gettop(L);
 
-    if (!dmScript::SetupCallback(cmd->m_Callback))
+    if (!dmScript::SetupCallback(callback))
     {
         assert(top == lua_gettop(L));
         return;
@@ -374,7 +400,7 @@ static void HandlePurchaseResult(const IAPCommand* cmd)
 
     dmScript::PCall(L, 3, 0);
 
-    dmScript::TeardownCallback(cmd->m_Callback);
+    dmScript::TeardownCallback(callback);
 
     assert(top == lua_gettop(L));
 }
@@ -402,6 +428,8 @@ static dmExtension::Result InitializeIAP(dmExtension::Params* params)
 
     jclass iap_class = dmAndroid::LoadClass(env, class_name);
     jclass iap_jni_class = dmAndroid::LoadClass(env, "com.defold.iap.IapJNI");
+
+    g_IAP.m_Invalidate = env->GetMethodID(iap_jni_class, "invalidate", "()V");
 
     g_IAP.m_List = env->GetMethodID(iap_class, "listItems", "(Ljava/lang/String;Lcom/defold/iap/IListProductsListener;J)V");
     g_IAP.m_Buy = env->GetMethodID(iap_class, "buy", "(Ljava/lang/String;Ljava/lang/String;Lcom/defold/iap/IPurchaseListener;)V");
@@ -457,19 +485,33 @@ static dmExtension::Result UpdateIAP(dmExtension::Params* params)
 
 static dmExtension::Result FinalizeIAP(dmExtension::Params* params)
 {
+    dmAndroid::ThreadAttacher threadAttacher;
+    JNIEnv* env = threadAttacher.GetEnv();
+
+    // Do not hold the queue mutex while waiting for a Java callback to finish.
+    // Old Java listeners remain invalid even if the engine initializes again.
+    env->CallVoidMethod(g_IAP.m_IAPJNI, g_IAP.m_Invalidate);
+    env->CallVoidMethod(g_IAP.m_IAP, g_IAP.m_Stop);
+
+    for (uint32_t i = 0; i < g_IAP.m_PendingRequests.Size(); ++i)
+        dmScript::DestroyCallback(g_IAP.m_PendingRequests[i].m_Callback);
+    g_IAP.m_PendingRequests.SetCapacity(0);
+
+    // Producers are stopped. Discard responses without invoking Lua during finalization.
+    for (uint32_t i = 0; i < g_IAP.m_CommandQueue.m_Commands.Size(); ++i)
+        free(g_IAP.m_CommandQueue.m_Commands[i].m_Data);
+    g_IAP.m_CommandQueue.m_Commands.SetCapacity(0);
     IAP_Queue_Destroy(&g_IAP.m_CommandQueue);
 
-    if (params->m_L == dmScript::GetCallbackLuaContext(g_IAP.m_Listener)) {
+    if (g_IAP.m_Listener && params->m_L == dmScript::GetCallbackLuaContext(g_IAP.m_Listener)) {
         dmScript::DestroyCallback(g_IAP.m_Listener);
         g_IAP.m_Listener = 0;
     }
 
-    dmAndroid::ThreadAttacher threadAttacher;
-    JNIEnv* env = threadAttacher.GetEnv();
-    env->CallVoidMethod(g_IAP.m_IAP, g_IAP.m_Stop);
     env->DeleteGlobalRef(g_IAP.m_IAP);
     env->DeleteGlobalRef(g_IAP.m_IAPJNI);
     g_IAP.m_IAP = NULL;
+    g_IAP.m_IAPJNI = NULL;
     return dmExtension::RESULT_OK;
 }
 

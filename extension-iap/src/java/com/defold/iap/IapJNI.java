@@ -23,10 +23,29 @@ public class IapJNI implements IListProductsListener, IPurchaseListener {
     public IapJNI() {
     }
 
-    @Override
-    public native void onProductsResult(int responseCode, String productList, long cmdHandle);
+    private boolean active = true;
+
+    // Wait for an in-flight native callback before the engine destroys its queue.
+    // A new extension session must use a new IapJNI instance.
+    public synchronized void invalidate() {
+        active = false;
+    }
 
     @Override
-    public native void onPurchaseResult(int responseCode, String purchaseData);
+    public synchronized void onProductsResult(int responseCode, String productList, long requestId) {
+        if (active) {
+            nativeOnProductsResult(responseCode, productList, requestId);
+        }
+    }
+
+    @Override
+    public synchronized void onPurchaseResult(int responseCode, String purchaseData) {
+        if (active) {
+            nativeOnPurchaseResult(responseCode, purchaseData);
+        }
+    }
+
+    private native void nativeOnProductsResult(int responseCode, String productList, long requestId);
+    private native void nativeOnPurchaseResult(int responseCode, String purchaseData);
 
 }

@@ -106,6 +106,7 @@ void IAP_Queue_Create(IAPCommandQueue* queue)
 void IAP_Queue_Destroy(IAPCommandQueue* queue)
 {
     dmMutex::Delete(queue->m_Mutex);
+    queue->m_Mutex = 0;
 }
 
 void IAP_Queue_Push(IAPCommandQueue* queue, IAPCommand* cmd)
@@ -123,14 +124,13 @@ void IAP_Queue_Flush(IAPCommandQueue* queue, IAPCommandFn fn, void* ctx)
 {
     assert(fn != 0);
 
-    if (queue->m_Commands.Empty())
-    {
-        return;
-    }
-
     dmArray<IAPCommand> tmp;
     {
         DM_MUTEX_SCOPED_LOCK(queue->m_Mutex);
+        if (queue->m_Commands.Empty())
+        {
+            return;
+        }
         tmp.Swap(queue->m_Commands);
     }
 

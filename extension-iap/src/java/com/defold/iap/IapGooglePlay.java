@@ -87,9 +87,7 @@ public class IapGooglePlay implements PurchasesUpdatedListener {
 
     public void stop() {
         Log.d(TAG, "stop()");
-        if (billingClient.isReady()) {
-            billingClient.endConnection();
-        }
+        billingClient.endConnection();
     }
 
     private String toISO8601(final Date date) {

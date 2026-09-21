@@ -21,6 +21,9 @@ struct DM_ALIGNED(16) IAPCommand
     // Used for storing eventual callback info (if needed)
     dmScript::LuaCallbackInfo* m_Callback;
 
+    // Android product requests are resolved to Lua callbacks on the engine thread.
+    uint64_t m_RequestId;
+
     // The actual command payload
     int32_t  	m_Command;
     int32_t  	m_ResponseCode;

@@ -14,3 +14,4 @@ manifest.public.der
 /.editor_settings
 debug.keystore.pass.txt
 debug.keystore
+/internal_tests/
