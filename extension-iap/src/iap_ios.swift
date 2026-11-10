@@ -50,6 +50,8 @@ public final class StoreTransaction: NSObject {
     @objc public let originalTransaction: StoreTransaction?
     @objc public let error: String?
     @objc public let errorReason: StoreErrorReason
+    // Set for the result of iap.buy() and iap.restore(), which is delivered even if the transaction was finished before
+    @objc public let isRequested: Bool
 
     init(ident: String, state: StoreTransactionState, date: Date? = nil, transIdent: String? = nil, error: String? = nil, errorReason: StoreErrorReason = .unspecified) {
         self.ident = ident
@@ -61,15 +63,17 @@ public final class StoreTransaction: NSObject {
         self.originalTransaction = nil
         self.error = error
         self.errorReason = errorReason
+        self.isRequested = true
     }
 
-    init(_ result: VerificationResult<Transaction>, state: StoreTransactionState) {
+    init(_ result: VerificationResult<Transaction>, state: StoreTransactionState, isRequested: Bool) {
         let transaction = result.unsafePayloadValue
         ident = transaction.productID
         date = transaction.purchaseDate
         transIdent = String(transaction.id)
         jwsRepresentation = result.jwsRepresentation
         errorReason = .unspecified
+        self.isRequested = isRequested
 
         if case .unverified(_, let verificationError) = result {
             self.state = .unverified
@@ -100,7 +104,7 @@ public final class Store: NSObject {
         super.init()
         updatesTask = Task { [weak self] in
             for await result in Transaction.updates {
-                self?.process(result, state: .purchased, isUpdate: true)
+                self?.process(result, source: .update)
             }
         }
     }
@@ -134,7 +138,7 @@ public final class Store: NSObject {
                 }
                 switch try await product.purchase() {
                 case .success(let result):
-                    process(result, state: .purchased)
+                    process(result, source: .purchase)
                 case .userCancelled:
                     report(StoreTransaction(ident: ident, state: .failed, error: "Purchase canceled by the user", errorReason: .userCanceled))
                 case .pending:
@@ -155,7 +159,7 @@ public final class Store: NSObject {
     @objc public func processPendingTransactions() {
         Task {
             for await result in Transaction.unfinished {
-                process(result, state: .purchased)
+                process(result, source: .unfinished)
             }
         }
     }
@@ -169,10 +173,7 @@ public final class Store: NSObject {
                 deliver { completion(error.localizedDescription) }
             }
             for await result in Transaction.currentEntitlements {
-                if case .verified(let transaction) = result, transaction.revocationDate != nil || transaction.isUpgraded {
-                    continue
-                }
-                report(StoreTransaction(result, state: .restored))
+                process(result, source: .restore)
             }
         }
     }
@@ -201,24 +202,35 @@ public final class Store: NSObject {
         return finished.contains(transIdent)
     }
 
-    private func process(_ result: VerificationResult<Transaction>, state: StoreTransactionState, isUpdate: Bool = false) {
+    private enum Source {
+        case purchase, update, unfinished, restore
+    }
+
+    private func process(_ result: VerificationResult<Transaction>, source: Source) {
         let transaction = result.unsafePayloadValue
 
         if case .verified = result, transaction.revocationDate != nil || transaction.isUpgraded {
-            Task {
-                await transaction.finish()
+            if source != .restore {
+                Task {
+                    await transaction.finish()
+                }
             }
             return
         }
 
-        lock.lock()
-        let isKnown = unfinished.updateValue(transaction, forKey: String(transaction.id)) != nil
-        lock.unlock()
+        // A restored transaction that StoreKit verified is not finished again, an unverified one can be
+        var isKnown = false
+        if source != .restore || result.isUnverified {
+            lock.lock()
+            isKnown = unfinished.updateValue(transaction, forKey: String(transaction.id)) != nil
+            lock.unlock()
+        }
 
-        if isUpdate && isKnown {
+        if source == .update && isKnown {
             return
         }
-        report(StoreTransaction(result, state: state))
+        let isRequested = source == .purchase || source == .restore
+        report(StoreTransaction(result, state: source == .restore ? .restored : .purchased, isRequested: isRequested))
     }
 
     private func report(_ transaction: StoreTransaction) {
@@ -231,6 +243,15 @@ public final class Store: NSObject {
         if !isStopped {
             callback()
         }
+    }
+}
+
+extension VerificationResult {
+    var isUnverified: Bool {
+        if case .unverified = self {
+            return true
+        }
+        return false
     }
 }
 

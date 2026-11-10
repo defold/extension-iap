@@ -174,7 +174,7 @@ static void DeliverTransaction(IAPExtTransaction* transaction)
 
     // The same transaction can be queued twice, by Transaction.updates and iap.process_pending_transactions
     NSString* trans_ident = transaction.transIdent;
-    if (transaction.state != IAPExtTransactionStateRestored && trans_ident && [g_IAP.m_Store isTransactionFinished:trans_ident]) {
+    if (!transaction.isRequested && trans_ident && [g_IAP.m_Store isTransactionFinished:trans_ident]) {
         return;
     }
 
@@ -281,20 +281,24 @@ static int IAP_Buy(lua_State* L)
 
 static int IAP_Finish(lua_State* L)
 {
-    if(g_IAP.m_AutoFinishTransactions)
-    {
-        dmLogWarning("Calling iap.finish when autofinish transactions is enabled. Ignored.");
-        return 0;
-    }
-
     int top = lua_gettop(L);
 
     luaL_checktype(L, 1, LUA_TTABLE);
 
     lua_getfield(L, -1, "state");
+    int state = lua_isnumber(L, -1) ? lua_tointeger(L, -1) : -1;
+
+    // Unverified transactions are never finished automatically
+    if (g_IAP.m_AutoFinishTransactions && state != TRANS_STATE_UNVERIFIED)
+    {
+        dmLogWarning("Calling iap.finish when autofinish transactions is enabled. Ignored.");
+        lua_pop(L, 1);
+        assert(top == lua_gettop(L));
+        return 0;
+    }
+
     if (lua_isnumber(L, -1))
     {
-        int state = lua_tointeger(L, -1);
         if(state != TRANS_STATE_PURCHASED && state != TRANS_STATE_UNVERIFIED)
         {
             dmLogError("Transaction error. Invalid transaction state for transaction finish (must be iap.TRANS_STATE_PURCHASED or iap.TRANS_STATE_UNVERIFIED).");
