@@ -169,6 +169,9 @@ public final class Store: NSObject {
                 deliver { completion(error.localizedDescription) }
             }
             for await result in Transaction.currentEntitlements {
+                if case .verified(let transaction) = result, transaction.revocationDate != nil || transaction.isUpgraded {
+                    continue
+                }
                 report(StoreTransaction(result, state: .restored))
             }
         }

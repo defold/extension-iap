@@ -213,6 +213,8 @@ On iOS, use the `jws_representation` field of the transaction for this. It is th
 
 StoreKit reports purchases that are made outside of the application, such as approved Ask to Buy requests, subscription renewals and purchases on other devices, while the application is running, and unfinished transactions when the application starts. The extension sends them to the listener. A transaction that arrives before `iap.set_listener()` is called, or while there is no listener, is not lost: it stays unfinished and `iap.process_pending_transactions()` sends all unfinished transactions to the listener again.
 
+StoreKit can send a transaction again, for example after the application is restarted or when the transaction is updated, even if it has been finished. Use `trans_ident` to make sure that the content of a transaction is only delivered once.
+
 Unverified transactions
 : If StoreKit can't verify the signature of a transaction, the listener receives it with the state `TRANS_STATE_UNVERIFIED` and an `error`. Don't deliver the content based on the transaction itself. The transaction is never finished automatically and it comes back when the application starts. If your server verifies the `jws_representation` and accepts it, call `iap.finish()` on the transaction, which requires that `auto_finish_transactions` is disabled.
 
@@ -220,7 +222,7 @@ Ask to Buy and other pending purchases
 : The listener receives the state `TRANS_STATE_UNVERIFIED` without an `error` or a `trans_ident`. If the purchase is approved, the listener later receives the transaction with the state `TRANS_STATE_PURCHASED`. StoreKit 2 doesn't notify the application if the purchase is declined.
 
 Restoring purchases
-: `iap.restore()` synchronizes the transactions with the App Store, which may ask the user to sign in, so only call it when the user asks for it. The listener then receives one transaction with the state `TRANS_STATE_RESTORED` for each non-consumable product and active subscription of the user. These transactions don't have to be finished. If the synchronization fails, a warning is logged and the listener receives the transactions known to the device.
+: `iap.restore()` synchronizes the transactions with the App Store, which may ask the user to sign in, so only call it when the user asks for it. The listener then receives one transaction with the state `TRANS_STATE_RESTORED` for each non-consumable product and active subscription of the user. Refunded products and subscriptions replaced by an upgrade are left out. These transactions don't have to be finished. If the synchronization fails, a warning is logged and the listener receives the transactions known to the device.
 
 Refunds and subscription upgrades
 : A transaction that has been refunded, revoked or replaced by a subscription upgrade is finished without calling the listener. Use [App Store Server Notifications](https://developer.apple.com/documentation/appstoreservernotifications) to get notified of those on your server.
