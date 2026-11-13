@@ -211,7 +211,7 @@ On iOS, use the `jws_representation` field of the transaction for this. It is th
 
 ## StoreKit 2 on iOS
 
-StoreKit reports purchases that are made outside of the application, such as approved Ask to Buy requests, subscription renewals and purchases on other devices, while the application is running, and unfinished transactions when the application starts. The extension sends them to the listener. A transaction that arrives before `iap.set_listener()` is called, or while there is no listener, is not lost: it stays unfinished and `iap.process_pending_transactions()` sends all unfinished transactions to the listener again. The result of a purchase that completes after the extension has been restarted, for example with `sys.reboot()`, is sent to the listener of the new session.
+StoreKit reports purchases that are made outside of the application, such as approved Ask to Buy requests, subscription renewals and purchases on other devices, while the application is running. The extension sends them to the listener, and the unfinished transactions when it starts, also after `sys.reboot()`. A transaction that arrives before `iap.set_listener()` is called, or while there is no listener, is not lost: it stays unfinished and `iap.process_pending_transactions()` sends all unfinished transactions to the listener again. A purchase that completes while the extension is restarted is sent to the listener of the new session.
 
 StoreKit can send a transaction again, for example after the application is restarted or when the transaction is updated, even if it has been finished. Use `trans_ident` to make sure that the content of a transaction is only delivered once.
 
@@ -238,7 +238,7 @@ Google Play and Apple supports three different product types: subscriptions, con
 
 If you want to simulate non-consumable products on Amazon you need to make sure to not call `iap.finish()` on the product in question (and make sure to not have enabled Auto Finish Transactions in *game.project*).
 
-Calls to `iap.buy()` and `iap.set_listener()` will return all non-finished purchases on Google Play. (This will not happen on iOS, where `iap.process_pending_transactions()` returns them)
+Calls to `iap.buy()` and `iap.set_listener()` will return all non-finished purchases on Google Play. (On iOS they are sent to the listener when the extension starts, and `iap.process_pending_transactions()` sends them again)
 
 The concept of restoring purchases does not exist on Google Play/Amazon. Calls to `iap.restore()` on iOS will return all non-consumable products and active subscriptions (and have product state set to TRANS_STATE_RESTORED). Calls to `iap.restore()` on Google Play will return all non-finished purchases (and have product state set to TRANS_STATE_PURCHASED).
 

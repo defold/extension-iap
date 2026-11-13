@@ -102,7 +102,6 @@ public final class Store: NSObject {
     // A purchase can complete after the extension was restarted, its result goes to the store that is active then
     private static let sessionLock = NSLock()
     private static var active: Store?
-    private static var orphaned: [(Store) -> Void] = []
 
     @objc public init(transactionHandler: @escaping (StoreTransaction) -> Void) {
         self.transactionHandler = transactionHandler
@@ -115,10 +114,15 @@ public final class Store: NSObject {
 
         Store.sessionLock.lock()
         Store.active = self
-        let outcomes = Store.orphaned
-        Store.orphaned = []
         Store.sessionLock.unlock()
-        outcomes.forEach { $0(self) }
+
+        // Transaction.updates sends the unfinished transactions only once per application launch, and a purchase
+        // that completed while the extension was restarted is not sent there at all
+        Task { [weak self] in
+            for await result in Transaction.unfinished {
+                self?.process(result, source: .update)
+            }
+        }
     }
 
     // No callback is running or starts after this returns
@@ -248,12 +252,10 @@ public final class Store: NSObject {
         report(StoreTransaction(result, state: source == .restore ? .restored : .purchased, isRequested: isRequested))
     }
 
-    private static func complete(_ outcome: @escaping (Store) -> Void) {
+    // Without an active store the result is dropped, the next store gets the purchase from Transaction.unfinished
+    private static func complete(_ outcome: (Store) -> Void) {
         sessionLock.lock()
         let store = active
-        if store == nil {
-            orphaned.append(outcome)
-        }
         sessionLock.unlock()
         store.map(outcome)
     }
