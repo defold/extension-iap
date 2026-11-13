@@ -61,7 +61,7 @@
           with `auto_finish_transactions` set will be ignored and a warning is printed, except for
           a transaction with the state `iap.TRANS_STATE_UNVERIFIED` on iOS [icon:ios], which is never finished automatically.
           The `transaction.state` field must equal `iap.TRANS_STATE_PURCHASED`. On iOS [icon:ios] it may also
-          equal `iap.TRANS_STATE_UNVERIFIED` if your server has verified the transaction.
+          equal `iap.TRANS_STATE_RESTORED`, or `iap.TRANS_STATE_UNVERIFIED` if your server has verified the transaction.
     parameters:
       - name: transaction
         type: table

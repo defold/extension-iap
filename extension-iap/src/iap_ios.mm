@@ -207,7 +207,8 @@ static void DeliverTransaction(IAPExtTransaction* transaction)
 
     assert(top == lua_gettop(L));
 
-    if (transaction.state == IAPExtTransactionStatePurchased && g_IAP.m_AutoFinishTransactions) {
+    bool finishable = transaction.state == IAPExtTransactionStatePurchased || transaction.state == IAPExtTransactionStateRestored;
+    if (finishable && g_IAP.m_AutoFinishTransactions) {
         [g_IAP.m_Store finishTransaction:trans_ident];
     }
 }
@@ -299,9 +300,9 @@ static int IAP_Finish(lua_State* L)
 
     if (lua_isnumber(L, -1))
     {
-        if(state != TRANS_STATE_PURCHASED && state != TRANS_STATE_UNVERIFIED)
+        if(state != TRANS_STATE_PURCHASED && state != TRANS_STATE_RESTORED && state != TRANS_STATE_UNVERIFIED)
         {
-            dmLogError("Transaction error. Invalid transaction state for transaction finish (must be iap.TRANS_STATE_PURCHASED or iap.TRANS_STATE_UNVERIFIED).");
+            dmLogError("Transaction error. Invalid transaction state for transaction finish (must be iap.TRANS_STATE_PURCHASED, iap.TRANS_STATE_RESTORED or iap.TRANS_STATE_UNVERIFIED).");
             lua_pop(L, 1);
             assert(top == lua_gettop(L));
             return 0;

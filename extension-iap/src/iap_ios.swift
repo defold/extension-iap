@@ -99,6 +99,11 @@ public final class Store: NSObject {
     private var finished = Set<String>()
     private var updatesTask: Task<Void, Never>?
 
+    // A purchase can complete after the extension was restarted, its result goes to the store that is active then
+    private static let sessionLock = NSLock()
+    private static var active: Store?
+    private static var orphaned: [(Store) -> Void] = []
+
     @objc public init(transactionHandler: @escaping (StoreTransaction) -> Void) {
         self.transactionHandler = transactionHandler
         super.init()
@@ -107,6 +112,13 @@ public final class Store: NSObject {
                 self?.process(result, source: .update)
             }
         }
+
+        Store.sessionLock.lock()
+        Store.active = self
+        let outcomes = Store.orphaned
+        Store.orphaned = []
+        Store.sessionLock.unlock()
+        outcomes.forEach { $0(self) }
     }
 
     // No callback is running or starts after this returns
@@ -115,6 +127,12 @@ public final class Store: NSObject {
         isStopped = true
         lock.unlock()
         updatesTask?.cancel()
+
+        Store.sessionLock.lock()
+        if Store.active === self {
+            Store.active = nil
+        }
+        Store.sessionLock.unlock()
     }
 
     @objc public func listProducts(_ idents: [String], completion: @escaping ([StoreProduct], String?) -> Void) {
@@ -133,25 +151,26 @@ public final class Store: NSObject {
         Task {
             do {
                 guard let product = try await Product.products(for: [ident]).first else {
-                    report(StoreTransaction(ident: ident, state: .failed, error: "Unknown product"))
+                    Store.complete { $0.report(StoreTransaction(ident: ident, state: .failed, error: "Unknown product")) }
                     return
                 }
                 switch try await product.purchase() {
                 case .success(let result):
-                    process(result, source: .purchase)
+                    Store.complete { $0.process(result, source: .purchase) }
                 case .userCancelled:
-                    report(StoreTransaction(ident: ident, state: .failed, error: "Purchase canceled by the user", errorReason: .userCanceled))
+                    Store.complete { $0.report(StoreTransaction(ident: ident, state: .failed, error: "Purchase canceled by the user", errorReason: .userCanceled)) }
                 case .pending:
-                    report(StoreTransaction(ident: ident, state: .unverified))
+                    Store.complete { $0.report(StoreTransaction(ident: ident, state: .unverified)) }
                 @unknown default:
-                    report(StoreTransaction(ident: ident, state: .failed, error: "Unknown purchase result"))
+                    Store.complete { $0.report(StoreTransaction(ident: ident, state: .failed, error: "Unknown purchase result")) }
                 }
             } catch {
                 var reason = StoreErrorReason.unspecified
                 if case StoreKitError.userCancelled = error {
                     reason = .userCanceled
                 }
-                report(StoreTransaction(ident: ident, state: .failed, error: error.localizedDescription, errorReason: reason))
+                let transaction = StoreTransaction(ident: ident, state: .failed, error: error.localizedDescription, errorReason: reason)
+                Store.complete { $0.report(transaction) }
             }
         }
     }
@@ -218,19 +237,25 @@ public final class Store: NSObject {
             return
         }
 
-        // A restored transaction that StoreKit verified is not finished again, an unverified one can be
-        var isKnown = false
-        if source != .restore || result.isUnverified {
-            lock.lock()
-            isKnown = unfinished.updateValue(transaction, forKey: String(transaction.id)) != nil
-            lock.unlock()
-        }
+        lock.lock()
+        let isKnown = unfinished.updateValue(transaction, forKey: String(transaction.id)) != nil
+        lock.unlock()
 
         if source == .update && isKnown {
             return
         }
         let isRequested = source == .purchase || source == .restore
         report(StoreTransaction(result, state: source == .restore ? .restored : .purchased, isRequested: isRequested))
+    }
+
+    private static func complete(_ outcome: @escaping (Store) -> Void) {
+        sessionLock.lock()
+        let store = active
+        if store == nil {
+            orphaned.append(outcome)
+        }
+        sessionLock.unlock()
+        store.map(outcome)
     }
 
     private func report(_ transaction: StoreTransaction) {
@@ -243,15 +268,6 @@ public final class Store: NSObject {
         if !isStopped {
             callback()
         }
-    }
-}
-
-extension VerificationResult {
-    var isUnverified: Bool {
-        if case .unverified = self {
-            return true
-        }
-        return false
     }
 }
 
