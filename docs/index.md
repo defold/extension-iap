@@ -7,7 +7,7 @@ brief: This manual covers how to setup and use In-App Purchases in Defold.
 
 This extension provides a unified, simple to use interface to several different stores for in-app purchase:
 
-* Apple’s iOS Appstore - StoreKit
+* Apple’s iOS Appstore - StoreKit 2
 * Google Play Billing 5.0
 * Amazon 'in-app billing' 2.0.61
 * Facebook Canvas 'game payments'
@@ -23,7 +23,7 @@ The current Defold interface allows full interaction with Apple's Storekit funct
 
 Detailed documentation from Apple, Google, Amazon and Facebook can be found here:
 
-* [In-App Purchase Programming Guide](https://developer.apple.com/library/ios/documentation/NetworkingInternet/Conceptual/StoreKitGuide/Introduction.html).
+* [In-App Purchase with StoreKit](https://developer.apple.com/documentation/storekit/in-app-purchase).
 * [Google Play In-app Billing documentation](http://developer.android.com/google/play/billing/index.html).
 * [Amazon In-app Purchase documentation](https://developer.amazon.com/public/apis/earn/in-app-purchasing).
 * [Facebook game payments documentation](https://developers.facebook.com/docs/payments).
@@ -36,6 +36,13 @@ To use this library in your Defold project, add the following URL to your `game.
 We recommend using a link to a zip file of a [specific release](https://github.com/defold/extension-iap/releases).
 
 For Facebook Canvas you also need to add the [Facebook extension as a dependency](https://github.com/defold/extension-facebook).
+
+### iOS requirements
+
+On iOS the extension uses StoreKit 2, which is only available from Swift, so the extension contains [Swift sources](/manuals/extensions-swift). This has the following requirements:
+
+* iOS 15.0 or later, which is the minimum version of StoreKit 2.
+* A Defold version and a build server with support for Swift sources in native extensions. Older versions fail to build the project for iOS, and depending on the build server also for macOS, with an error such as `Swift sources are not supported by this Defold SDK version` or `'IAPExt-Swift.h' file not found`. Use an earlier [release](https://github.com/defold/extension-iap/releases) of the extension with those versions.
 
 
 ## Testing Google Play Billing with static responses
@@ -174,7 +181,7 @@ Most payment providers only supports synchronous payments. This means that the c
 
 Some payment providers require supporting asynchronous payments. This means that the client (your application) will only receive a notification when the payment is initiated. In order to verify completion of payment, further communication needs to be done between the developer server (or client) and the payment provider in order to verify.
 
-In the case of an initiated asynchronous payment the IAP listener will receive the state TRANS_STATE_UNVERIFIED to indicate this (as opposed to TRANS_STATE_PURCHASED). This is the final state of the payment, meaning no more callbacks will be done on this transaction.
+In the case of an initiated asynchronous payment the IAP listener will receive the state TRANS_STATE_UNVERIFIED to indicate this (as opposed to TRANS_STATE_PURCHASED). This is the final state of the payment, meaning no more callbacks will be done on this transaction. The exception is iOS, where a pending purchase can later be completed, see [StoreKit 2 on iOS](#storekit-2-on-ios).
 
 
 ## Purchase fulfilment
@@ -199,6 +206,29 @@ The Apple App Store supports non-consumable products which means that you need t
 
 The receipt is a signed chunk of data that can be sent to the App Store to verify that the payment was successfully processed. This is most useful when designing a store that uses a separate server to verify that payment was processed.
 
+On iOS, use the `jws_representation` field of the transaction for this. It is the transaction signed by the App Store as a JSON Web Signature (JWS), which your server can verify by itself or with the [App Store Server API](https://developer.apple.com/documentation/appstoreserverapi). The `receipt` field of a purchased transaction still holds the contents of the app receipt if the file exists on the device, but Apple has deprecated the app receipt and its `verifyReceipt` endpoint.
+
+
+## StoreKit 2 on iOS
+
+StoreKit reports purchases that are made outside of the application, such as approved Ask to Buy requests, subscription renewals and purchases on other devices, while the application is running. The extension sends them to the listener, and the unfinished transactions when it starts, also after `sys.reboot()`. A transaction that arrives before `iap.set_listener()` is called, or while there is no listener, is not lost: it stays unfinished and `iap.process_pending_transactions()` sends all unfinished transactions to the listener again. A purchase that completes while the extension is restarted is sent to the listener of the new session.
+
+StoreKit can send a transaction again, for example after the application is restarted or when the transaction is updated, even if it has been finished. Use `trans_ident` to make sure that the content of a transaction is only delivered once.
+
+Unverified transactions
+: If StoreKit can't verify the signature of a transaction, the listener receives it with the state `TRANS_STATE_UNVERIFIED` and an `error`. Don't deliver the content based on the transaction itself. The transaction is never finished automatically and it comes back when the application starts. If your server verifies the `jws_representation` and accepts it, call `iap.finish()` on the transaction. On iOS this also works when `auto_finish_transactions` is enabled.
+
+Ask to Buy and other pending purchases
+: The listener receives the state `TRANS_STATE_UNVERIFIED` without an `error` or a `trans_ident`. If the purchase is approved, the listener later receives the transaction with the state `TRANS_STATE_PURCHASED`. StoreKit 2 doesn't notify the application if the purchase is declined.
+
+Restoring purchases
+: `iap.restore()` synchronizes the transactions with the App Store, which may ask the user to sign in, so only call it when the user asks for it. The listener then receives the latest transaction of each product the user is entitled to with the state `TRANS_STATE_RESTORED`: non-consumable products, active auto-renewable subscriptions and non-renewing subscriptions. StoreKit returns non-renewing subscriptions even after they have expired, so check the `date` of the transaction against the duration of the subscription. Refunded products and subscriptions replaced by an upgrade are left out. A restored transaction can be a purchase that hasn't been finished yet. It is finished like a purchased transaction: automatically if `auto_finish_transactions` is enabled, otherwise call `iap.finish()` on it. Finishing a transaction that was already finished has no effect. A transaction that StoreKit can't verify is received with the state `TRANS_STATE_UNVERIFIED` and an `error`, as described above. If the synchronization fails, a warning is logged and the listener receives the transactions known to the device.
+
+    Compared to the original StoreKit API, a restored transaction is the purchase itself and not a new restore transaction: `trans_ident` and `date` are those of the purchase, or of the latest renewal of a subscription, and earlier renewals are not sent again. A restored transaction and its `original_trans` don't have a `receipt`, use `jws_representation` to verify them.
+
+Refunds and subscription upgrades
+: A transaction that has been refunded, revoked or replaced by a subscription upgrade is finished without calling the listener. Use [App Store Server Notifications](https://developer.apple.com/documentation/appstoreservernotifications) to get notified of those on your server.
+
 
 ## Differences between supported platforms
 
@@ -208,9 +238,9 @@ Google Play and Apple supports three different product types: subscriptions, con
 
 If you want to simulate non-consumable products on Amazon you need to make sure to not call `iap.finish()` on the product in question (and make sure to not have enabled Auto Finish Transactions in *game.project*).
 
-Calls to `iap.buy()` and `iap.set_listener()` will return all non-finished purchases on Google Play. (This will not happen on iOS)
+Calls to `iap.buy()` and `iap.set_listener()` will return all non-finished purchases on Google Play. (On iOS they are sent to the listener when the extension starts, and `iap.process_pending_transactions()` sends them again)
 
-The concept of restoring purchases does not exist on Google Play/Amazon. Calls to `iap.restore()` on iOS will return all purchased products (and have product state set to TRANS_STATE_RESTORED). Calls to `iap.restore()` on Google Play will return all non-finished purchases (and have product state set to TRANS_STATE_PURCHASED).
+The concept of restoring purchases does not exist on Google Play/Amazon. Calls to `iap.restore()` on iOS will return all non-consumable products and active subscriptions (and have product state set to TRANS_STATE_RESTORED). Calls to `iap.restore()` on Google Play will return all non-finished purchases (and have product state set to TRANS_STATE_PURCHASED).
 
 
 ## Troubleshooting

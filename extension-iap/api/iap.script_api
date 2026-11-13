@@ -58,8 +58,10 @@
     desc: Explicitly finish a product transaction.
           [icon:attention] Calling iap.finish is required on a successful transaction
           if `auto_finish_transactions` is disabled in project settings. Calling this function
-          with `auto_finish_transactions` set will be ignored and a warning is printed.
-          The `transaction.state` field must equal `iap.TRANS_STATE_PURCHASED`.
+          with `auto_finish_transactions` set will be ignored and a warning is printed, except for
+          a transaction with the state `iap.TRANS_STATE_UNVERIFIED` on iOS [icon:ios], which is never finished automatically.
+          The `transaction.state` field must equal `iap.TRANS_STATE_PURCHASED`. On iOS [icon:ios] it may also
+          equal `iap.TRANS_STATE_RESTORED`, or `iap.TRANS_STATE_UNVERIFIED` if your server has verified the transaction.
     parameters:
       - name: transaction
         type: table
@@ -229,9 +231,16 @@
 
 #*****************************************************************************************************
 
+  - name: process_pending_transactions
+    type: function
+    desc: Send the transactions that are not yet finished to the listener set with `iap.set_listener()`.
+
+#*****************************************************************************************************
+
   - name: restore
     type: function
     desc: Restore previously purchased products.
+          On iOS [icon:ios] this synchronizes with the App Store, which may ask the user to sign in, so only call it when the user asks for it.
     returns:
       - name: success
         type: boolean
@@ -286,9 +295,16 @@
         - name: receipt
           type: string
           desc: The transaction receipt. This field is only set when `state` is `TRANS_STATE_PURCHASED` or `TRANS_STATE_UNVERIFIED`.
+                On iOS [icon:ios] this is the app receipt, which Apple has deprecated, and it is only set when `state` is `TRANS_STATE_PURCHASED`
+                and the file exists on the device. Use `jws_representation` to verify a purchase.
+
+        - name: jws_representation
+          type: string
+          desc: Apple only [icon:apple]. The transaction signed by the App Store as a JSON Web Signature (JWS), to verify on a server.
+                This field is only set when `state` is `TRANS_STATE_PURCHASED`, `TRANS_STATE_RESTORED` or, if StoreKit could not verify the transaction, `TRANS_STATE_UNVERIFIED`.
 
         - name: original_trans
-          type: string
+          type: table
           desc: Apple only [icon:apple]. The original transaction. This field is only set when `state` is `TRANS_STATE_RESTORED`.
 
         - name: original_json
